@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "651529005645",
+    "project_id": "mood-1e181",
+    "storage_bucket": "mood-1e181.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:651529005645:android:322f59b02fda864a968a04",
+        "android_client_info": {
+          "package_name": "com.example.mood01"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKEHCbZb4WIm-7lDiZZjfG0w6-h5WEzlE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
