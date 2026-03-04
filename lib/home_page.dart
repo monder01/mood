@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/auth/signInPage.dart';
-import 'package:mood01/auth/signUpPage.dart';
+import 'package:mood01/auth/signin_page.dart';
+import 'package:mood01/auth/signup_page.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});

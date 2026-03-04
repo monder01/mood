@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mood01/auth/users.dart';
 
 class Signinpage extends StatefulWidget {
   const Signinpage({super.key});
@@ -8,8 +9,10 @@ class Signinpage extends StatefulWidget {
 }
 
 class _SigninpageState extends State<Signinpage> {
+  Users users = Users();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  bool isLoading = false;
   Widget submitButton01(
     BuildContext context,
     String text,
@@ -25,17 +28,19 @@ class _SigninpageState extends State<Signinpage> {
         minimumSize: Size(width, height),
         maximumSize: Size(width, height),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        side: const BorderSide(color: Colors.black, width: 2),
+        side: const BorderSide(color: Colors.greenAccent, width: 2),
       ),
-      onPressed: onPressed,
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 22,
-        ),
-      ),
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? CircularProgressIndicator(color: Colors.greenAccent)
+          : Text(
+              text,
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
     );
   }
 
@@ -48,8 +53,16 @@ class _SigninpageState extends State<Signinpage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(height: 20),
+            Center(
+              child: Image.asset(
+                "assets/icons/monther.png",
+                width: 200,
+                height: 200,
+              ),
+            ),
             const Text(
-              "أدخل إلى تطبيقكنا",
+              "مرحبًا بك في مزاجي!",
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
@@ -71,15 +84,18 @@ class _SigninpageState extends State<Signinpage> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black54, width: 1),
+                  borderSide: const BorderSide(color: Colors.black, width: 1),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black54, width: 1),
+                  borderSide: const BorderSide(color: Colors.black, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black54, width: 1),
+                  borderSide: const BorderSide(
+                    color: Colors.greenAccent,
+                    width: 1,
+                  ),
                 ),
               ),
             ),
@@ -99,15 +115,18 @@ class _SigninpageState extends State<Signinpage> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black54, width: 1),
+                  borderSide: const BorderSide(color: Colors.black, width: 1),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black54, width: 1),
+                  borderSide: const BorderSide(color: Colors.black, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black54, width: 1),
+                  borderSide: const BorderSide(
+                    color: Colors.greenAccent,
+                    width: 1,
+                  ),
                 ),
               ),
             ),
@@ -115,8 +134,18 @@ class _SigninpageState extends State<Signinpage> {
             submitButton01(
               context,
               "تسجيل الدخول",
-              () {
-                // Handle sign-in logic here
+              () async {
+                setState(() {
+                  isLoading = true;
+                });
+                await users.signIn(
+                  context,
+                  emailController,
+                  passwordController,
+                );
+                setState(() {
+                  isLoading = false;
+                });
               },
               300,
               70,

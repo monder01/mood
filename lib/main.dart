@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/homePage.dart';
+import 'package:mood01/auth/auth.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const Homepage(),
+      home: const AuthWrapper(),
     );
   }
 }
