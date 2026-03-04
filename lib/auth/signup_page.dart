@@ -78,15 +78,17 @@ class _SignuppageState extends State<Signuppage> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         side: const BorderSide(color: Colors.greenAccent, width: 2),
       ),
-      onPressed: onPressed,
-      child: Text(
-        text,
-        style: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 22,
-        ),
-      ),
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
+          ? CircularProgressIndicator(color: Colors.greenAccent)
+          : Text(
+              text,
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 22,
+              ),
+            ),
     );
   }
 

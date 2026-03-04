@@ -5,7 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mood01/admin/admin_main_page.dart';
 import 'package:mood01/auth/users.dart';
+import 'package:mood01/discover_page.dart';
 import 'package:mood01/home_page.dart';
 import 'package:mood01/interfaces.dart';
 import 'package:mood01/main_page.dart';
@@ -23,9 +25,12 @@ class _BrowsepageState extends State<Browsepage> {
   bool isPhotoLoading = false;
   int currentIndex = 0;
 
-  final List<Widget> pages = const [
-    MainPage(),
-    Center(child: Text("بحث", style: TextStyle(fontSize: 25))),
+  List<Widget> pages = [];
+  final List<Widget> userPages = const [MainPage(), DiscoverPage()];
+
+  final List<Widget> adminPages = const [
+    AdminMainPage(),
+    Center(child: Text("Admin Panel2")),
   ];
   Future<void> pickFromGallery() async {
     final picker = ImagePicker();
@@ -136,16 +141,28 @@ class _BrowsepageState extends State<Browsepage> {
     );
   }
 
+  Future<void> loadUser() async {
+    final user = await users.getCurrentUser();
+    if (user != null) {
+      if (!mounted) return;
+      setState(() {
+        users = user;
+      });
+    }
+    if (!mounted) return;
+    setState(() {});
+
+    if (users.role == "admin") {
+      pages = adminPages;
+    } else {
+      pages = userPages;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    users.getCurrentUser().then((user) {
-      if (user != null) {
-        setState(() {
-          users = user;
-        });
-      }
-    });
+    loadUser();
   }
 
   Widget drawerbutton() {
@@ -175,7 +192,7 @@ class _BrowsepageState extends State<Browsepage> {
                               height: 80,
                               fit: BoxFit.cover,
                             )
-                          : Icon(Icons.person, size: 50),
+                          : Icon(Icons.person, size: 50, color: Colors.black54),
                     ),
                   ),
                 ),
@@ -231,6 +248,13 @@ class _BrowsepageState extends State<Browsepage> {
               style: TextStyle(color: Colors.red),
             ),
             onTap: () async {
+              final confirm = await interfaces.showConfirmationDialog(
+                context,
+                "سيتم تسجيل الخروج وسيتم تحويلك للصفحة الرئيسية ، هل أنت متاكد ؟",
+                icon: Icons.question_mark_outlined,
+              );
+
+              if (!confirm) return;
               await FirebaseAuth.instance.signOut();
               if (!mounted) return;
               Navigator.pushReplacement(
@@ -281,7 +305,9 @@ class _BrowsepageState extends State<Browsepage> {
           ],
         ),
         drawer: drawerbutton(),
-        body: pages[currentIndex],
+        body: pages.isEmpty
+            ? Center(child: CircularProgressIndicator())
+            : pages[currentIndex],
 
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: currentIndex,

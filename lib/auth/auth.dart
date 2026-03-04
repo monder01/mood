@@ -19,7 +19,7 @@ class AuthWrapper extends StatelessWidget {
             ),
           );
         }
-        print(FirebaseAuth.instance.currentUser);
+
         // إذا المستخدم مسجل دخول
         if (snapshot.hasData) {
           return const Browsepage();

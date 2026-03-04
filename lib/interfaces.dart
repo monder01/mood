@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Interfaces {
-  bool? isLoading;
+  bool isLoading = false;
   // show confirmation dialog
   Future<bool> showConfirmationDialog(
     BuildContext context, // السياق المطلوب لعرض مربع الحوار
@@ -135,6 +135,9 @@ class Interfaces {
     required String label,
     required TextInputType keyboardType,
     required TextEditingController controller,
+    // add optional parameters for icon and icon color
+    IconData? icon,
+    Color? iconColor,
   }) {
     return TextField(
       controller: controller,
@@ -154,6 +157,7 @@ class Interfaces {
           color: Colors.black,
           fontWeight: FontWeight.bold,
         ),
+        prefixIcon: icon != null ? Icon(icon, color: iconColor) : null,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(20),
           borderSide: const BorderSide(color: Colors.black, width: 1),
@@ -188,8 +192,8 @@ class Interfaces {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         side: const BorderSide(color: Colors.greenAccent, width: 2),
       ),
-      onPressed: isLoading! ? null : onPressed,
-      child: isLoading!
+      onPressed: isLoading ? null : onPressed,
+      child: isLoading
           ? CircularProgressIndicator(color: Colors.greenAccent)
           : Text(
               text,
