@@ -1,0 +1,25 @@
+colleges
+   └ collegeId
+        CollegeName
+        ...
+
+departments
+   └ departmentId
+        collegeId
+        DepartmentName
+        DepartmentImageUrl
+        isActive
+
+sections
+   └ sectionId
+        departmentId
+        SectionName
+
+subjects
+   └ subjectId
+        sectionId
+        SubjectName
+
+fileCategories
+   └ categoryId
+        subjectId

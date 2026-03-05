@@ -5,12 +5,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mood01/admin/admin_browse_page.dart';
+import 'package:mood01/admin/admin_fellows_page.dart';
 import 'package:mood01/admin/admin_main_page.dart';
 import 'package:mood01/auth/users.dart';
 import 'package:mood01/discover_page.dart';
 import 'package:mood01/home_page.dart';
 import 'package:mood01/interfaces.dart';
 import 'package:mood01/main_page.dart';
+import 'package:mood01/student/user_fellows_page.dart';
 
 class Browsepage extends StatefulWidget {
   const Browsepage({super.key});
@@ -28,10 +31,7 @@ class _BrowsepageState extends State<Browsepage> {
   List<Widget> pages = [];
   final List<Widget> userPages = const [MainPage(), DiscoverPage()];
 
-  final List<Widget> adminPages = const [
-    AdminMainPage(),
-    Center(child: Text("Admin Panel2")),
-  ];
+  final List<Widget> adminPages = const [AdminMainPage(), AdminBrowsePage()];
   Future<void> pickFromGallery() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
@@ -209,10 +209,24 @@ class _BrowsepageState extends State<Browsepage> {
           ),
 
           ListTile(
-            leading: const Icon(Icons.home),
-            title: const Text("الرئيسية"),
+            leading: const Icon(Icons.history_edu),
+            title: const Text("زملائي"),
             onTap: () {
-              Navigator.pop(context);
+              if (users.role == "admin") {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdminFellowsPage(),
+                  ),
+                );
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserFellowsPage(),
+                  ),
+                );
+              }
             },
           ),
 
@@ -306,7 +320,9 @@ class _BrowsepageState extends State<Browsepage> {
         ),
         drawer: drawerbutton(),
         body: pages.isEmpty
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+                child: CircularProgressIndicator(color: Colors.greenAccent),
+              )
             : pages[currentIndex],
 
         bottomNavigationBar: BottomNavigationBar(
@@ -319,9 +335,14 @@ class _BrowsepageState extends State<Browsepage> {
           selectedItemColor: Colors.greenAccent,
           unselectedItemColor: Colors.grey,
           type: BottomNavigationBarType.fixed,
-          items: const [
+          items: [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: "الرئيسية"),
-            BottomNavigationBarItem(icon: Icon(Icons.search), label: "بحث"),
+            BottomNavigationBarItem(
+              icon: users.role == "admin"
+                  ? Icon(Icons.manage_search_outlined)
+                  : Icon(Icons.search),
+              label: users.role == "admin" ? "تصفح" : "بحث",
+            ),
           ],
         ),
       ),

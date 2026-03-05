@@ -1,7 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Interfaces {
   bool isLoading = false;
+
+  Future<void> pickImage(File localImage) async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 70,
+    );
+
+    if (picked == null) return;
+
+    localImage = File(picked.path);
+  }
+
   // show confirmation dialog
   Future<bool> showConfirmationDialog(
     BuildContext context, // السياق المطلوب لعرض مربع الحوار

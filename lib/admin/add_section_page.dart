@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 class AddSectionPage extends StatefulWidget {
-  const AddSectionPage({super.key});
+  final String? departmentId;
+
+  const AddSectionPage({super.key, required this.departmentId});
 
   @override
   State<AddSectionPage> createState() => _AddSectionPageState();
