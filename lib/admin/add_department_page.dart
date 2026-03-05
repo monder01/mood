@@ -9,6 +9,8 @@ import 'package:mood01/interfaces.dart';
 class DepartmentForm {
   TextEditingController nameController = TextEditingController();
   File? image;
+  bool haveSection = false;
+  bool isLoadingPic = false;
 }
 
 class AddDepartmentPage extends StatefulWidget {
@@ -21,7 +23,6 @@ class AddDepartmentPage extends StatefulWidget {
 
 class _AddDepartmentPageState extends State<AddDepartmentPage> {
   Interfaces interfaces = Interfaces();
-  bool isLoadingPic = false;
   List<DepartmentForm> departments = [];
 
   @override
@@ -38,24 +39,24 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
 
   Future<void> pickImage(int index) async {
     setState(() {
-      isLoadingPic = true;
+      departments[index].isLoadingPic = true;
     });
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
       imageQuality: 70,
     );
 
+    if (!mounted) return;
     if (picked == null) {
       setState(() {
-        isLoadingPic = false;
+        departments[index].isLoadingPic = false;
       });
       return;
     }
-    ;
 
     setState(() {
       departments[index].image = File(picked.path);
-      isLoadingPic = false;
+      departments[index].isLoadingPic = false;
     });
   }
 
@@ -90,12 +91,15 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
           const SizedBox(height: 15),
 
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("شعار القسم :", style: TextStyle(fontSize: 18)),
+              const Text(
+                "شعار القسم  (إختياري) :",
+                style: TextStyle(fontSize: 18),
+              ),
 
               InkWell(
-                onTap: isLoadingPic
+                onTap: departments[index].isLoadingPic
                     ? null
                     : () async {
                         await pickImage(index);
@@ -115,7 +119,7 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
                       ),
                     ],
                   ),
-                  child: isLoadingPic
+                  child: departments[index].isLoadingPic
                       ? Center(
                           child: SizedBox(
                             height: 30,
@@ -143,6 +147,48 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
               ),
             ],
           ),
+
+          const SizedBox(height: 15),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "القسم يحتوي على شعب ؟",
+                style: TextStyle(fontSize: 18),
+              ),
+              Switch(
+                activeTrackColor: Colors.greenAccent,
+                value: departments[index].haveSection,
+                onChanged: (value) {
+                  setState(() {
+                    departments[index].haveSection = value;
+                  });
+                },
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  side: const BorderSide(color: Colors.redAccent, width: 2),
+                ),
+                onPressed: () {
+                  if (departments.length == 1) return;
+
+                  /// حذف من القائمة
+                  setState(() {
+                    departments[index].nameController.dispose();
+                    departments.removeAt(index);
+                  });
+                },
+                child: const Text(
+                  "حذف من القائمة",
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -151,13 +197,27 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
   Future<void> saveDepartments() async {
     if (widget.collegeId == null) return;
 
+    /// إذا كان أي اسم قسم فارغ
+    bool hasEmpty = departments.any(
+      (d) => d.nameController.text.trim().isEmpty,
+    );
+
+    if (hasEmpty) {
+      interfaces.showAlert(
+        context,
+        "الرجاء ملء جميع أسماء الأقسام",
+        icon: Icons.warning_amber_outlined,
+        iconColor: Colors.redAccent,
+      );
+      return;
+    }
     try {
       setState(() => interfaces.isLoading = true);
+
       for (var d in departments) {
         final name = d.nameController.text.trim();
 
-        if (name.isEmpty) continue;
-
+        /// انشاء صورة للقسم اذا كان لا يوجد صورة
         String imageUrl =
             "https://dummyimage.com/400x400/cccccc/000000&text=Department";
 
@@ -166,7 +226,7 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
           final storageRef = FirebaseStorage.instance
               .ref()
               .child("departments")
-              .child("${DateTime.now().millisecondsSinceEpoch}.jpg");
+              .child("${DateTime.now().millisecondsSinceEpoch}_$name.jpg");
 
           await storageRef.putFile(d.image!);
 
@@ -178,6 +238,7 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
           "collegeId": widget.collegeId, // الربط مع الكلية
           "DepartmentName": "قسم $name",
           "DepartmentImageUrl": imageUrl,
+          "haveSection": d.haveSection,
           "isActive": true,
           "createdAt": FieldValue.serverTimestamp(),
         });
@@ -249,7 +310,16 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
             interfaces.submitButton01(
               context,
               "حفظ الأقسام",
-              saveDepartments,
+              () async {
+                final confirm = await interfaces.showConfirmationDialog(
+                  context,
+                  "هل أنت متاكد من جميع بيانات الأقسام ؟",
+                  icon: Icons.warning_amber_outlined,
+                  iconColor: Colors.redAccent,
+                );
+                if (!confirm) return;
+                await saveDepartments();
+              },
               double.infinity,
               50,
             ),

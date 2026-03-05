@@ -18,7 +18,7 @@ class _AddCollegePageState extends State<AddCollegePage> {
   TextEditingController collegeNameController = TextEditingController();
   File? localImage;
   bool isActive = true;
-  bool loadingCollege = false;
+  bool loadingCollege = false, loadingImage = false;
   String? selectedUniversity;
 
   final List<String> items = ["جامعة طرابلس", "جامعة بنغازي"];
@@ -163,7 +163,13 @@ class _AddCollegePageState extends State<AddCollegePage> {
             const SizedBox(height: 15),
 
             GestureDetector(
-              onTap: pickImage,
+              onTap: loadingImage
+                  ? null
+                  : () async {
+                      setState(() => loadingImage = true);
+                      await pickImage();
+                      setState(() => loadingImage = false);
+                    },
               child: Container(
                 height: 250,
                 width: 400,
@@ -186,7 +192,13 @@ class _AddCollegePageState extends State<AddCollegePage> {
                         )
                       : null,
                 ),
-                child: localImage == null
+                child: loadingImage
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.greenAccent,
+                        ),
+                      )
+                    : localImage == null
                     ? const Center(child: Text("اختيار صورة"))
                     : null,
               ),

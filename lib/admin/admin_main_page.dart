@@ -24,8 +24,9 @@ class _AdminMainPageState extends State<AdminMainPage> {
     String id,
     String collectionName,
     String modifiedName,
-    String textName,
-  ) async {
+    String textName, {
+    bool? hasSection,
+  }) async {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -35,31 +36,46 @@ class _AdminMainPageState extends State<AdminMainPage> {
         return SafeArea(
           child: Wrap(
             children: [
-              ListTile(
-                leading: const Icon(
-                  Icons.add_box_outlined,
-                  color: Colors.greenAccent,
+              if (hasSection == true || collectionName == "colleges")
+                ListTile(
+                  leading: const Icon(
+                    Icons.add_box_outlined,
+                    color: Colors.greenAccent,
+                  ),
+                  title: Text("إضافة $textName جديد ل $modifiedName"),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    if (collectionName == "colleges") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AddDepartmentPage(collegeId: id),
+                        ),
+                      );
+                    } else if (collectionName == "departments") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AddSectionPage(departmentId: id),
+                        ),
+                      );
+                    }
+                  },
                 ),
-                title: Text("إضافة $textName جديد ل $modifiedName"),
-                onTap: () async {
-                  Navigator.pop(context);
-                  if (collectionName == "colleges") {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddDepartmentPage(collegeId: id),
-                      ),
-                    );
-                  } else if (collectionName == "departments") {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddSectionPage(departmentId: id),
-                      ),
-                    );
-                  }
-                },
-              ),
+              if (hasSection == false)
+                ListTile(
+                  leading: const Icon(
+                    Icons.add_box_outlined,
+                    color: Colors.greenAccent,
+                  ),
+                  title: Text("إضافة مادة جديد ل $modifiedName"),
+                  onTap: () async {
+                    Navigator.pop(context);
+                  },
+                ),
+
               ListTile(
                 leading: const Icon(
                   Icons.mode_edit_outline,
@@ -480,6 +496,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                       "departments",
                                       data["DepartmentName"],
                                       "شعبة",
+                                      hasSection: data["haveSection"],
                                     );
                                   },
                                   child: Container(
