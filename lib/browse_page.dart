@@ -12,8 +12,9 @@ import 'package:mood01/auth/users.dart';
 import 'package:mood01/discover_page.dart';
 import 'package:mood01/home_page.dart';
 import 'package:mood01/interfaces.dart';
-import 'package:mood01/main_page.dart';
+import 'package:mood01/search_for_friends_page.dart';
 import 'package:mood01/student/user_fellows_page.dart';
+import 'package:mood01/student/user_browse_page.dart';
 
 class Browsepage extends StatefulWidget {
   const Browsepage({super.key});
@@ -29,7 +30,7 @@ class _BrowsepageState extends State<Browsepage> {
   int currentIndex = 0;
 
   List<Widget> pages = [];
-  final List<Widget> userPages = const [MainPage(), DiscoverPage()];
+  final List<Widget> userPages = const [UserBrowsePage(), DiscoverPage()];
 
   final List<Widget> adminPages = const [AdminMainPage(), AdminBrowsePage()];
   Future<void> pickFromGallery() async {
@@ -304,9 +305,15 @@ class _BrowsepageState extends State<Browsepage> {
           toolbarHeight: 50,
           shadowColor: Colors.greenAccent,
           actions: [
+            // if (users.role == "user")
             IconButton(
               onPressed: () {
-                // Action for search button
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SearchForFriendsPage(),
+                  ),
+                );
               },
               icon: Icon(Icons.search),
             ),
