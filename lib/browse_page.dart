@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mood01/about_us_page.dart';
 import 'package:mood01/admin/admin_browse_page.dart';
 import 'package:mood01/admin/admin_fellows_page.dart';
 import 'package:mood01/admin/admin_main_page.dart';
@@ -12,7 +13,7 @@ import 'package:mood01/auth/users.dart';
 import 'package:mood01/student/discover_page.dart';
 import 'package:mood01/home_page.dart';
 import 'package:mood01/interfaces.dart';
-import 'package:mood01/search_for_friends_page.dart';
+import 'package:mood01/friends/search_for_friends_page.dart';
 import 'package:mood01/student/user_fellows_page.dart';
 import 'package:mood01/student/user_browse_page.dart';
 
@@ -217,7 +218,7 @@ class _BrowsepageState extends State<Browsepage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const AdminFellowsPage(),
+                    builder: (context) => const UserFellowsPage(),
                   ),
                 );
               } else {
@@ -252,7 +253,10 @@ class _BrowsepageState extends State<Browsepage> {
             leading: const Icon(Icons.info_outline),
             title: const Text("عن التطبيق"),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AboutAppPage()),
+              );
             },
           ),
 

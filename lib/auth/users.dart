@@ -92,19 +92,24 @@ class Users {
       await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
         {"isOnline": true, "lastLogin": FieldValue.serverTimestamp()},
       );
+      // get user data
+      final userData = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid)
+          .get();
+      final name = "${userData.get("firstName")} ${userData.get("lastName")}";
 
       if (!context.mounted) return;
-
-      Interfaces().showAlert(
-        context,
-        "تم تسجيل الدخول بنجاح",
-        icon: Icons.check_circle,
-        iconColor: Colors.green,
-      );
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const Browsepage()),
+      );
+      Interfaces().showAlert(
+        context,
+        "مرحبا بك $name",
+        icon: Icons.check_circle,
+        iconColor: Colors.green,
       );
     } on FirebaseAuthException catch (e) {
       String? message;

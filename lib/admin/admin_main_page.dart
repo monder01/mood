@@ -874,7 +874,6 @@ class _AdminMainPageState extends State<AdminMainPage> {
                     ],
                   ),
                 ),
-
                 ////////////////
                 // tab 4 courses
                 ////////////////
@@ -932,7 +931,12 @@ class _AdminMainPageState extends State<AdminMainPage> {
                               final name = doc["courseName"]
                                   .toString()
                                   .toLowerCase();
-                              return name.contains(searchText4);
+                              final code = doc["courseCode"]
+                                  .toString()
+                                  .toLowerCase();
+
+                              return name.contains(searchText4) ||
+                                  code.contains(searchText4);
                             }).toList();
 
                             if (docs.isEmpty) {

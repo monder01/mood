@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mood01/search_for_friends_page.dart';
+import 'package:mood01/friends/search_for_friends_page.dart';
 
 class UserBrowseDepartmentPage extends StatefulWidget {
   final String collegeId;

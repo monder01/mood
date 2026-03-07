@@ -19,7 +19,10 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("تصفح الكليات")),
+      appBar: AppBar(
+        title: const Text("تصفح الكليات"),
+        automaticallyImplyLeading: false,
+      ),
 
       body: StreamBuilder<QuerySnapshot>(
         stream: collegesStream,
