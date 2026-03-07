@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SearchForFriendsPage extends StatefulWidget {
   const SearchForFriendsPage({super.key});
@@ -9,6 +10,7 @@ class SearchForFriendsPage extends StatefulWidget {
 }
 
 class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
+  final currentUserId = FirebaseAuth.instance.currentUser!.uid;
   String searchText = "";
 
   Stream<QuerySnapshot> searchByUsername() {
@@ -216,6 +218,7 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
                             final ids = <String>{};
                             users = users.where((doc) {
                               if (ids.contains(doc.id)) return false;
+                              if (doc.id == currentUserId) return false;
                               ids.add(doc.id);
                               return true;
                             }).toList();

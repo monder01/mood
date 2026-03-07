@@ -13,6 +13,7 @@ class _SigninpageState extends State<Signinpage> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
+  bool isObscure = true;
   Widget submitButton01(
     BuildContext context,
     String text,
@@ -82,6 +83,7 @@ class _SigninpageState extends State<Signinpage> {
                     color: Colors.black54,
                   ),
                 ),
+                prefixIcon: const Icon(Icons.email, color: Colors.black),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: const BorderSide(color: Colors.black, width: 1),
@@ -103,7 +105,7 @@ class _SigninpageState extends State<Signinpage> {
             TextField(
               controller: passwordController,
               keyboardType: TextInputType.visiblePassword,
-              obscureText: true,
+              obscureText: isObscure,
               decoration: InputDecoration(
                 label: const Text(
                   "كلمة المرور",
@@ -112,6 +114,17 @@ class _SigninpageState extends State<Signinpage> {
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
+                ),
+                prefixIcon: const Icon(Icons.lock, color: Colors.black),
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      isObscure = !isObscure;
+                    });
+                  },
+                  icon: isObscure
+                      ? const Icon(Icons.visibility_off, color: Colors.black)
+                      : const Icon(Icons.visibility, color: Colors.black),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),

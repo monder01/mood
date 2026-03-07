@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mood01/search_for_friends_page.dart';
 
 class UserBrowseDepartmentPage extends StatefulWidget {
   final String collegeId;
@@ -22,13 +23,44 @@ class _UserBrowseDepartmentPageState extends State<UserBrowseDepartmentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("تصفح الأقسام")),
+      appBar: AppBar(
+        backgroundColor: Colors.greenAccent[200],
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
+        toolbarHeight: 50,
+        shadowColor: Colors.greenAccent,
+        actions: [
+          // if (users.role == "user")
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SearchForFriendsPage()),
+              );
+            },
+            icon: Icon(Icons.search),
+          ),
+          IconButton(
+            onPressed: () {
+              // Action for notification button
+            },
+            icon: Icon(Icons.notifications),
+          ),
+        ],
+      ),
 
       body: StreamBuilder<QuerySnapshot>(
         stream: departmentsStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.greenAccent),
+            );
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {

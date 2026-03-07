@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/admin/add_college_page.dart';
+import 'package:mood01/admin/add_course_page.dart';
 import 'package:mood01/admin/add_department_page.dart';
 import 'package:mood01/admin/add_section_page.dart';
 import 'package:mood01/interfaces.dart';
@@ -16,7 +17,7 @@ class AdminMainPage extends StatefulWidget {
 
 class _AdminMainPageState extends State<AdminMainPage> {
   Interfaces interfaces = Interfaces();
-  String searchText = "", searchText2 = "", searchText3 = "";
+  String searchText = "", searchText2 = "", searchText3 = "", searchText4 = "";
 
   File? departmentImage;
 
@@ -73,6 +74,15 @@ class _AdminMainPageState extends State<AdminMainPage> {
                   title: Text("إضافة مادة جديد ل $modifiedName"),
                   onTap: () async {
                     Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AddCoursePage(
+                          departmentId: id,
+                          collectionName: collectionName,
+                        ),
+                      ),
+                    );
                   },
                 ),
 
@@ -130,20 +140,22 @@ class _AdminMainPageState extends State<AdminMainPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Column(
         children: [
-          const TabBar(
+          TabBar(
             indicatorColor: Color.fromARGB(255, 90, 205, 150),
             labelStyle: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: Colors.greenAccent,
             ),
+            labelPadding: const EdgeInsets.symmetric(vertical: 5),
             tabs: [
               Tab(text: "إدارة الكليات"),
               Tab(text: "إدارة الأقسام"),
               Tab(text: "إدارة الشعب"),
+              Tab(text: "إدارة المواد"),
             ],
           ),
 
@@ -852,6 +864,124 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                         ],
                                       ),
                                     ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                ////////////////
+                // tab 4 courses
+                ////////////////
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    spacing: 10,
+                    children: [
+                      TextField(
+                        onChanged: (value) {
+                          setState(() {
+                            searchText4 = value.toLowerCase();
+                          });
+                        },
+                        decoration: InputDecoration(
+                          label: const Text(
+                            "اسم المادة",
+                            style: TextStyle(color: Colors.black54),
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: Colors.greenAccent,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: const BorderSide(
+                              color: Colors.greenAccent,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: StreamBuilder<QuerySnapshot>(
+                          stream: FirebaseFirestore.instance
+                              .collectionGroup("courses")
+                              .snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const Center(
+                                child: CircularProgressIndicator(
+                                  color: Colors.greenAccent,
+                                ),
+                              );
+                            }
+
+                            if (snapshot.data!.docs.isEmpty) {
+                              return const Center(child: Text("لا توجد نتائج"));
+                            }
+
+                            final docs = snapshot.data!.docs.where((doc) {
+                              final name = doc["courseName"]
+                                  .toString()
+                                  .toLowerCase();
+                              return name.contains(searchText4);
+                            }).toList();
+
+                            if (docs.isEmpty) {
+                              return const Center(child: Text("لا توجد نتائج"));
+                            }
+
+                            return ListView.builder(
+                              itemCount: docs.length,
+                              itemBuilder: (context, index) {
+                                final data =
+                                    docs[index].data() as Map<String, dynamic>;
+
+                                return Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 6,
+                                    horizontal: 5,
+                                  ),
+                                  child: ListTile(
+                                    title: Text(data["courseName"]),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "رمز المادة : ${data["courseCode"]}",
+                                        ),
+                                        Text(data["courseDescription"]),
+                                      ],
+                                    ),
+                                    trailing: Switch(
+                                      activeTrackColor: Colors.greenAccent,
+                                      value: data["isActive"] ?? false,
+                                      onChanged: (value) async {
+                                        final confirm = await interfaces
+                                            .showConfirmationDialog(
+                                              context,
+                                              "هل أنت متاكد من أنك تريد تغيير حالة المادة؟",
+                                            );
+                                        if (!confirm) return;
+                                        await FirebaseFirestore.instance
+                                            .collection("courses")
+                                            .doc(docs[index].id)
+                                            .update({"isActive": value});
+                                      },
+                                    ),
+                                    onTap: () {},
                                   ),
                                 );
                               },

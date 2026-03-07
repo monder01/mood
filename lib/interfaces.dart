@@ -153,16 +153,18 @@ class Interfaces {
     // add optional parameters for icon and icon color
     IconData? icon,
     Color? iconColor,
+    int? maxLines,
   }) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
       obscureText: keyboardType == TextInputType.visiblePassword ? true : false,
+      maxLines: maxLines ?? 1,
       decoration: InputDecoration(
         label: Text(
           label,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.black54,
           ),

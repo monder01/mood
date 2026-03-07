@@ -9,7 +9,7 @@ import 'package:mood01/admin/admin_browse_page.dart';
 import 'package:mood01/admin/admin_fellows_page.dart';
 import 'package:mood01/admin/admin_main_page.dart';
 import 'package:mood01/auth/users.dart';
-import 'package:mood01/discover_page.dart';
+import 'package:mood01/student/discover_page.dart';
 import 'package:mood01/home_page.dart';
 import 'package:mood01/interfaces.dart';
 import 'package:mood01/search_for_friends_page.dart';
@@ -347,8 +347,8 @@ class _BrowsepageState extends State<Browsepage> {
             BottomNavigationBarItem(
               icon: users.role == "admin"
                   ? Icon(Icons.manage_search_outlined)
-                  : Icon(Icons.search),
-              label: users.role == "admin" ? "تصفح" : "بحث",
+                  : Icon(Icons.near_me_rounded),
+              label: users.role == "admin" ? "تصفح" : "تصفح",
             ),
           ],
         ),

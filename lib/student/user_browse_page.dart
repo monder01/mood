@@ -25,7 +25,9 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
         stream: collegesStream,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.greenAccent),
+            );
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
