@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mood01/chats/my_conversations_page.dart';
 import 'package:mood01/screens/about_us_page.dart';
 import 'package:mood01/admin/admin_browse_page.dart';
 import 'package:mood01/admin/admin_fellows_page.dart';
@@ -233,6 +234,17 @@ class _BrowsepageState extends State<Browsepage> {
                   ),
                 );
               }
+            },
+          ),
+
+          ListTile(
+            leading: const Icon(Icons.mail),
+            title: const Text("محادثاتي"),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MyConversationsPage()),
+              );
             },
           ),
 

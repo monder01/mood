@@ -15,6 +15,7 @@ class _ChatPageState extends State<ChatPage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
   final TextEditingController messageController = TextEditingController();
 
+  String? otherUserFirstName, otherUserLastName, otherUserImageUrl;
   String? chatId;
   bool loading = true;
 
@@ -22,6 +23,7 @@ class _ChatPageState extends State<ChatPage> {
   void initState() {
     super.initState();
     initChat();
+    getOtherUser();
   }
 
   /// البحث عن chat أو إنشاء واحد
@@ -76,10 +78,31 @@ class _ChatPageState extends State<ChatPage> {
     });
   }
 
+  // get other user
+  Future<void> getOtherUser() async {
+    final userDoc = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(widget.otherUserId)
+        .get();
+    otherUserFirstName = userDoc.get("firstName") ?? "";
+    otherUserLastName = userDoc.get("lastName") ?? "";
+    otherUserImageUrl = userDoc.get("photoUrl") ?? "";
+  }
+
+  @override
+  void dispose() {
+    messageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (loading || chatId == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.greenAccent),
+        ),
+      );
     }
 
     final messagesStream = FirebaseFirestore.instance
@@ -91,9 +114,50 @@ class _ChatPageState extends State<ChatPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat"),
-        backgroundColor: Colors.lightBlueAccent,
-        centerTitle: true,
+        backgroundColor: Colors.greenAccent[200],
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
+        toolbarHeight: 60,
+        shadowColor: Colors.greenAccent,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: otherUserImageUrl != null && otherUserImageUrl!.isNotEmpty
+                ? CircleAvatar(
+                    backgroundImage: NetworkImage(otherUserImageUrl ?? ""),
+                  )
+                : const CircleAvatar(child: Icon(Icons.person)),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "$otherUserFirstName",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  "$otherUserLastName",
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -103,13 +167,15 @@ class _ChatPageState extends State<ChatPage> {
               stream: messagesStream,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.greenAccent),
+                  );
                 }
 
                 final messages = snapshot.data!.docs;
 
                 if (messages.isEmpty) {
-                  return const Center(child: Text("No messages yet"));
+                  return const Center(child: Text("لا يوجد رسائل بعد"));
                 }
 
                 return ListView.builder(
@@ -130,7 +196,7 @@ class _ChatPageState extends State<ChatPage> {
                         constraints: const BoxConstraints(maxWidth: 280),
                         decoration: BoxDecoration(
                           color: isMe
-                              ? Colors.lightBlueAccent
+                              ? Colors.greenAccent
                               : Colors.grey.shade300,
                           borderRadius: isMe
                               ? const BorderRadius.only(
@@ -166,17 +232,25 @@ class _ChatPageState extends State<ChatPage> {
                     child: TextField(
                       controller: messageController,
                       decoration: InputDecoration(
-                        hintText: "Write message...",
+                        hintText: "اكتب رسالة ...",
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                            color: Colors.greenAccent,
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30),
+                          borderSide: const BorderSide(
+                            color: Colors.greenAccent,
+                          ),
                         ),
                       ),
                       onSubmitted: (_) => sendMessage(),
                     ),
                   ),
-                  const SizedBox(width: 6),
                   IconButton(
-                    icon: const Icon(Icons.send, color: Colors.lightBlueAccent),
+                    icon: const Icon(Icons.send, color: Colors.greenAccent),
                     onPressed: sendMessage,
                   ),
                 ],

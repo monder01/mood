@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mood01/chats/chat_page.dart';
 import 'package:mood01/friends/friends.dart';
 import 'package:mood01/global/interfaces.dart';
 import 'package:mood01/friends/search_for_friends_page.dart';
@@ -163,7 +164,16 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                   children: [
                     ElevatedButton(
                       style: buttonStyle01(),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ChatPage(otherUserId: userData['uid']),
+                          ),
+                        );
+                      },
                       child: const Text("مراسلة"),
                     ),
                     ElevatedButton(
@@ -315,6 +325,7 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                             onTap: () => friendShowProfile(userData),
                             child: Container(
                               padding: const EdgeInsets.all(8),
+                              margin: const EdgeInsets.only(bottom: 5),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(10),
