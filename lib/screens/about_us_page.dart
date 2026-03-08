@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/interfaces.dart';
+import 'package:mood01/global/interfaces.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutAppPage extends StatelessWidget {

@@ -1,25 +1,116 @@
+users
+   └ userId
+        uid
+        userName
+        firstName
+        lastName
+        email
+        phone
+        photoUrl
+        role
+        isOnline
+        messageToken
+        createdAt
+        lastLogin
+
 colleges
    └ collegeId
-        CollegeName
-        ...
+        collegeId
+        collegeName
+        university
+        collegeImageUrl
+        isActive
+        createdAt
 
 departments
    └ departmentId
+        departmentId
         collegeId
-        DepartmentName
-        DepartmentImageUrl
+        departmentName
+        departmentImageUrl
+        hasSections
         isActive
+        createdAt
 
 sections
    └ sectionId
-        departmentId
-        SectionName
-
-subjects
-   └ subjectId
         sectionId
-        SubjectName
+        collegeId
+        departmentId
+        sectionName
+        sectionImageUrl
+        isActive
+        createdAt
 
-fileCategories
+courses
+   └ courseId
+        courseId
+        collegeId
+        departmentId
+        sectionId        // null إذا المادة ليست داخل شعبة
+        courseName
+        courseCode
+        courseDescription
+        isActive
+        createdAt
+
+friend_requests
+   └ requestId
+        requestId
+        senderId
+        receiverId
+        status           // pending | accepted | rejected | canceled
+        createdAt
+        updatedAt
+
+friendships
+   └ friendshipId
+        friendshipId
+        user1Id
+        user2Id
+        createdAt
+
+chats
+   └ chatId             // مثال: الأصغرUid_الأكبرUid
+        chatId
+        participants     // [user1Id, user2Id]
+        lastMessage
+        lastSenderId
+        lastMessageAt
+        createdAt
+        updatedAt
+        type             // private
+
+chats
+   └ chatId
+        messages
+           └ messageId
+                messageId
+                senderId
+                text
+                createdAt
+                isSeen
+
+file_categories
    └ categoryId
-        subjectId
+        categoryId
+        courseId
+        categoryName
+        createdAt
+
+files
+   └ fileId
+        fileId
+        courseId
+        sectionId
+        departmentId
+        collegeId
+        categoryId
+        uploaderId
+        fileName
+        fileUrl
+        fileType
+        fileSize
+        description
+        createdAt
+        isActive

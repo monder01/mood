@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:mood01/browse_page.dart';
-import 'package:mood01/interfaces.dart';
+import 'package:mood01/global/browse_page.dart';
+import 'package:mood01/global/interfaces.dart';
 
 class Users {
   String? id;

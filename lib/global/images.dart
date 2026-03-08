@@ -6,7 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mood01/auth/users.dart';
-import 'package:mood01/interfaces.dart';
+import 'package:mood01/global/interfaces.dart';
 
 class Images {
   final Function(bool) setLoading;

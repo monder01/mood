@@ -6,7 +6,7 @@ import 'package:mood01/admin/add_college_page.dart';
 import 'package:mood01/admin/add_course_page.dart';
 import 'package:mood01/admin/add_department_page.dart';
 import 'package:mood01/admin/add_section_page.dart';
-import 'package:mood01/interfaces.dart';
+import 'package:mood01/global/interfaces.dart';
 
 class AdminMainPage extends StatefulWidget {
   const AdminMainPage({super.key});
@@ -493,6 +493,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 10,
                                     mainAxisSpacing: 10,
+                                    childAspectRatio: 0.8,
                                   ),
                               itemCount: departments.length,
                               itemBuilder: (context, index) {

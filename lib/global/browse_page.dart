@@ -4,17 +4,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mood01/about_us_page.dart';
+import 'package:mood01/screens/about_us_page.dart';
 import 'package:mood01/admin/admin_browse_page.dart';
 import 'package:mood01/admin/admin_fellows_page.dart';
 import 'package:mood01/admin/admin_main_page.dart';
 import 'package:mood01/auth/users.dart';
 import 'package:mood01/student/discover_page.dart';
-import 'package:mood01/home_page.dart';
-import 'package:mood01/interfaces.dart';
+import 'package:mood01/screens/home_page.dart';
+import 'package:mood01/global/interfaces.dart';
 import 'package:mood01/friends/search_for_friends_page.dart';
-import 'package:mood01/student/user_fellows_page.dart';
+import 'package:mood01/friends/user_fellows_page.dart';
 import 'package:mood01/student/user_browse_page.dart';
 
 class Browsepage extends StatefulWidget {
@@ -28,7 +30,9 @@ class _BrowsepageState extends State<Browsepage> {
   Users users = Users();
   Interfaces interfaces = Interfaces();
   bool isPhotoLoading = false;
-  int currentIndex = 0;
+  int currentIndex = 0, counter = 0;
+
+  DateTime? lastBackPressed;
 
   List<Widget> pages = [];
   final List<Widget> userPages = const [UserBrowsePage(), DiscoverPage()];
@@ -290,11 +294,28 @@ class _BrowsepageState extends State<Browsepage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) {
-          // do something if the pop was successful
+      canPop: (counter >= 2),
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        final now = DateTime.now();
+
+        if (lastBackPressed == null ||
+            now.difference(lastBackPressed!) > const Duration(seconds: 2)) {
+          lastBackPressed = now;
+          Fluttertoast.showToast(
+            msg: "اضغط مرة أخرى للخروج",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM,
+            timeInSecForIosWeb: 2,
+            backgroundColor: Colors.grey.shade700,
+            textColor: Colors.white,
+            fontSize: 16.0,
+          );
+          return;
         }
+
+        SystemNavigator.pop(); // close app
       },
       child: Scaffold(
         appBar: AppBar(
@@ -347,12 +368,13 @@ class _BrowsepageState extends State<Browsepage> {
           unselectedItemColor: Colors.grey,
           type: BottomNavigationBarType.fixed,
           items: [
-            BottomNavigationBarItem(icon: Icon(Icons.home), label: "الرئيسية"),
             BottomNavigationBarItem(
-              icon: users.role == "admin"
-                  ? Icon(Icons.manage_search_outlined)
-                  : Icon(Icons.near_me_rounded),
-              label: users.role == "admin" ? "تصفح" : "تصفح",
+              icon: Icon(Icons.home_rounded),
+              label: "الرئيسية",
+            ),
+            BottomNavigationBarItem(
+              icon: const Icon(Icons.near_me_rounded),
+              label: "تصفح",
             ),
           ],
         ),
