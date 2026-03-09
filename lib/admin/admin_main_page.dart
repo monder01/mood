@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/admin/add_college_page.dart';
@@ -21,6 +20,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
 
   File? departmentImage;
 
+  /// show options bottom sheet
   Future<void> showOptionsDialog(
     String id,
     String collectionName,
@@ -137,10 +137,261 @@ class _AdminMainPageState extends State<AdminMainPage> {
     );
   }
 
+  // build section tab , but it's not used
+  Widget sectionTab() {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        spacing: 10,
+        children: [
+          TextField(
+            onChanged: (value) {
+              setState(() {
+                searchText3 = value.toLowerCase();
+              });
+            },
+            decoration: InputDecoration(
+              label: const Text(
+                "اسم الشعبة",
+                style: TextStyle(color: Colors.black54),
+              ),
+              prefixIcon: const Icon(Icons.search, color: Colors.greenAccent),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(20),
+                borderSide: const BorderSide(
+                  color: Colors.greenAccent,
+                  width: 2,
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection("sections")
+                  .orderBy("SectionName")
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.greenAccent),
+                  );
+                }
+
+                if (snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text("لا توجد شعب مضافة بعد"));
+                }
+
+                final allSections = snapshot.data!.docs;
+
+                final sections = allSections.where((doc) {
+                  final data = doc.data() as Map<String, dynamic>;
+                  final name = (data["SectionName"] ?? "")
+                      .toString()
+                      .toLowerCase();
+
+                  return name.contains(searchText3);
+                }).toList();
+                if (sections.isEmpty) {
+                  return const Center(child: Text("لا توجد نتائج بحث"));
+                }
+                return ListView.builder(
+                  padding: const EdgeInsets.all(10),
+                  itemCount: sections.length,
+                  itemBuilder: (context, index) {
+                    final data = sections[index].data() as Map<String, dynamic>;
+                    final id = sections[index].id;
+
+                    return InkWell(
+                      onTap: () async {
+                        await showOptionsDialog(
+                          id,
+                          "sections",
+                          data["SectionName"],
+                          "مادة",
+                        );
+                      },
+                      child: Container(
+                        height: 150,
+                        margin: const EdgeInsets.all(5),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                          border: Border.all(
+                            color: Colors.greenAccent,
+                            width: 2,
+                          ),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              offset: Offset(0, 5),
+                              blurRadius: 4,
+                            ),
+                          ],
+                          gradient: const LinearGradient(
+                            colors: [Colors.greenAccent, Colors.white],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Stack(
+                            children: [
+                              /// الصورة مع اللودر (في الخلف)
+                              Positioned.fill(
+                                child: Hero(
+                                  tag: "section_$id",
+                                  child: Image.network(
+                                    data["SectionImageUrl"] ?? "",
+                                    fit: BoxFit.cover,
+
+                                    loadingBuilder:
+                                        (context, child, loadingProgress) {
+                                          if (loadingProgress == null) {
+                                            return child;
+                                          }
+
+                                          return const Center(
+                                            child: CircularProgressIndicator(
+                                              color: Colors.greenAccent,
+                                            ),
+                                          );
+                                        },
+
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Center(
+                                        child: Icon(
+                                          Icons.broken_image,
+                                          color: Colors.white,
+                                          size: 70,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+
+                              /// النص فوق الصورة
+                              Positioned(
+                                right: 12,
+                                top: 12,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                    borderRadius: BorderRadius.circular(20),
+                                    boxShadow: const [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        offset: Offset(0, 5),
+                                        blurRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Text(
+                                    data["SectionName"] ?? "اسم غير معروف",
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                              /// زر التفعيل (في الأعلى)
+                              Positioned(
+                                left: 5,
+                                top: 2,
+                                child: Switch(
+                                  activeThumbColor: Colors.white,
+                                  activeTrackColor: Colors.lightBlueAccent,
+                                  value: data["isActive"] ?? false,
+                                  onChanged: (value) async {
+                                    final confirm = await interfaces
+                                        .showConfirmationDialog(
+                                          context,
+                                          "هل أنت متاكد من أنك تريد تغيير حالة التصنيف؟",
+                                        );
+                                    if (!confirm) return;
+                                    await FirebaseFirestore.instance
+                                        .collection("sections")
+                                        .doc(id)
+                                        .update({"isActive": value});
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// show courses options bottom sheet
+  Future<void> showCoursesOptions(DocumentReference courseRef) async {
+    return showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.edit, color: Colors.greenAccent),
+                title: const Text("تعديل بيانات المادة"),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.redAccent),
+                title: const Text("حذف المادة"),
+                onTap: () async {
+                  final confirm = await interfaces.showConfirmationDialog(
+                    context,
+                    "هل أنت متاكد من حذف هذه المادة؟ لا يمكن استرجاعها لاحقا! ⛔",
+                  );
+                  if (!confirm) return;
+
+                  /// delete course
+                  if (!context.mounted) return;
+                  Navigator.pop(context);
+                  try {
+                    await courseRef.delete();
+                  } on FirebaseException catch (e) {
+                    debugPrint("Error deleting course: $e");
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Column(
         children: [
           TabBar(
@@ -154,7 +405,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
             tabs: [
               Tab(text: "إدارة الكليات"),
               Tab(text: "إدارة الأقسام"),
-              Tab(text: "إدارة الشعب"),
+              // Tab(text: "إدارة الشعب"),
               Tab(text: "إدارة المواد"),
             ],
           ),
@@ -639,242 +890,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                 ////////////////
                 // Tab 3 content
                 ////////////////
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    spacing: 10,
-                    children: [
-                      TextField(
-                        onChanged: (value) {
-                          setState(() {
-                            searchText3 = value.toLowerCase();
-                          });
-                        },
-                        decoration: InputDecoration(
-                          label: const Text(
-                            "اسم الشعبة",
-                            style: TextStyle(color: Colors.black54),
-                          ),
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            color: Colors.greenAccent,
-                          ),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20),
-                            borderSide: const BorderSide(
-                              color: Colors.greenAccent,
-                              width: 2,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: StreamBuilder<QuerySnapshot>(
-                          stream: FirebaseFirestore.instance
-                              .collection("sections")
-                              .orderBy("SectionName")
-                              .snapshots(),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return const Center(
-                                child: CircularProgressIndicator(
-                                  color: Colors.greenAccent,
-                                ),
-                              );
-                            }
-
-                            if (snapshot.data!.docs.isEmpty) {
-                              return const Center(
-                                child: Text("لا توجد شعب مضافة بعد"),
-                              );
-                            }
-
-                            final allSections = snapshot.data!.docs;
-
-                            final sections = allSections.where((doc) {
-                              final data = doc.data() as Map<String, dynamic>;
-                              final name = (data["SectionName"] ?? "")
-                                  .toString()
-                                  .toLowerCase();
-
-                              return name.contains(searchText3);
-                            }).toList();
-                            if (sections.isEmpty) {
-                              return const Center(
-                                child: Text("لا توجد نتائج بحث"),
-                              );
-                            }
-                            return ListView.builder(
-                              padding: const EdgeInsets.all(10),
-                              itemCount: sections.length,
-                              itemBuilder: (context, index) {
-                                final data =
-                                    sections[index].data()
-                                        as Map<String, dynamic>;
-                                final id = sections[index].id;
-
-                                return InkWell(
-                                  onTap: () async {
-                                    await showOptionsDialog(
-                                      id,
-                                      "sections",
-                                      data["SectionName"],
-                                      "مادة",
-                                    );
-                                  },
-                                  child: Container(
-                                    height: 150,
-                                    margin: const EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: Colors.greenAccent,
-                                        width: 2,
-                                      ),
-                                      boxShadow: const [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          offset: Offset(0, 5),
-                                          blurRadius: 4,
-                                        ),
-                                      ],
-                                      gradient: const LinearGradient(
-                                        colors: [
-                                          Colors.greenAccent,
-                                          Colors.white,
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(20),
-                                      child: Stack(
-                                        children: [
-                                          /// الصورة مع اللودر (في الخلف)
-                                          Positioned.fill(
-                                            child: Hero(
-                                              tag: "section_$id",
-                                              child: Image.network(
-                                                data["SectionImageUrl"] ?? "",
-                                                fit: BoxFit.cover,
-
-                                                loadingBuilder:
-                                                    (
-                                                      context,
-                                                      child,
-                                                      loadingProgress,
-                                                    ) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-
-                                                      return const Center(
-                                                        child:
-                                                            CircularProgressIndicator(
-                                                              color: Colors
-                                                                  .greenAccent,
-                                                            ),
-                                                      );
-                                                    },
-
-                                                errorBuilder:
-                                                    (
-                                                      context,
-                                                      error,
-                                                      stackTrace,
-                                                    ) {
-                                                      return const Center(
-                                                        child: Icon(
-                                                          Icons.broken_image,
-                                                          color: Colors.white,
-                                                          size: 70,
-                                                        ),
-                                                      );
-                                                    },
-                                              ),
-                                            ),
-                                          ),
-
-                                          /// النص فوق الصورة
-                                          Positioned(
-                                            right: 12,
-                                            top: 12,
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 12,
-                                                    vertical: 6,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white.withValues(
-                                                  alpha: 0.7,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                                boxShadow: const [
-                                                  BoxShadow(
-                                                    color: Colors.black26,
-                                                    offset: Offset(0, 5),
-                                                    blurRadius: 4,
-                                                  ),
-                                                ],
-                                              ),
-                                              child: Text(
-                                                data["SectionName"] ??
-                                                    "اسم غير معروف",
-                                                style: const TextStyle(
-                                                  color: Colors.black,
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-
-                                          /// زر التفعيل (في الأعلى)
-                                          Positioned(
-                                            left: 5,
-                                            top: 2,
-                                            child: Switch(
-                                              activeThumbColor: Colors.white,
-                                              activeTrackColor:
-                                                  Colors.lightBlueAccent,
-                                              value: data["isActive"] ?? false,
-                                              onChanged: (value) async {
-                                                final confirm = await interfaces
-                                                    .showConfirmationDialog(
-                                                      context,
-                                                      "هل أنت متاكد من أنك تريد تغيير حالة التصنيف؟",
-                                                    );
-                                                if (!confirm) return;
-                                                await FirebaseFirestore.instance
-                                                    .collection("sections")
-                                                    .doc(id)
-                                                    .update({
-                                                      "isActive": value,
-                                                    });
-                                              },
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                // sectionTab(),
                 ////////////////
                 // tab 4 courses
                 ////////////////
@@ -959,6 +975,9 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                     horizontal: 5,
                                   ),
                                   child: ListTile(
+                                    onTap: () {
+                                      showCoursesOptions(docs[index].reference);
+                                    },
                                     title: Text(data["courseName"]),
                                     subtitle: Column(
                                       crossAxisAlignment:
@@ -980,13 +999,11 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                               "هل أنت متاكد من أنك تريد تغيير حالة المادة؟",
                                             );
                                         if (!confirm) return;
-                                        await FirebaseFirestore.instance
-                                            .collection("courses")
-                                            .doc(docs[index].id)
-                                            .update({"isActive": value});
+                                        await docs[index].reference.update({
+                                          "isActive": value,
+                                        });
                                       },
                                     ),
-                                    onTap: () {},
                                   ),
                                 );
                               },

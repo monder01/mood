@@ -149,6 +149,15 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                   final userName = userData["userName"] ?? "";
                   final photoUrl = userData["photoUrl"] ?? "";
                   final isOnline = userData["isOnline"] ?? false;
+                  final lastMessage = formatLastMessage(
+                    chatData["lastMessage"],
+                  );
+                  String youOrMe = "";
+                  if (chatData["lastSenderId"] == currentUser.uid) {
+                    youOrMe = "أنت : $lastMessage";
+                  } else {
+                    youOrMe = "$firstName : $lastMessage";
+                  }
 
                   return InkWell(
                     borderRadius: BorderRadius.circular(18),
@@ -242,7 +251,7 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
-                                    formatLastMessage(chatData["lastMessage"]),
+                                    youOrMe,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(

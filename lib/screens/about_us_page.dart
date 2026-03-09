@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mood01/global/interfaces.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -58,7 +59,7 @@ class AboutAppPage extends StatelessWidget {
         shadowColor: Colors.greenAccent,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(10),
         child: Column(
           children: [
             const SizedBox(height: 10),
@@ -82,7 +83,11 @@ class AboutAppPage extends StatelessWidget {
             Container(
               alignment: Alignment.center,
               child: Text(
-                "",
+                "تطبيق مزاجي هو منصة تعليمية تساعد الطلبة على الوصول إلى المواد وملخصاتها الدراسية بسهولة. "
+                "يمكنك من خلاله تصفح الكليات والأقسام والمواد المختلفة بطريقة منظمة وواضحة. "
+                "يوفر التطبيق أيضًا إمكانية التعرف على الزملاء والتواصل معهم عبر المحادثات. "
+                "يساعد ذلك على تبادل المعلومات والملفات الدراسية بسرعة وسهولة. "
+                "تم تصميم التطبيق ليكون بسيط الاستخدام ويوفر تجربة مريحة للطلبة.",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 16),
               ),
@@ -92,7 +97,7 @@ class AboutAppPage extends StatelessWidget {
 
             const Divider(),
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 10),
 
             /// 🔹 معلومات المطور
             const Align(
@@ -106,70 +111,113 @@ class AboutAppPage extends StatelessWidget {
             const SizedBox(height: 10),
 
             Row(
-              spacing: 10,
               children: [
-                Container(
-                  alignment: Alignment.centerRight,
-                  width: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade200,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    leading: Icon(Icons.badge, size: 30), //company icon
-                    title: Text(
-                      "المطور",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(left: 5),
+                    alignment: Alignment.centerRight,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade200,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    subtitle: Text(
-                      "شركة المكسد",
-                      style: TextStyle(fontSize: 16),
+                    child: ListTile(
+                      leading: Icon(Icons.badge, size: 30), //company icon
+                      title: Text(
+                        "المطور",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      subtitle: Text(
+                        "منذر الرعبوب",
+                        style: TextStyle(fontSize: 16),
+                      ),
                     ),
                   ),
                 ),
 
-                Container(
-                  alignment: Alignment.centerRight,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.shade200,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    leading: Icon(Icons.location_on, size: 30),
-                    title: Text(
-                      "الدولة",
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                      ),
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsets.only(right: 5),
+                    alignment: Alignment.centerRight,
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade300),
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.shade200,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
                     ),
-                    subtitle: Text("ليبيا", style: TextStyle(fontSize: 16)),
+                    child: ListTile(
+                      leading: Icon(Icons.location_on, size: 30),
+                      title: Text(
+                        "الدولة",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                        ),
+                      ),
+                      subtitle: Text("ليبيا", style: TextStyle(fontSize: 16)),
+                    ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 10),
 
-            const SizedBox(height: 20),
+            Container(
+              alignment: Alignment.centerRight,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade300),
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: ListTile(
+                leading: Icon(Icons.email, size: 30),
+                title: Text(
+                  "البريد الألكتروني",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                subtitle: InkWell(
+                  onLongPress: () {
+                    Clipboard.setData(
+                      const ClipboardData(text: "monther00147@gmail.com"),
+                    );
+                    interfaces.showFlutterToast(
+                      context,
+                      "تم نسخ البريد الإلكتروني",
+                    );
+                  },
+                  child: Text(
+                    "monther00147@gmail.com",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
 
             const Divider(),
 

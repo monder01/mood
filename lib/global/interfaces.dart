@@ -1,11 +1,22 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
 class Interfaces {
   bool isLoading = false;
 
+  void showFlutterToast(BuildContext context, String message) {
+    Fluttertoast.showToast(
+      gravity: ToastGravity.BOTTOM,
+      backgroundColor: Colors.grey,
+      textColor: Colors.white,
+      msg: message,
+    );
+  }
+
+  // pick image
   Future<void> pickImage(File localImage) async {
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,

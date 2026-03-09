@@ -132,6 +132,12 @@ class _AddCoursePageState extends State<AddCoursePage> {
     setState(() {
       isSaving = true;
     });
+    String nameId = "";
+    if (widget.collectionName == "departments") {
+      nameId = "departmentId";
+    } else if (widget.collectionName == "sections") {
+      nameId = "sectionId";
+    }
 
     try {
       final firestore = FirebaseFirestore.instance;
@@ -154,6 +160,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
             .doc();
 
         batch.set(doc, {
+          nameId: widget.departmentId,
           "courseName": name,
           "courseCode": code,
           "courseDescription": description,
@@ -209,7 +216,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
         },
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      appBar: AppBar(title: Text("إضافة كورس"), centerTitle: true),
+      appBar: AppBar(title: Text("إضافة مواد"), centerTitle: true),
       body: ListView.builder(
         padding: const EdgeInsets.all(10),
         itemCount: courses.length,

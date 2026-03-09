@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mood01/friends/search_for_friends_page.dart';
+import 'package:mood01/student/user_browse_courses_page.dart';
 
 class UserBrowseDepartmentPage extends StatefulWidget {
-  final String collegeId;
-  const UserBrowseDepartmentPage({super.key, required this.collegeId});
+  final String collegeId, collegeName;
+  const UserBrowseDepartmentPage({
+    super.key,
+    required this.collegeId,
+    required this.collegeName,
+  });
 
   @override
   State<UserBrowseDepartmentPage> createState() =>
@@ -24,6 +29,8 @@ class _UserBrowseDepartmentPageState extends State<UserBrowseDepartmentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text("أقسام ${widget.collegeName}"),
+        centerTitle: true,
         backgroundColor: Colors.greenAccent[200],
         elevation: 5,
         shape: RoundedRectangleBorder(
@@ -83,10 +90,20 @@ class _UserBrowseDepartmentPageState extends State<UserBrowseDepartmentPage> {
 
             itemBuilder: (context, index) {
               var department = departments[index];
+              final departmentName = department["DepartmentName"] ?? "";
+              final departmentImageUrl = department["DepartmentImageUrl"] ?? "";
 
-              return GestureDetector(
+              return InkWell(
                 onTap: () {
-                  // هنا يمكنك فتح صفحة تفاصيل القسم
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UserBrowseCoursesPage(
+                        departmentId: department.id,
+                        departmentName: departmentName,
+                      ),
+                    ),
+                  );
                 },
 
                 child: Container(
@@ -107,7 +124,7 @@ class _UserBrowseDepartmentPageState extends State<UserBrowseDepartmentPage> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: Image.network(
-                          department["DepartmentImageUrl"],
+                          departmentImageUrl,
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
@@ -135,7 +152,7 @@ class _UserBrowseDepartmentPageState extends State<UserBrowseDepartmentPage> {
                         left: 10,
                         right: 10,
                         child: Text(
-                          department["DepartmentName"],
+                          departmentName ?? "",
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 16,

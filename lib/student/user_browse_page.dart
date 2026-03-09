@@ -33,6 +33,10 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
             );
           }
 
+          if (snapshot.hasError) {
+            return Center(child: Text("حدث خطأ: ${snapshot.error}"));
+          }
+
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("لا توجد كليات"));
           }
@@ -53,22 +57,34 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
 
             itemBuilder: (context, index) {
               var college = colleges[index];
+              final data = college.data() as Map<String, dynamic>;
+              final collegeName = data["CollegeName"] ?? "";
+              final collegeImageUrl = data["CollegeImageUrl"] ?? "";
+              final university = data["University"] ?? "";
 
-              return GestureDetector(
+              return InkWell(
                 onLongPress: () {
                   showDialog(
                     context: context,
                     builder: (context) => AlertDialog(
-                      title: Text(college["CollegeName"]),
+                      title: Text(collegeName),
                       content: SingleChildScrollView(
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Image.network(
-                              college["CollegeImageUrl"],
+                              collegeImageUrl,
                               height: 200,
                               fit: BoxFit.fill,
+                              errorBuilder: (context, error, stackTrace) {
+                                return const SizedBox(
+                                  height: 200,
+                                  child: Center(
+                                    child: Icon(Icons.broken_image, size: 40),
+                                  ),
+                                );
+                              },
                             ),
                             const SizedBox(height: 10),
                             Row(
@@ -77,7 +93,7 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
                                   "الاسم: ",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                Expanded(child: Text(college["CollegeName"])),
+                                Expanded(child: Text(collegeName)),
                               ],
                             ),
                             const SizedBox(height: 5),
@@ -87,7 +103,7 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
                                   "الجامعة: ",
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                Expanded(child: Text(college["University"])),
+                                Expanded(child: Text(university)),
                               ],
                             ),
                           ],
@@ -96,7 +112,10 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.of(context).pop(),
-                          child: const Text("اغلاق"),
+                          child: const Text(
+                            "اغلاق",
+                            style: TextStyle(color: Colors.black),
+                          ),
                         ),
                       ],
                     ),
@@ -106,8 +125,10 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          UserBrowseDepartmentPage(collegeId: college.id),
+                      builder: (context) => UserBrowseDepartmentPage(
+                        collegeId: college.id,
+                        collegeName: collegeName,
+                      ),
                     ),
                   );
                 },
@@ -130,10 +151,21 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: Image.network(
-                          college["CollegeImageUrl"],
+                          collegeImageUrl,
                           width: double.infinity,
                           height: double.infinity,
                           fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: const Center(
+                                child: Icon(Icons.broken_image, size: 40),
+                              ),
+                            );
+                          },
                         ),
                       ),
 
@@ -161,7 +193,7 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              college["CollegeName"],
+                              collegeName,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -172,7 +204,7 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
                             const SizedBox(height: 3),
 
                             Text(
-                              "جامعة ${college["University"]}",
+                              "جامعة $university",
                               style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 13,

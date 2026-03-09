@@ -27,7 +27,7 @@ class Browsepage extends StatefulWidget {
   State<Browsepage> createState() => _BrowsepageState();
 }
 
-class _BrowsepageState extends State<Browsepage> {
+class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
   Users users = Users();
   Interfaces interfaces = Interfaces();
   bool isPhotoLoading = false;
@@ -39,6 +39,20 @@ class _BrowsepageState extends State<Browsepage> {
   final List<Widget> userPages = const [UserBrowsePage(), DiscoverPage()];
 
   final List<Widget> adminPages = const [AdminMainPage(), AdminBrowsePage()];
+
+  Future<void> setOnlineStatus(bool isOnline) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+        {"isOnline": isOnline, "lastLogin": FieldValue.serverTimestamp()},
+      );
+    } catch (e) {
+      print("Error updating online status: $e");
+    }
+  }
+
   Future<void> pickFromGallery() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
@@ -170,6 +184,26 @@ class _BrowsepageState extends State<Browsepage> {
   void initState() {
     super.initState();
     loadUser();
+    WidgetsBinding.instance.addObserver(this);
+    setOnlineStatus(true);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setOnlineStatus(true);
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.detached) {
+      setOnlineStatus(false);
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    setOnlineStatus(false);
+    super.dispose();
   }
 
   Widget drawerbutton() {
@@ -247,6 +281,7 @@ class _BrowsepageState extends State<Browsepage> {
               );
             },
           ),
+          const Divider(),
 
           ListTile(
             leading: const Icon(Icons.person),
@@ -263,8 +298,8 @@ class _BrowsepageState extends State<Browsepage> {
               Navigator.pop(context);
             },
           ),
-
           const Divider(),
+
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text("عن التطبيق"),
@@ -290,7 +325,10 @@ class _BrowsepageState extends State<Browsepage> {
               );
 
               if (!confirm) return;
+
+              await setOnlineStatus(false);
               await FirebaseAuth.instance.signOut();
+
               if (!mounted) return;
               Navigator.pushReplacement(
                 context,
