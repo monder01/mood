@@ -299,86 +299,120 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                 /// Tab 1: أصدقائي
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: FutureBuilder<Map<String, Map<String, dynamic>>>(
-                    future: fetchUsersData(friends),
-                    builder: (context, snap) {
-                      if (!snap.hasData) {
-                        return const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.greenAccent,
-                          ),
-                        );
-                      }
-                      final friendsData = snap.data!;
-                      if (friends.isEmpty) {
-                        return const Center(
-                          child: Text("لا يوجد أصدقاء حتى الآن"),
-                        );
-                      }
+                  child: friends.isEmpty
+                      ? const Center(child: Text("لا يوجد أصدقاء حتى الآن"))
+                      : ListView.builder(
+                          padding: const EdgeInsets.all(10),
+                          itemCount: friends.length,
+                          itemBuilder: (context, index) {
+                            final friendId = friends[index];
 
-                      return ListView(
-                        padding: const EdgeInsets.all(10),
-                        children: friends.map((friendId) {
-                          final userData = friendsData[friendId];
-                          if (userData == null) return const SizedBox();
-                          return InkWell(
-                            onTap: () => friendShowProfile(userData),
-                            child: Container(
-                              padding: const EdgeInsets.all(8),
-                              margin: const EdgeInsets.only(bottom: 5),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 5,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundImage:
-                                        (userData['photoUrl'] ?? '').isNotEmpty
-                                        ? NetworkImage(userData['photoUrl'])
-                                        : null,
-                                    child: (userData['photoUrl'] ?? '').isEmpty
-                                        ? const Icon(Icons.person)
-                                        : null,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${userData['firstName']} ${userData['lastName']}",
-                                      ),
-                                      Text(
-                                        "${userData['userName']}@",
-                                        style: const TextStyle(
-                                          color: Colors.grey,
+                            return StreamBuilder<DocumentSnapshot>(
+                              stream: usersRef.doc(friendId).snapshots(),
+                              builder: (context, userSnap) {
+                                if (!userSnap.hasData ||
+                                    !userSnap.data!.exists) {
+                                  return const SizedBox();
+                                }
+
+                                final userData =
+                                    userSnap.data!.data()
+                                        as Map<String, dynamic>? ??
+                                    {};
+
+                                return InkWell(
+                                  onTap: () => friendShowProfile(userData),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    margin: const EdgeInsets.only(bottom: 5),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: const [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 5,
+                                          offset: Offset(0, 4),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Stack(
+                                          children: [
+                                            CircleAvatar(
+                                              radius: 30,
+                                              backgroundImage:
+                                                  (userData['photoUrl'] ?? '')
+                                                      .toString()
+                                                      .isNotEmpty
+                                                  ? NetworkImage(
+                                                      userData['photoUrl'],
+                                                    )
+                                                  : null,
+                                              child:
+                                                  (userData['photoUrl'] ?? '')
+                                                      .toString()
+                                                      .isEmpty
+                                                  ? const Icon(Icons.person)
+                                                  : null,
+                                            ),
+                                            Positioned(
+                                              bottom: 0,
+                                              left: 5,
+                                              child: Container(
+                                                width: 12,
+                                                height: 12,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color:
+                                                      (userData['isOnline'] ??
+                                                          false)
+                                                      ? Colors.green
+                                                      : Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}",
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                            Text(
+                                              "${userData['userName'] ?? ''}@",
+                                              style: const TextStyle(
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const Spacer(),
+                                        Column(
+                                          children: [
+                                            Icon(
+                                              Icons.group_outlined,
+                                              size: 25,
+                                              color: Colors.green,
+                                            ),
+                                            const Text("اصدقاء"),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  const Spacer(),
-                                  Icon(
-                                    Icons.circle,
-                                    color: userData['isOnline']
-                                        ? Colors.green
-                                        : Colors.grey,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
                 ),
 
                 /// Tab 2: طلبات واردة

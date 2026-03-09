@@ -6,6 +6,7 @@ class Course {
   TextEditingController courseNameController = TextEditingController();
   TextEditingController courseCodeController = TextEditingController();
   TextEditingController courseDescriptionController = TextEditingController();
+  TextEditingController courseUrlController = TextEditingController();
   bool isActive = false;
 }
 
@@ -54,6 +55,12 @@ class _AddCoursePageState extends State<AddCoursePage> {
             label: "وصف المادة",
             keyboardType: TextInputType.text,
             controller: courses[index].courseDescriptionController,
+            maxLines: 2,
+          ),
+          interfaces.textField01(
+            label: "رابط المادة",
+            keyboardType: TextInputType.text,
+            controller: courses[index].courseUrlController,
             maxLines: 2,
           ),
           Row(
@@ -133,11 +140,6 @@ class _AddCoursePageState extends State<AddCoursePage> {
       isSaving = true;
     });
     String nameId = "";
-    if (widget.collectionName == "departments") {
-      nameId = "departmentId";
-    } else if (widget.collectionName == "sections") {
-      nameId = "sectionId";
-    }
 
     try {
       final firestore = FirebaseFirestore.instance;
@@ -147,10 +149,30 @@ class _AddCoursePageState extends State<AddCoursePage> {
         String name = course.courseNameController.text.trim();
         String code = course.courseCodeController.text.trim();
         String description = course.courseDescriptionController.text.trim();
+        String url = course.courseUrlController.text.trim();
 
-        if (name.isEmpty || code.isEmpty || description.isEmpty) {
-          interfaces.showAlert(context, "يرجى ملء جميع الحقول");
+        if (name.isEmpty ||
+            code.isEmpty ||
+            description.isEmpty ||
+            url.isEmpty) {
+          interfaces.showAlert(
+            context,
+            "هناك حقول فارغة لم يتم تعبئتها",
+            icon: Icons.error,
+            iconColor: Colors.red,
+          );
           return;
+        }
+
+        if (url.contains("http://") || url.contains("https://")) {
+        } else {
+          url = "https://$url";
+        }
+
+        if (widget.collectionName == "departments") {
+          nameId = "departmentId";
+        } else if (widget.collectionName == "sections") {
+          nameId = "sectionId";
         }
 
         DocumentReference doc = firestore
@@ -161,6 +183,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
         batch.set(doc, {
           nameId: widget.departmentId,
+          "courseUrl": url,
           "courseName": name,
           "courseCode": code,
           "courseDescription": description,

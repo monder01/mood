@@ -171,15 +171,41 @@ class _UserBrowseCoursesPageState extends State<UserBrowseCoursesPage> {
                     ],
                   ),
 
-                  child: ListTile(
-                    leading: const Icon(
-                      Icons.menu_book,
-                      color: Colors.greenAccent,
-                    ),
-                    title: Text(courseName),
-                    subtitle: Text(
-                      courseCode,
-                      style: const TextStyle(color: Colors.grey),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.menu_book,
+                          color: Colors.greenAccent,
+                          size: 30,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                courseName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                courseCode,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
