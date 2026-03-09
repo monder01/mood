@@ -33,7 +33,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/icons/monther.png"
+  image_path: "assets/icons/moodLogo01.png"
 
 
 flutter:
