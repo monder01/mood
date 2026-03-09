@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +13,7 @@ class Users {
   String? photoUrl;
   String? phoneNumber;
   String? role;
+  String? messageToken;
 
   Users({
     this.id,
@@ -21,6 +23,7 @@ class Users {
     this.photoUrl,
     this.phoneNumber,
     this.role,
+    this.messageToken,
   });
 
   // get current user data
@@ -78,6 +81,7 @@ class Users {
       final user = credential.user;
 
       if (!context.mounted) return;
+
       if (user == null) {
         Interfaces().showAlert(
           context,
@@ -98,6 +102,27 @@ class Users {
           .doc(user.uid)
           .get();
       final name = "${userData.get("firstName")} ${userData.get("lastName")}";
+      messageToken = await FirebaseMessaging.instance.getToken();
+      if (messageToken != userData["messageToken"]) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .update({"messageToken": messageToken});
+      }
+
+      // force logout
+      if (userData["isActive"] == false) {
+        await FirebaseAuth.instance.signOut();
+
+        if (!context.mounted) return;
+        Interfaces().showAlert(
+          context,
+          "تم تعطيل حسابك من قبل الإدارة",
+          icon: Icons.block,
+          iconColor: Colors.red,
+        );
+        return;
+      }
 
       if (!context.mounted) return;
 
@@ -218,6 +243,7 @@ class Users {
           );
 
       final user = credential.user;
+      messageToken = await FirebaseMessaging.instance.getToken();
 
       // حفظ بيانات المستخدم في Firestore
       await FirebaseFirestore.instance.collection("users").doc(user!.uid).set({
@@ -230,22 +256,24 @@ class Users {
         "password": passwordController.text.trim(),
         "photoUrl": "",
         "isOnline": true,
-        "messageToken": "",
+        "isActive": true,
+        "messageToken": messageToken,
         "role": "user",
         "createdAt": FieldValue.serverTimestamp(),
         "lastLogin": FieldValue.serverTimestamp(),
       });
+
       if (!context.mounted) return;
-      Interfaces().showAlert(
-        context,
-        "تم إنشاء الحساب بنجاح يمكنك الآن تسجيل الدخول\n ${emailController.text.trim()} \n ${passwordController.text.trim()}",
-        icon: Icons.check_circle,
-        iconColor: Colors.green,
-      );
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => Browsepage()),
+      );
+      Interfaces().showAlert(
+        context,
+        "تم إنشاء الحساب بنجاح يمكنك الآن تصفح التطبيق \n ${usernameController.text.trim()} \n ${firstnameController.text.trim()} \n ${lastNameController.text.trim()} \n ${phoneController.text.trim()} \n ${emailController.text.trim()} \n ${passwordController.text.trim()}",
+        icon: Icons.check_circle,
+        iconColor: Colors.green,
       );
     } on FirebaseAuthException catch (e) {
       String? message;

@@ -2,15 +2,16 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mood01/admin/admin_user_management_page.dart';
 import 'package:mood01/chats/my_conversations_page.dart';
 import 'package:mood01/screens/about_us_page.dart';
 import 'package:mood01/admin/admin_browse_page.dart';
-import 'package:mood01/admin/admin_fellows_page.dart';
 import 'package:mood01/admin/admin_main_page.dart';
 import 'package:mood01/auth/users.dart';
 import 'package:mood01/student/discover_page.dart';
@@ -38,7 +39,11 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
   List<Widget> pages = [];
   final List<Widget> userPages = const [UserBrowsePage(), DiscoverPage()];
 
-  final List<Widget> adminPages = const [AdminMainPage(), AdminBrowsePage()];
+  final List<Widget> adminPages = const [
+    AdminMainPage(),
+    AdminUserManagementPage(),
+    AdminBrowsePage(),
+  ];
 
   Future<void> setOnlineStatus(bool isOnline) async {
     final user = FirebaseAuth.instance.currentUser;
@@ -164,19 +169,13 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
 
   Future<void> loadUser() async {
     final user = await users.getCurrentUser();
+    if (!mounted) return;
+
     if (user != null) {
-      if (!mounted) return;
       setState(() {
         users = user;
+        pages = users.role == "admin" ? adminPages : userPages;
       });
-    }
-    if (!mounted) return;
-    setState(() {});
-
-    if (users.role == "admin") {
-      pages = adminPages;
-    } else {
-      pages = userPages;
     }
   }
 
@@ -327,6 +326,15 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
               if (!confirm) return;
 
               await setOnlineStatus(false);
+              // delete fcm token
+              final messageToken = await FirebaseMessaging.instance.getToken();
+              if (messageToken != null && messageToken.isNotEmpty) {
+                // update fcm token
+                await FirebaseFirestore.instance
+                    .collection("users")
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .update({"messageToken": ""});
+              }
               await FirebaseAuth.instance.signOut();
 
               if (!mounted) return;
@@ -422,6 +430,11 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
               icon: Icon(Icons.home_rounded),
               label: "الرئيسية",
             ),
+            if (users.role == "admin")
+              BottomNavigationBarItem(
+                icon: Icon(Icons.admin_panel_settings_rounded),
+                label: "التحكم",
+              ),
             BottomNavigationBarItem(
               icon: const Icon(Icons.near_me_rounded),
               label: "تصفح",

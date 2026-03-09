@@ -1,7 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/friends/search_for_friends_page.dart';
-import 'package:mood01/global/interfaces.dart';
 
 class UserBrowseSectionsPage extends StatefulWidget {
   final String sectionId, sectionName;

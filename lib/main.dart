@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mood01/auth/auth.dart';
+import 'package:mood01/firebase_notifications.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -7,6 +8,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  await FirebaseNotifications.init();
+
   runApp(const MyApp());
 }
 
