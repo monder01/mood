@@ -38,6 +38,10 @@ class _ChatPageState extends State<ChatPage> {
 
       if (users.contains(widget.otherUserId)) {
         chatId = doc.id;
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(currentUser.uid)
+            .update({"activeChatId": chatId});
         setState(() => loading = false);
         return;
       }
@@ -52,7 +56,10 @@ class _ChatPageState extends State<ChatPage> {
     });
 
     chatId = newChat.id;
-
+    await FirebaseFirestore.instance
+        .collection("users")
+        .doc(currentUser.uid)
+        .update({"activeChatId": chatId});
     setState(() => loading = false);
   }
 
@@ -91,6 +98,12 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   void dispose() {
+    if (chatId != null) {
+      FirebaseFirestore.instance
+          .collection("users")
+          .doc(currentUser.uid)
+          .update({"activeChatId": null});
+    }
     messageController.dispose();
     super.dispose();
   }

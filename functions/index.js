@@ -48,6 +48,12 @@ exports.sendChatNotification = onDocumentCreated(
             if (!receiverDoc.exists) return;
 
             const receiverData = receiverDoc.data();
+
+            if (receiverData.activeChatId === chatId) {
+                console.log("المستخدم داخل نفس المحادثة، لن يتم إرسال إشعار");
+                return;
+            }
+
             const token = receiverData.messageToken;
 
             if (!token) {

@@ -47,16 +47,28 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
 
   // get user fcm
   Future<void> getFcmToken() async {
-    final fcmToken = await FirebaseMessaging.instance.getToken();
-    final user = await users.getCurrentUser();
-    if (!mounted) return;
-    if (user != null &&
-        fcmToken != null &&
-        fcmToken.isNotEmpty &&
-        user.messageToken != fcmToken) {
-      await FirebaseFirestore.instance.collection("users").doc(user.id).update({
-        "messageToken": fcmToken,
-      });
+    try {
+      final firebaseUser = FirebaseAuth.instance.currentUser;
+      if (firebaseUser == null) return;
+
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken == null || fcmToken.isEmpty) return;
+
+      final doc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(firebaseUser.uid)
+          .get();
+
+      final currentToken = doc.data()?["messageToken"];
+
+      if (currentToken != fcmToken) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(firebaseUser.uid)
+            .set({"messageToken": fcmToken}, SetOptions(merge: true));
+      }
+    } catch (e) {
+      debugPrint("FCM token error: $e");
     }
   }
 
