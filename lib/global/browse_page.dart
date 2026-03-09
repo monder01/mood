@@ -45,6 +45,21 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     AdminBrowsePage(),
   ];
 
+  // get user fcm
+  Future<void> getFcmToken() async {
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    final user = await users.getCurrentUser();
+    if (!mounted) return;
+    if (user != null &&
+        fcmToken != null &&
+        fcmToken.isNotEmpty &&
+        user.messageToken != fcmToken) {
+      await FirebaseFirestore.instance.collection("users").doc(user.id).update({
+        "messageToken": fcmToken,
+      });
+    }
+  }
+
   Future<void> setOnlineStatus(bool isOnline) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -183,6 +198,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     loadUser();
+    getFcmToken();
     WidgetsBinding.instance.addObserver(this);
     setOnlineStatus(true);
   }

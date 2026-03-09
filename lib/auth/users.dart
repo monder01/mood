@@ -47,6 +47,7 @@ class Users {
         phoneNumber: userDoc.get("phone") ?? "",
         role: userDoc.get("role") ?? "",
         userName: userDoc.get("userName") ?? "",
+        messageToken: userDoc.get("messageToken") ?? "",
       );
     } catch (e) {
       print("Error fetching user data: $e");
