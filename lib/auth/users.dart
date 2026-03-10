@@ -2,6 +2,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/global/browse_page.dart';
 import 'package:mood01/global/interfaces.dart';
 
@@ -124,6 +125,8 @@ class Users {
         );
         return;
       }
+
+      await SessionService.saveSessionAfterLogin();
 
       if (!context.mounted) return;
 
@@ -263,6 +266,8 @@ class Users {
         "createdAt": FieldValue.serverTimestamp(),
         "lastLogin": FieldValue.serverTimestamp(),
       });
+
+      await SessionService.saveSessionAfterLogin();
 
       if (!context.mounted) return;
 

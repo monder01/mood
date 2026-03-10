@@ -64,8 +64,8 @@ exports.sendChatNotification = onDocumentCreated(
             const payload = {
                 token: token,
                 notification: {
-                    title: senderName,
-                    body: text,
+                    title: "رسالة جديدة",
+                    body: senderName + " : " + text,
                 },
                 data: {
                     type: "chat",
