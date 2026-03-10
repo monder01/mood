@@ -48,13 +48,24 @@ class _SigninpageState extends State<Signinpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.greenAccent[200]),
-      body: Padding(
+      appBar: AppBar(
+        backgroundColor: Colors.greenAccent[200],
+        elevation: 5,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
+        toolbarHeight: 50,
+        shadowColor: Colors.greenAccent,
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 20),
+            SizedBox(height: 30),
             Center(
               child: Image.asset(
                 "assets/icons/monther.png",
@@ -62,12 +73,13 @@ class _SigninpageState extends State<Signinpage> {
                 height: 200,
               ),
             ),
+            const SizedBox(height: 20),
             const Text(
               "مرحبًا بك في مزاجي!",
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: Color.fromARGB(255, 68, 238, 156),
               ),
             ),
             const SizedBox(height: 20),
@@ -78,19 +90,14 @@ class _SigninpageState extends State<Signinpage> {
                 label: const Text(
                   "البريد الالكتروني",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
                 ),
-                prefixIcon: const Icon(Icons.email, color: Colors.black),
+                prefixIcon: const Icon(Icons.email),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black, width: 1),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -110,12 +117,12 @@ class _SigninpageState extends State<Signinpage> {
                 label: const Text(
                   "كلمة المرور",
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black54,
                   ),
                 ),
-                prefixIcon: const Icon(Icons.lock, color: Colors.black),
+                prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
                   onPressed: () {
                     setState(() {
@@ -123,16 +130,11 @@ class _SigninpageState extends State<Signinpage> {
                     });
                   },
                   icon: isObscure
-                      ? const Icon(Icons.visibility_off, color: Colors.black)
-                      : const Icon(Icons.visibility, color: Colors.black),
+                      ? const Icon(Icons.visibility_off)
+                      : const Icon(Icons.visibility),
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black, width: 1),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(color: Colors.black, width: 1),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -162,6 +164,16 @@ class _SigninpageState extends State<Signinpage> {
               },
               300,
               70,
+            ),
+            const SizedBox(height: 50),
+            Text(
+              "عن طريق تسجيل الدخول ، فإنك توافق على شروط الخدمة وسياسة الخصوصية الخاصة بنا",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+              ),
             ),
           ],
         ),

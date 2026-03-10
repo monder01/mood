@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mood01/admin/admin_user_management_page.dart';
+import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/chats/my_conversations_page.dart';
 import 'package:mood01/screens/about_us_page.dart';
 import 'package:mood01/admin/admin_browse_page.dart';
@@ -44,6 +46,65 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     AdminUserManagementPage(),
     AdminBrowsePage(),
   ];
+
+  // أضف هذا المتغير في أعلى الكلاس
+  StreamSubscription<DocumentSnapshot>? _sessionSubscription;
+
+  void startSessionMonitoring() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // استماع مباشر للتغييرات في مستند المستخدم
+    _sessionSubscription = FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .snapshots()
+        .listen((snapshot) async {
+          if (!snapshot.exists) return;
+
+          final data = snapshot.data() as Map<String, dynamic>;
+          final bool isActive = data["isActive"] ?? true;
+          final String? firestoreSessionId = data["activeSessionId"];
+
+          // جلب المعرف المحلي
+          final localSessionId = await SessionService.getLocalSessionId();
+
+          if (!mounted) return;
+
+          // 1. فحص إذا تم تعطيل الحساب
+          if (isActive == false) {
+            _logoutDueToIssue("تم تعطيل حسابك من قبل الإدارة");
+            return;
+          }
+
+          // 2. فحص إذا تم الدخول من جهاز آخر
+          if (localSessionId != null &&
+              firestoreSessionId != null &&
+              firestoreSessionId.isNotEmpty &&
+              localSessionId != firestoreSessionId) {
+            _logoutDueToIssue("تم تسجيل الدخول من جهاز آخر");
+          }
+        });
+  }
+
+  void _logoutDueToIssue(String message) async {
+    // إيقاف المستمع أولاً لتجنب التكرار
+    _sessionSubscription?.cancel();
+
+    await setOnlineStatus(false);
+    await SessionService.clearLocalSession();
+    await FirebaseAuth.instance.signOut();
+
+    if (!mounted) return;
+
+    // إظهار تنبيه للمستخدم والعودة للرئيسية
+    interfaces.showFlutterToast(context, message);
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const Homepage()),
+      (route) => false,
+    );
+  }
 
   // get user fcm
   Future<void> getFcmToken() async {
@@ -213,6 +274,8 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     getFcmToken();
     WidgetsBinding.instance.addObserver(this);
     setOnlineStatus(true);
+
+    startSessionMonitoring();
   }
 
   @override
@@ -228,6 +291,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    _sessionSubscription?.cancel();
     WidgetsBinding.instance.removeObserver(this);
     setOnlineStatus(false);
     super.dispose();
@@ -363,6 +427,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                     .doc(FirebaseAuth.instance.currentUser!.uid)
                     .update({"messageToken": ""});
               }
+              await SessionService.clearLocalSession();
               await FirebaseAuth.instance.signOut();
 
               if (!mounted) return;

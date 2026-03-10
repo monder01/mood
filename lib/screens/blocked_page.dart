@@ -3,6 +3,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/global/interfaces.dart';
 import 'package:mood01/screens/home_page.dart';
 
@@ -59,6 +60,7 @@ class BlockedPage extends StatelessWidget {
                       .doc(FirebaseAuth.instance.currentUser!.uid)
                       .update({"messageToken": ""});
                 }
+                await SessionService.clearLocalSession();
 
                 await FirebaseAuth.instance.signOut();
 
