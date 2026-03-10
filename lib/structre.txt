@@ -1,3 +1,22 @@
+just thinking , not actully excist : 
+lib
+│
+├─ services
+│   ├─ firebase_firestore_service.dart
+│   ├─ firebase_storage_service.dart
+│   └─ firebase_auth_service.dart
+│
+├─ models
+│   ├─ college_model.dart
+│   └─ department_model.dart
+│
+├─ pages
+│   ├─ admin
+│   └─ user
+│
+└─ main.dart
+///////////////////////////
+
 users
    └ userId
         uid

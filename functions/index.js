@@ -129,7 +129,7 @@ exports.notifyLoginFromAnotherDevice = onDocumentUpdated(
                 token: beforeToken,
                 notification: {
                     title: "تنبيه أمني",
-                    body: "تم تسجيل الدخول إلى هذا الحساب من جهاز آخر",
+                    body: "تم تسجيل الدخول إلى هذا الحساب من جهاز آخر 🚨\n إن لم تكن أنت الرجاء تسجيل الدخول وتغيير كلمة المرور",
                 },
                 data: {
                     type: "security_login",
