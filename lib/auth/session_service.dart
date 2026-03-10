@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SessionService {
@@ -14,12 +15,14 @@ class SessionService {
     if (user == null) return;
 
     final sessionId = createSessionId();
+    final token = await FirebaseMessaging.instance.getToken();
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(localSessionKey, sessionId);
 
     await FirebaseFirestore.instance.collection("users").doc(user.uid).update({
       "activeSessionId": sessionId,
+      "messageToken": token ?? "",
       "lastLogin": FieldValue.serverTimestamp(),
     });
   }

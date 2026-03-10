@@ -1,9 +1,11 @@
 const { setGlobalOptions } = require("firebase-functions");
-const { onDocumentCreated } = require("firebase-functions/v2/firestore");
+const {
+    onDocumentCreated,
+    onDocumentUpdated,
+} = require("firebase-functions/v2/firestore");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
-
 setGlobalOptions({ maxInstances: 10 });
 
 initializeApp();
@@ -89,6 +91,69 @@ exports.sendChatNotification = onDocumentCreated(
             console.log("تم إرسال الإشعار بنجاح:", response);
         } catch (error) {
             console.error("خطأ أثناء إرسال إشعار الرسالة:", error);
+        }
+    }
+);
+exports.notifyLoginFromAnotherDevice = onDocumentUpdated(
+    "users/{userId}",
+    async (event) => {
+        try {
+            const before = event.data?.before?.data();
+            const after = event.data?.after?.data();
+
+            if (!before || !after) return;
+
+            const beforeSessionId = before.activeSessionId || "";
+            const afterSessionId = after.activeSessionId || "";
+
+            const beforeToken = before.messageToken || "";
+            const afterToken = after.messageToken || "";
+
+            const firstName = after.firstName || "";
+            const lastName = after.lastName || "";
+            const fullName = `${firstName} ${lastName}`.trim();
+
+            // إذا لم تتغير الجلسة، لا تفعل شيئًا
+            if (beforeSessionId === afterSessionId) return;
+
+            // إذا كانت الجلسة القديمة فارغة، فهذا غالبًا أول تسجيل دخول
+            if (!beforeSessionId || !afterSessionId) return;
+
+            // إذا كان التوكن القديم غير موجود، لا يوجد جهاز نرسل له
+            if (!beforeToken) return;
+
+            // إذا كان نفس التوكن، فالغالب أنه نفس الجهاز وليس جهازًا آخر
+            if (beforeToken === afterToken) return;
+
+            const payload = {
+                token: beforeToken,
+                notification: {
+                    title: "تنبيه أمني",
+                    body: "تم تسجيل الدخول إلى هذا الحساب من جهاز آخر",
+                },
+                data: {
+                    type: "security_login",
+                    action: "logged_in_elsewhere",
+                },
+                android: {
+                    priority: "high",
+                },
+                apns: {
+                    payload: {
+                        aps: {
+                            sound: "default",
+                        },
+                    },
+                },
+            };
+
+            const response = await getMessaging().send(payload);
+            console.log(
+                `تم إرسال إشعار تسجيل دخول من جهاز آخر للمستخدم ${fullName || event.params.userId}:`,
+                response
+            );
+        } catch (error) {
+            console.error("خطأ أثناء إرسال إشعار تسجيل الدخول من جهاز آخر:", error);
         }
     }
 );

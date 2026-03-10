@@ -328,7 +328,7 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
       appBar: AppBar(
         title: TextField(
           decoration: const InputDecoration(
-            hintText: "ابحث بالاسم او اسم المستخدم",
+            hintText: "ابحث عن صديق",
             filled: true,
             fillColor: Colors.white,
             contentPadding: EdgeInsets.symmetric(vertical: 0),
@@ -376,7 +376,9 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
             const SizedBox(height: 20),
             Expanded(
               child: searchText.isEmpty
-                  ? const Center(child: Text("ابدأ البحث"))
+                  ? const Center(
+                      child: Text("ابدأ البحث عن طريق اسم المستخدم او الاسم"),
+                    )
                   : StreamBuilder<QuerySnapshot>(
                       stream: searchByUsername(),
                       builder: (context, snapshot1) {

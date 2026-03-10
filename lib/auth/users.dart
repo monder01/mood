@@ -104,13 +104,8 @@ class Users {
           .doc(user.uid)
           .get();
       final name = "${userData.get("firstName")} ${userData.get("lastName")}";
-      messageToken = await FirebaseMessaging.instance.getToken();
-      if (messageToken != null && messageToken != userData["messageToken"]) {
-        await FirebaseFirestore.instance
-            .collection("users")
-            .doc(user.uid)
-            .update({"messageToken": messageToken});
-      }
+
+      await SessionService.saveSessionAfterLogin();
 
       // force logout
       if (userData["isActive"] == false) {
@@ -247,9 +242,7 @@ class Users {
           );
 
       final user = credential.user;
-      messageToken = await FirebaseMessaging.instance.getToken();
 
-      // حفظ بيانات المستخدم في Firestore
       await FirebaseFirestore.instance.collection("users").doc(user!.uid).set({
         "uid": user.uid,
         "userName": usernameController.text.trim(),
@@ -257,11 +250,11 @@ class Users {
         "lastName": lastNameController.text.trim(),
         "email": emailController.text.trim(),
         "phone": "+218${phoneController.text.trim()}",
-        "password": passwordController.text.trim(),
         "photoUrl": "",
         "isOnline": true,
         "isActive": true,
-        "messageToken": messageToken ?? "",
+        "messageToken": "",
+        "activeSessionId": "",
         "role": "user",
         "createdAt": FieldValue.serverTimestamp(),
         "lastLogin": FieldValue.serverTimestamp(),
