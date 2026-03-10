@@ -105,7 +105,7 @@ class Users {
           .get();
       final name = "${userData.get("firstName")} ${userData.get("lastName")}";
       messageToken = await FirebaseMessaging.instance.getToken();
-      if (messageToken != userData["messageToken"]) {
+      if (messageToken != null && messageToken != userData["messageToken"]) {
         await FirebaseFirestore.instance
             .collection("users")
             .doc(user.uid)
@@ -261,7 +261,7 @@ class Users {
         "photoUrl": "",
         "isOnline": true,
         "isActive": true,
-        "messageToken": messageToken,
+        "messageToken": messageToken ?? "",
         "role": "user",
         "createdAt": FieldValue.serverTimestamp(),
         "lastLogin": FieldValue.serverTimestamp(),
