@@ -15,61 +15,10 @@ class AdminUserManagementPage extends StatefulWidget {
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   final interfaces = Interfaces();
   String searchText = "";
+  final titleController = TextEditingController();
+  final bodyController = TextEditingController();
+  bool isLoading = false;
   final currentUserId = FirebaseAuth.instance.currentUser!.uid;
-
-  void showSendNotificationDialog(BuildContext context) {
-    final titleController = TextEditingController();
-    final bodyController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: const Text("إرسال إشعار لجميع المستخدمين"),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(hintText: "عنوان الإشعار"),
-                ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: bodyController,
-                  maxLines: 4,
-                  decoration: const InputDecoration(hintText: "نص الإشعار"),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text("إلغاء"),
-            ),
-            TextButton(
-              onPressed: () async {
-                final title = titleController.text.trim();
-                final body = bodyController.text.trim();
-
-                if (title.isEmpty || body.isEmpty) return;
-
-                Navigator.pop(dialogContext);
-
-                await sendNotificationToAllUsersSafe(
-                  context: context,
-                  title: title,
-                  body: body,
-                );
-              },
-              child: const Text("إرسال"),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   Future<void> sendNotificationToAllUsersSafe({
     required BuildContext context,
@@ -490,6 +439,13 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   }
 
   @override
+  void dispose() {
+    titleController.dispose();
+    bodyController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final usersStream = FirebaseFirestore.instance
         .collection("users")
@@ -497,122 +453,243 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
         .snapshots();
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(10),
+      body: DefaultTabController(
+        length: 2,
         child: Column(
           children: [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        searchText = value.trim().toLowerCase();
-                      });
-                    },
-                    decoration: InputDecoration(
-                      hintText: "ابحث بالاسم أو اسم المستخدم أو البريد",
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: const BorderSide(
-                          color: Colors.greenAccent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.black,
-                    elevation: 2,
-                    side: const BorderSide(color: Colors.greenAccent, width: 1),
-                    maximumSize: const Size(100, 50),
-                    minimumSize: const Size(100, 50),
-                    shadowColor: Colors.black,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  onPressed: () {
-                    final user = FirebaseAuth.instance.currentUser;
-                    print(user?.uid);
-                    print(user?.email);
-                    showSendNotificationDialog(context);
-                  },
-                  child: Text("إرسال إشعار"),
-                ),
+            TabBar(
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.black54,
+              indicatorColor: Color.fromARGB(255, 90, 205, 150),
+              labelStyle: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.greenAccent,
+              ),
+              tabs: const [
+                Tab(text: "إدارة المستخدمين"),
+                Tab(text: "إرسال إشعار"),
               ],
             ),
-            const SizedBox(height: 10),
+
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: usersStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: Colors.greenAccent,
-                      ),
-                    );
-                  }
+              child: TabBarView(
+                children: [
+                  // Users Tab 1 content
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            onChanged: (value) {
+                              setState(() {
+                                searchText = value.trim().toLowerCase();
+                              });
+                            },
+                            decoration: InputDecoration(
+                              hintText: "ابحث بالاسم أو اسم المستخدم أو البريد",
+                              prefixIcon: const Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: const BorderSide(
+                                  color: Colors.greenAccent,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Expanded(
+                          child: StreamBuilder<QuerySnapshot>(
+                            stream: usersStream,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Colors.greenAccent,
+                                  ),
+                                );
+                              }
 
-                  if (snapshot.hasError) {
-                    return Center(child: Text("حدث خطأ: ${snapshot.error}"));
-                  }
+                              if (snapshot.hasError) {
+                                return Center(
+                                  child: Text("حدث خطأ: ${snapshot.error}"),
+                                );
+                              }
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text("لا يوجد مستخدمون"));
-                  }
+                              if (!snapshot.hasData ||
+                                  snapshot.data!.docs.isEmpty) {
+                                return const Center(
+                                  child: Text("لا يوجد مستخدمون"),
+                                );
+                              }
 
-                  final allUsers = snapshot.data!.docs;
+                              final allUsers = snapshot.data!.docs;
 
-                  final filteredUsers = allUsers.where((doc) {
-                    if (doc.id == currentUserId) return false;
+                              final filteredUsers = allUsers.where((doc) {
+                                if (doc.id == currentUserId) return false;
 
-                    final data = doc.data() as Map<String, dynamic>;
+                                final data = doc.data() as Map<String, dynamic>;
 
-                    final firstName = (data["firstName"] ?? "")
-                        .toString()
-                        .toLowerCase();
-                    final lastName = (data["lastName"] ?? "")
-                        .toString()
-                        .toLowerCase();
-                    final userName = (data["userName"] ?? "")
-                        .toString()
-                        .toLowerCase();
-                    final email = (data["email"] ?? "")
-                        .toString()
-                        .toLowerCase();
+                                final firstName = (data["firstName"] ?? "")
+                                    .toString()
+                                    .toLowerCase();
+                                final lastName = (data["lastName"] ?? "")
+                                    .toString()
+                                    .toLowerCase();
+                                final userName = (data["userName"] ?? "")
+                                    .toString()
+                                    .toLowerCase();
+                                final email = (data["email"] ?? "")
+                                    .toString()
+                                    .toLowerCase();
 
-                    final fullName = "$firstName $lastName";
+                                final fullName = "$firstName $lastName";
 
-                    return fullName.contains(searchText) ||
-                        userName.contains(searchText) ||
-                        email.contains(searchText);
-                  }).toList();
+                                return fullName.contains(searchText) ||
+                                    userName.contains(searchText) ||
+                                    email.contains(searchText);
+                              }).toList();
 
-                  if (filteredUsers.isEmpty) {
-                    return const Center(child: Text("لا توجد نتائج بحث"));
-                  }
+                              if (filteredUsers.isEmpty) {
+                                return const Center(
+                                  child: Text("لا توجد نتائج بحث"),
+                                );
+                              }
 
-                  return ListView.separated(
-                    itemCount: filteredUsers.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      return buildUserCard(filteredUsers[index]);
-                    },
-                  );
-                },
+                              return ListView.separated(
+                                itemCount: filteredUsers.length,
+                                separatorBuilder: (context, index) =>
+                                    const SizedBox(height: 8),
+                                itemBuilder: (context, index) {
+                                  return buildUserCard(filteredUsers[index]);
+                                },
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // send notification tab 2 content
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller: titleController,
+                          decoration: const InputDecoration(
+                            hintText: "عنوان الإشعار",
+                            prefixIcon: Icon(
+                              Icons.title,
+                              color: Colors.greenAccent,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                              borderSide: BorderSide(
+                                color: Colors.greenAccent,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        TextField(
+                          controller: bodyController,
+                          maxLines: 4,
+                          decoration: const InputDecoration(
+                            hintText: "نص الإشعار",
+                            prefixIcon: Icon(
+                              Icons.message,
+                              color: Colors.greenAccent,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(20),
+                              ),
+                              borderSide: BorderSide(
+                                color: Colors.greenAccent,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                        ),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: Colors.black,
+                            elevation: 5,
+                            shadowColor: Colors.black,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            side: const BorderSide(
+                              color: Colors.greenAccent,
+                              width: 1,
+                            ),
+                          ),
+                          onPressed: isLoading
+                              ? null
+                              : () async {
+                                  final title = titleController.text.trim();
+                                  final body = bodyController.text.trim();
+
+                                  if (title.isEmpty || body.isEmpty) {
+                                    interfaces.showFlutterToast(
+                                      context,
+                                      "يرجى ملء جميع الحقول",
+                                    );
+                                    return;
+                                  }
+                                  setState(() {
+                                    isLoading = true;
+                                  });
+                                  await sendNotificationToAllUsersSafe(
+                                    context: context,
+                                    title: title,
+                                    body: body,
+                                  );
+                                  setState(() {
+                                    isLoading = false;
+                                  });
+                                },
+                          child: isLoading
+                              ? Center(
+                                  child: const CircularProgressIndicator(
+                                    color: Colors.greenAccent,
+                                  ),
+                                )
+                              : const Text(
+                                  "ارسل الإشعار لجميع المستخدمين",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

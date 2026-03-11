@@ -24,9 +24,20 @@ class FirebaseNotifications {
 
   static Future<void> init() async {
     await _requestPermission();
+    await subscribeToAllUsersTopic();
     await _initLocalNotifications();
     await _setupFirebaseHandlers();
     _listenTokenRefresh();
+  }
+
+  static Future<void> subscribeToAllUsersTopic() async {
+    await _messaging.subscribeToTopic("all_users");
+    debugPrint("تم الاشتراك في all_users");
+  }
+
+  static Future<void> unsubscribeFromAllUsersTopic() async {
+    await _messaging.unsubscribeFromTopic("all_users");
+    debugPrint("تم إلغاء الاشتراك من all_users");
   }
 
   static Future<void> _requestPermission() async {

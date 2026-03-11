@@ -12,6 +12,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mood01/admin/admin_user_management_page.dart';
 import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/chats/my_conversations_page.dart';
+import 'package:mood01/firebase_notifications.dart';
 import 'package:mood01/screens/about_us_page.dart';
 import 'package:mood01/admin/admin_browse_page.dart';
 import 'package:mood01/admin/admin_main_page.dart';
@@ -131,11 +132,6 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     } catch (e) {
       debugPrint("FCM token error: $e");
     }
-  }
-
-  Future<void> subscribeToAllUsersTopic() async {
-    await FirebaseMessaging.instance.subscribeToTopic("all_users");
-    print("subscribed to all_users");
   }
 
   Future<void> setOnlineStatus(bool isOnline) async {
@@ -277,7 +273,6 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     super.initState();
     loadUser();
     getFcmToken();
-    subscribeToAllUsersTopic();
     WidgetsBinding.instance.addObserver(this);
     setOnlineStatus(true);
 
@@ -425,6 +420,9 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
 
               await setOnlineStatus(false);
               // delete fcm token
+              // إلغاء الاشتراك من إشعارات الجميع
+              await FirebaseNotifications.unsubscribeFromAllUsersTopic();
+
               final messageToken = await FirebaseMessaging.instance.getToken();
               if (messageToken != null && messageToken.isNotEmpty) {
                 // update fcm token
