@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/global/interfaces.dart';
@@ -15,6 +16,100 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   final interfaces = Interfaces();
   String searchText = "";
   final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+  void showSendNotificationDialog(BuildContext context) {
+    final titleController = TextEditingController();
+    final bodyController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text("إرسال إشعار لجميع المستخدمين"),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: const InputDecoration(hintText: "عنوان الإشعار"),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: bodyController,
+                  maxLines: 4,
+                  decoration: const InputDecoration(hintText: "نص الإشعار"),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text("إلغاء"),
+            ),
+            TextButton(
+              onPressed: () async {
+                final title = titleController.text.trim();
+                final body = bodyController.text.trim();
+
+                if (title.isEmpty || body.isEmpty) return;
+
+                Navigator.pop(dialogContext);
+
+                await sendNotificationToAllUsersSafe(
+                  context: context,
+                  title: title,
+                  body: body,
+                );
+              },
+              child: const Text("إرسال"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> sendNotificationToAllUsersSafe({
+    required BuildContext context,
+    required String title,
+    required String body,
+  }) async {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+
+      if (currentUser == null) {
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("لا يوجد مستخدم مسجل دخول")),
+        );
+        return;
+      }
+
+      await currentUser.getIdToken(true);
+
+      final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
+
+      final callable = functions.httpsCallable('sendNotificationToAllUsers');
+
+      final result = await callable.call({
+        "title": title.trim(),
+        "body": body.trim(),
+      });
+
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.data["message"] ?? "تم الإرسال بنجاح")),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("فشل الإرسال: $e")));
+    }
+  }
+
   Future<void> showUserDetails(
     Map<String, dynamic> userData,
     String userId,
@@ -406,26 +501,56 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  searchText = value.trim().toLowerCase();
-                });
-              },
-              decoration: InputDecoration(
-                hintText: "ابحث بالاسم أو اسم المستخدم أو البريد",
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    color: Colors.greenAccent,
-                    width: 2,
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Expanded(
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        searchText = value.trim().toLowerCase();
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: "ابحث بالاسم أو اسم المستخدم أو البريد",
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: const BorderSide(
+                          color: Colors.greenAccent,
+                          width: 2,
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(width: 10),
+
+                TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.black,
+                    elevation: 2,
+                    side: const BorderSide(color: Colors.greenAccent, width: 1),
+                    maximumSize: const Size(100, 50),
+                    minimumSize: const Size(100, 50),
+                    shadowColor: Colors.black,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    final user = FirebaseAuth.instance.currentUser;
+                    print(user?.uid);
+                    print(user?.email);
+                    showSendNotificationDialog(context);
+                  },
+                  child: Text("إرسال إشعار"),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             Expanded(

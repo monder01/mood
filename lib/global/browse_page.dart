@@ -133,6 +133,11 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> subscribeToAllUsersTopic() async {
+    await FirebaseMessaging.instance.subscribeToTopic("all_users");
+    print("subscribed to all_users");
+  }
+
   Future<void> setOnlineStatus(bool isOnline) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -272,6 +277,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     super.initState();
     loadUser();
     getFcmToken();
+    subscribeToAllUsersTopic();
     WidgetsBinding.instance.addObserver(this);
     setOnlineStatus(true);
 

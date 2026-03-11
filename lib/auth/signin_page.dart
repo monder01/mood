@@ -150,14 +150,18 @@ class _SigninpageState extends State<Signinpage> {
               context,
               "تسجيل الدخول",
               () async {
+                if (!mounted) return;
                 setState(() {
                   isLoading = true;
                 });
+
                 await users.signIn(
                   context,
                   emailController,
                   passwordController,
                 );
+
+                if (!mounted) return;
                 setState(() {
                   isLoading = false;
                 });

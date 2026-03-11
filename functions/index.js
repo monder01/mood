@@ -8,6 +8,10 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 setGlobalOptions({ maxInstances: 10 });
 
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
+const { onCall, HttpsError } = require("firebase-functions/v2/https");
+
 initializeApp();
 
 exports.sendChatNotification = onDocumentCreated(
@@ -94,6 +98,7 @@ exports.sendChatNotification = onDocumentCreated(
         }
     }
 );
+
 exports.notifyLoginFromAnotherDevice = onDocumentUpdated(
     "users/{userId}",
     async (event) => {
@@ -155,5 +160,67 @@ exports.notifyLoginFromAnotherDevice = onDocumentUpdated(
         } catch (error) {
             console.error("خطأ أثناء إرسال إشعار تسجيل الدخول من جهاز آخر:", error);
         }
+    }
+);
+
+exports.sendNotificationToAllUsers = onCall(
+    { region: "us-central1" },
+    async (request) => {
+        console.log("AUTH:", request.auth);
+
+        if (!request.auth) {
+            throw new HttpsError("unauthenticated", "يجب تسجيل الدخول أولاً");
+        }
+
+        const uid = request.auth.uid;
+
+        const userDoc = await getFirestore().collection("users").doc(uid).get();
+
+        if (!userDoc.exists) {
+            throw new HttpsError("not-found", "المستخدم غير موجود");
+        }
+
+        const userData = userDoc.data();
+
+        if (userData.role !== "admin") {
+            throw new HttpsError("permission-denied", "غير مصرح لك");
+        }
+
+        const title = (request.data.title || "").toString().trim();
+        const body = (request.data.body || "").toString().trim();
+
+        if (!title || !body) {
+            throw new HttpsError("invalid-argument", "العنوان والنص مطلوبان");
+        }
+
+        await getMessaging().send({
+            topic: "all_users",
+            notification: {
+                title,
+                body,
+            },
+            data: {
+                type: "broadcast",
+                click_action: "FLUTTER_NOTIFICATION_CLICK",
+            },
+            android: {
+                priority: "high",
+                notification: {
+                    sound: "default",
+                },
+            },
+            apns: {
+                payload: {
+                    aps: {
+                        sound: "default",
+                    },
+                },
+            },
+        });
+
+        return {
+            success: true,
+            message: "تم إرسال الإشعار إلى جميع المستخدمين",
+        };
     }
 );
