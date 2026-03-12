@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mood01/notifications/route_picker_page.dart';
 import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/notifications/user_route_tree.dart';
 
 class AdminUserManagementPage extends StatefulWidget {
   const AdminUserManagementPage({super.key});
@@ -13,17 +15,23 @@ class AdminUserManagementPage extends StatefulWidget {
 }
 
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
+  bool hasRoute = false;
+  String? selectedRoutePath;
+  String? selectedRouteTitle;
+
   final interfaces = Interfaces();
   String searchText = "";
   final titleController = TextEditingController();
   final bodyController = TextEditingController();
   bool isLoading = false;
   final currentUserId = FirebaseAuth.instance.currentUser!.uid;
-
+  ////////////////////////////////////////////////////////////////////////////////
   Future<void> sendNotificationToAllUsersSafe({
     required BuildContext context,
     required String title,
     required String body,
+    String? routePath,
+    String? routeTitle,
   }) async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -45,6 +53,8 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       final result = await callable.call({
         "title": title.trim(),
         "body": body.trim(),
+        "routePath": routePath,
+        "routeTitle": routeTitle,
       });
 
       if (!context.mounted) return;
@@ -311,6 +321,22 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     );
   }
 
+  Future<void> openRoutePickerPage() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const RoutePickerPage(routesTree: userRouteTree),
+      ),
+    );
+
+    if (result != null && result is Map<String, dynamic>) {
+      setState(() {
+        selectedRouteTitle = result["title"];
+        selectedRoutePath = result["path"];
+      });
+    }
+  }
+
   Widget buildUserCard(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final userId = doc.id;
@@ -480,25 +506,23 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                     padding: const EdgeInsets.all(10),
                     child: Column(
                       children: [
-                        Expanded(
-                          child: TextField(
-                            onChanged: (value) {
-                              setState(() {
-                                searchText = value.trim().toLowerCase();
-                              });
-                            },
-                            decoration: InputDecoration(
-                              hintText: "ابحث بالاسم أو اسم المستخدم أو البريد",
-                              prefixIcon: const Icon(Icons.search),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20),
-                                borderSide: const BorderSide(
-                                  color: Colors.greenAccent,
-                                  width: 2,
-                                ),
+                        TextField(
+                          onChanged: (value) {
+                            setState(() {
+                              searchText = value.trim().toLowerCase();
+                            });
+                          },
+                          decoration: InputDecoration(
+                            hintText: "ابحث بالاسم أو اسم المستخدم أو البريد",
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: const BorderSide(
+                                color: Colors.greenAccent,
+                                width: 2,
                               ),
                             ),
                           ),
@@ -582,6 +606,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                   Padding(
                     padding: const EdgeInsets.all(10),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         TextField(
                           controller: titleController,
@@ -633,58 +658,133 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                             ),
                           ),
                         ),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            foregroundColor: Colors.black,
-                            elevation: 5,
-                            shadowColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        const SizedBox(height: 12),
+
+                        Card(
+                          child: ListTile(
+                            title: const Text("يحتوي على مسار تنقل"),
+                            subtitle: const Text(
+                              "فعّلها إذا أردت أن يفتح الإشعار صفحة معينة",
                             ),
-                            side: const BorderSide(
-                              color: Colors.greenAccent,
-                              width: 1,
+                            trailing: Switch(
+                              value: hasRoute,
+                              activeTrackColor: Colors.greenAccent,
+                              onChanged: (value) {
+                                setState(() {
+                                  hasRoute = value;
+                                  if (!hasRoute) {
+                                    selectedRoutePath = null;
+                                    selectedRouteTitle = null;
+                                  }
+                                });
+                              },
                             ),
                           ),
-                          onPressed: isLoading
-                              ? null
-                              : () async {
-                                  final title = titleController.text.trim();
-                                  final body = bodyController.text.trim();
+                        ),
 
-                                  if (title.isEmpty || body.isEmpty) {
-                                    interfaces.showFlutterToast(
-                                      context,
-                                      "يرجى ملء جميع الحقول",
+                        if (hasRoute) ...[
+                          const SizedBox(height: 8),
+                          OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.greenAccent),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: openRoutePickerPage,
+                            icon: const Icon(
+                              Icons.folder_open,
+                              color: Colors.green,
+                            ),
+                            label: Text(
+                              selectedRouteTitle == null
+                                  ? "اختر المسار"
+                                  : "المسار المختار: $selectedRouteTitle",
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ),
+                          if (selectedRoutePath != null) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              "Path: $selectedRoutePath",
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ],
+
+                        const SizedBox(height: 40),
+
+                        Center(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.black,
+                              elevation: 5,
+                              shadowColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              side: const BorderSide(
+                                color: Colors.greenAccent,
+                                width: 1,
+                              ),
+                            ),
+                            onPressed: isLoading
+                                ? null
+                                : () async {
+                                    final title = titleController.text.trim();
+                                    final body = bodyController.text.trim();
+
+                                    if (title.isEmpty || body.isEmpty) {
+                                      interfaces.showFlutterToast(
+                                        context,
+                                        "يرجى ملء جميع الحقول",
+                                      );
+                                      return;
+                                    }
+
+                                    if (hasRoute && selectedRoutePath == null) {
+                                      interfaces.showFlutterToast(
+                                        context,
+                                        "يرجى اختيار مسار أولاً",
+                                      );
+                                      return;
+                                    }
+
+                                    setState(() {
+                                      isLoading = true;
+                                    });
+
+                                    await sendNotificationToAllUsersSafe(
+                                      context: context,
+                                      title: title,
+                                      body: body,
+                                      routePath: hasRoute
+                                          ? selectedRoutePath
+                                          : null,
+                                      routeTitle: hasRoute
+                                          ? selectedRouteTitle
+                                          : null,
                                     );
-                                    return;
-                                  }
-                                  setState(() {
-                                    isLoading = true;
-                                  });
-                                  await sendNotificationToAllUsersSafe(
-                                    context: context,
-                                    title: title,
-                                    body: body,
-                                  );
-                                  setState(() {
-                                    isLoading = false;
-                                  });
-                                },
-                          child: isLoading
-                              ? Center(
-                                  child: const CircularProgressIndicator(
-                                    color: Colors.greenAccent,
+
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                  },
+                            child: isLoading
+                                ? const Center(
+                                    child: CircularProgressIndicator(
+                                      color: Colors.greenAccent,
+                                    ),
+                                  )
+                                : const Text(
+                                    "ارسل الإشعار لجميع المستخدمين",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
-                                )
-                              : const Text(
-                                  "ارسل الإشعار لجميع المستخدمين",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                          ),
                         ),
                       ],
                     ),

@@ -5,6 +5,7 @@ import 'package:mood01/chats/chat_page.dart';
 import 'package:mood01/friends/friends.dart';
 import 'package:mood01/global/interfaces.dart';
 import 'package:mood01/friends/search_for_friends_page.dart';
+import 'package:mood01/notifications/my_notifications_page.dart';
 
 class UserFellowsPage extends StatefulWidget {
   const UserFellowsPage({super.key});
@@ -241,7 +242,12 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
             ),
             IconButton(
               onPressed: () {
-                // Action for notification button
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyNotificationsPage(),
+                  ),
+                );
               },
               icon: Icon(Icons.notifications),
             ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/auth/auth.dart';
-import 'package:mood01/firebase_notifications.dart';
+import 'package:mood01/notifications/firebase_notifications.dart';
+import 'package:mood01/navi_go.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -19,8 +19,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      routerConfig: NaviGo.router,
       title: 'Mood01',
       locale: const Locale('ar'),
       supportedLocales: const [Locale('ar')],
@@ -29,7 +30,6 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const AuthWrapper(),
     );
   }
 }

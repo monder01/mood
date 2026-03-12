@@ -23,6 +23,7 @@ dependencies:
   url_launcher: ^6.3.2
   fluttertoast: ^9.0.0
   shared_preferences: ^2.5.4
+  go_router: ^17.1.0
   flutter_localizations:
     sdk: flutter
     

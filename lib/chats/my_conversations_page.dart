@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mood01/chats/chat_page.dart';
+import 'package:mood01/global/interfaces.dart';
 
 class MyConversationsPage extends StatefulWidget {
   const MyConversationsPage({super.key});
@@ -57,17 +58,10 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("محادثاتي"),
-        centerTitle: true,
-        backgroundColor: Colors.greenAccent[200],
-        elevation: 5,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-          ),
-        ),
+      appBar: Interfaces().showAppBar(
+        context,
+        title: "محادثاتي",
+        actions: false,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: getMyChats(),

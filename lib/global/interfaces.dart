@@ -3,10 +3,59 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mood01/friends/search_for_friends_page.dart';
+import 'package:mood01/notifications/my_notifications_page.dart';
 
 class Interfaces {
   bool isLoading = false;
 
+  // show appbar
+  AppBar showAppBar(
+    BuildContext context, {
+    required String title,
+    bool actions = true,
+  }) => AppBar(
+    title: Text(title),
+    centerTitle: true,
+    backgroundColor: Colors.greenAccent[200],
+    elevation: 5,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        bottomLeft: Radius.circular(20),
+        bottomRight: Radius.circular(20),
+      ),
+    ),
+    toolbarHeight: 50,
+    shadowColor: Colors.greenAccent,
+    actions: actions
+        ? [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SearchForFriendsPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.search),
+            ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MyNotificationsPage(),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.notifications),
+            ),
+          ]
+        : null,
+  );
+
+  // show toast
   void showFlutterToast(BuildContext context, String message) {
     Fluttertoast.showToast(
       gravity: ToastGravity.BOTTOM,

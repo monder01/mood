@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mood01/friends/friends.dart';
 import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/notifications/my_notifications_page.dart';
 
 class SearchForFriendsPage extends StatefulWidget {
   const SearchForFriendsPage({super.key});
@@ -363,7 +364,12 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
           // notification
           IconButton(
             onPressed: () {
-              // navigate to notification page
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MyNotificationsPage(),
+                ),
+              );
             },
             icon: const Icon(Icons.notifications),
           ),

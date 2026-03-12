@@ -46,18 +46,7 @@ class AboutAppPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.greenAccent[200],
-        elevation: 5,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(20),
-            bottomRight: Radius.circular(20),
-          ),
-        ),
-        toolbarHeight: 50,
-        shadowColor: Colors.greenAccent,
-      ),
+      appBar: interfaces.showAppBar(context, title: "", actions: false),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(10),
         child: Column(
