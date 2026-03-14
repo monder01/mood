@@ -717,6 +717,34 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                           ),
                         ),
 
+                        Card(
+                          child: ListTile(
+                            title: const Text("تنقل خاص بالأقسام أو المواد"),
+                            subtitle: const Text(
+                              "خيار جديد بدون التأثير على route القديم",
+                            ),
+                            trailing: Switch(
+                              value: hasCourseDepartmentTarget,
+                              activeTrackColor: Colors.greenAccent,
+                              onChanged: (value) {
+                                setState(() {
+                                  hasCourseDepartmentTarget = value;
+
+                                  if (value) {
+                                    hasRoute = false;
+                                    selectedRoutePath = null;
+                                    selectedRouteTitle = null;
+                                  } else {
+                                    selectedTargetType = null;
+                                    selectedTargetId = null;
+                                    selectedTargetName = null;
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+
                         if (hasRoute) ...[
                           const SizedBox(height: 8),
                           OutlinedButton.icon(
@@ -746,39 +774,21 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                             ),
                           ],
                         ],
-                        Card(
-                          child: ListTile(
-                            title: const Text("تنقل خاص بالأقسام أو المواد"),
-                            subtitle: const Text(
-                              "خيار جديد بدون التأثير على route القديم",
-                            ),
-                            trailing: Switch(
-                              value: hasCourseDepartmentTarget,
-                              activeTrackColor: Colors.greenAccent,
-                              onChanged: (value) {
-                                setState(() {
-                                  hasCourseDepartmentTarget = value;
-
-                                  if (value) {
-                                    hasRoute = false;
-                                    selectedRoutePath = null;
-                                    selectedRouteTitle = null;
-                                  } else {
-                                    selectedTargetType = null;
-                                    selectedTargetId = null;
-                                    selectedTargetName = null;
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                        ),
 
                         if (hasCourseDepartmentTarget) ...[
                           const SizedBox(height: 8),
                           OutlinedButton.icon(
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: Colors.greenAccent),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
                             onPressed: openCourseDepartmentTargetPicker,
-                            icon: const Icon(Icons.route, color: Colors.black),
+                            icon: const Icon(
+                              Icons.folder_open,
+                              color: Colors.green,
+                            ),
                             label: Text(
                               selectedTargetName == null
                                   ? "اختيار كلية أو قسم"
@@ -797,6 +807,8 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                               foregroundColor: Colors.black,
                               elevation: 5,
                               shadowColor: Colors.black,
+                              maximumSize: const Size(300, 50),
+                              minimumSize: const Size(300, 50),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -874,8 +886,10 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                                   )
                                 : const Text(
                                     "ارسل الإشعار لجميع المستخدمين",
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),

@@ -5,6 +5,7 @@ import 'package:mood01/auth/signin_page.dart';
 import 'package:mood01/auth/signup_page.dart';
 import 'package:mood01/screens/about_us_page.dart';
 import 'package:mood01/notifications/my_notifications_page.dart';
+import 'package:mood01/screens/splash_page.dart';
 import 'package:mood01/student/discover_page.dart';
 import 'package:mood01/student/user_browse_page.dart';
 import 'package:mood01/student/user_browse_department_page.dart';
@@ -21,6 +22,12 @@ class NaviGo {
     routes: [
       GoRoute(
         path: '/',
+        name: 'splash',
+        builder: (context, state) => const SplashPage(),
+      ),
+
+      GoRoute(
+        path: '/authWrapper',
         name: 'authWrapper',
         builder: (context, state) => const AuthWrapper(),
       ),

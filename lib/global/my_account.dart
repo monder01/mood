@@ -17,43 +17,44 @@ class MyAccount extends StatefulWidget {
 
 class _MyAccountState extends State<MyAccount> {
   final interfaces = Interfaces();
-  Users users = Users();
-  final currentUser = FirebaseAuth.instance.currentUser;
+  final Users users = Users();
+  final ImagePicker picker = ImagePicker();
 
   bool isPhotoLoading = false;
+  bool isPasswordLoading = false;
 
-  Future<void> pickFromGallery() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70,
-    );
+  User? get currentUser => FirebaseAuth.instance.currentUser;
 
-    if (pickedFile == null) return;
+  Future<void> pickImage(ImageSource source) async {
+    try {
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 70,
+      );
 
-    File file = File(pickedFile.path);
-    await uploadImage(file);
-  }
+      if (pickedFile == null) return;
 
-  Future<void> pickFromCamera() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(
-      source: ImageSource.camera,
-      imageQuality: 70,
-    );
-
-    if (pickedFile == null) return;
-
-    File file = File(pickedFile.path);
-    await uploadImage(file);
+      final file = File(pickedFile.path);
+      await uploadImage(file);
+    } catch (e) {
+      if (!mounted) return;
+      interfaces.showAlert(
+        context,
+        "حدث خطأ أثناء اختيار الصورة",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
+    }
   }
 
   Future<void> uploadImage(File file) async {
-    try {
-      setState(() => isPhotoLoading = true);
+    final user = currentUser;
+    if (user == null) return;
 
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
+    try {
+      if (mounted) {
+        setState(() => isPhotoLoading = true);
+      }
 
       final ref = FirebaseStorage.instance
           .ref()
@@ -61,7 +62,6 @@ class _MyAccountState extends State<MyAccount> {
           .child("${user.uid}.jpg");
 
       await ref.putFile(file);
-
       final imageUrl = await ref.getDownloadURL();
 
       await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
@@ -77,10 +77,8 @@ class _MyAccountState extends State<MyAccount> {
         icon: Icons.done,
         iconColor: Colors.green,
       );
-
-      setState(() {});
     } catch (e) {
-      if (!context.mounted) return;
+      if (!mounted) return;
       interfaces.showAlert(
         context,
         "حدث خطأ أثناء رفع الصورة",
@@ -95,12 +93,12 @@ class _MyAccountState extends State<MyAccount> {
   }
 
   Future<void> showImageSourceDialog() async {
-    showModalBottomSheet(
+    await showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) {
+      builder: (bottomSheetContext) {
         return SafeArea(
           child: Wrap(
             children: [
@@ -111,16 +109,16 @@ class _MyAccountState extends State<MyAccount> {
                 ),
                 title: const Text("التقاط صورة"),
                 onTap: () async {
-                  Navigator.pop(context);
-                  await pickFromCamera();
+                  Navigator.pop(bottomSheetContext);
+                  await pickImage(ImageSource.camera);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.photo, color: Colors.greenAccent),
                 title: const Text("اختيار من المعرض"),
                 onTap: () async {
-                  Navigator.pop(context);
-                  await pickFromGallery();
+                  Navigator.pop(bottomSheetContext);
+                  await pickImage(ImageSource.gallery);
                 },
               ),
             ],
@@ -130,64 +128,160 @@ class _MyAccountState extends State<MyAccount> {
     );
   }
 
-  Future<void> updateField({
-    required String title,
-    required String fieldName,
-    required String currentValue,
-    TextInputType keyboardType = TextInputType.text,
-  }) async {
-    final controller = TextEditingController(text: currentValue);
-    if (keyboardType == TextInputType.phone) {
-      controller.text = currentValue.replaceAll("+218", "");
+  String normalizeSpaces(String value) {
+    return value.trim().replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  String normalizePhone(String value) {
+    String phone = value.trim().replaceAll(' ', '');
+
+    if (phone.startsWith('+218')) {
+      phone = phone.substring(4);
+    } else if (phone.startsWith('218')) {
+      phone = phone.substring(3);
     }
 
-    final result = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Text(title, textAlign: TextAlign.center),
-          content: TextField(
-            controller: controller,
-            keyboardType: keyboardType,
-            decoration: InputDecoration(
-              suffixText: keyboardType == TextInputType.phone ? "218+" : null,
-              hintText: "أدخل القيمة الجديدة",
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: const Text("إلغاء", style: TextStyle(color: Colors.black)),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext, controller.text.trim());
-              },
-              child: const Text("حفظ", style: TextStyle(color: Colors.green)),
-            ),
-          ],
-        );
-      },
-    );
+    if (phone.startsWith('0')) {
+      phone = phone.substring(1);
+    }
 
-    if (result == null || result.isEmpty || currentUser == null) return;
+    return phone;
+  }
+
+  bool isValidPhone(String value) {
+    return RegExp(r'^(9[1-6]|92|94|95)\d{7}$').hasMatch(value);
+  }
+
+  bool isValidUserName(String value) {
+    return RegExp(r'^[a-zA-Z0-9._]{3,30}$').hasMatch(value);
+  }
+
+  bool isValidName(String value) {
+    return RegExp(r'^[\u0600-\u06FFa-zA-Z\s]{2,30}$').hasMatch(value);
+  }
+
+  Future<bool> isUserNameTaken(String userName) async {
+    final user = currentUser;
+    if (user == null) return false;
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("userName", isEqualTo: userName)
+        .get();
+
+    for (final doc in snapshot.docs) {
+      if (doc.id != user.uid) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> updateName({
+    required String firstName,
+    required String lastName,
+  }) async {
+    final firstNameController = TextEditingController(text: firstName);
+    final lastNameController = TextEditingController(text: lastName);
 
     try {
-      await FirebaseFirestore.instance
-          .collection("users")
-          .doc(currentUser!.uid)
-          .update({fieldName: result});
+      final result = await showDialog<Map<String, String>>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text("تغيير الاسم", textAlign: TextAlign.center),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: firstNameController,
+                    decoration: InputDecoration(
+                      hintText: "الاسم الأول",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: lastNameController,
+                    decoration: InputDecoration(
+                      hintText: "الاسم الأخير",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text(
+                  "إلغاء",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext, {
+                    "firstName": normalizeSpaces(firstNameController.text),
+                    "lastName": normalizeSpaces(lastNameController.text),
+                  });
+                },
+                child: const Text("حفظ", style: TextStyle(color: Colors.green)),
+              ),
+            ],
+          );
+        },
+      );
+
+      final user = currentUser;
+      if (result == null || user == null) return;
+
+      final newFirstName = result["firstName"] ?? "";
+      final newLastName = result["lastName"] ?? "";
+
+      if (newFirstName.isEmpty || newLastName.isEmpty) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "يرجى إدخال الاسم الأول والاسم الأخير",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (!isValidName(newFirstName) || !isValidName(newLastName)) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "الاسم غير صالح",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (newFirstName == firstName && newLastName == lastName) {
+        return;
+      }
+
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+        {"firstName": newFirstName, "lastName": newLastName},
+      );
 
       if (!mounted) return;
       interfaces.showAlert(
         context,
-        "تم التعديل بنجاح",
+        "تم تعديل الاسم بنجاح",
         icon: Icons.check_circle,
         iconColor: Colors.green,
       );
@@ -195,7 +289,201 @@ class _MyAccountState extends State<MyAccount> {
       if (!mounted) return;
       interfaces.showAlert(
         context,
-        "حدث خطأ أثناء التعديل",
+        "حدث خطأ أثناء تعديل الاسم",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
+    }
+  }
+
+  Future<void> updatePhone({required String currentValue}) async {
+    final controller = TextEditingController(
+      text: normalizePhone(currentValue),
+    );
+
+    try {
+      final result = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text("تغيير رقم الهاتف", textAlign: TextAlign.center),
+            content: TextField(
+              controller: controller,
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                suffixText: "+218",
+                hintText: "أدخل رقم الهاتف",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text(
+                  "إلغاء",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext, normalizePhone(controller.text));
+                },
+                child: const Text("حفظ", style: TextStyle(color: Colors.green)),
+              ),
+            ],
+          );
+        },
+      );
+
+      final user = currentUser;
+      if (result == null || user == null) return;
+
+      if (!isValidPhone(result)) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "رقم الهاتف غير صالح",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      final phoneToSave = "+218$result";
+
+      if (phoneToSave == currentValue) {
+        return;
+      }
+
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+        {"phone": phoneToSave},
+      );
+
+      if (!mounted) return;
+      interfaces.showAlert(
+        context,
+        "تم تعديل رقم الهاتف بنجاح",
+        icon: Icons.check_circle,
+        iconColor: Colors.green,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      interfaces.showAlert(
+        context,
+        "حدث خطأ أثناء تعديل رقم الهاتف",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
+    }
+  }
+
+  Future<void> updateUserName({required String currentValue}) async {
+    final controller = TextEditingController(text: currentValue);
+
+    try {
+      final result = await showDialog<String>(
+        context: context,
+        builder: (dialogContext) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: const Text(
+              "تغيير اسم المستخدم",
+              textAlign: TextAlign.center,
+            ),
+            content: TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                hintText: "أدخل اسم المستخدم الجديد",
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text(
+                  "إلغاء",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(dialogContext, controller.text.trim());
+                },
+                child: const Text("حفظ", style: TextStyle(color: Colors.green)),
+              ),
+            ],
+          );
+        },
+      );
+
+      final user = currentUser;
+      if (result == null || user == null) return;
+
+      final userName = result.trim();
+
+      if (userName.isEmpty) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "يرجى إدخال اسم المستخدم",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (!isValidUserName(userName)) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "اسم المستخدم يجب أن يكون من 3 إلى 30 حرفًا ويحتوي على حروف أو أرقام أو نقطة أو شرطة سفلية فقط",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (userName == currentValue) {
+        return;
+      }
+
+      final taken = await isUserNameTaken(userName);
+      if (taken) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "اسم المستخدم مستخدم بالفعل",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+        {"userName": userName},
+      );
+
+      if (!mounted) return;
+      interfaces.showAlert(
+        context,
+        "تم تعديل اسم المستخدم بنجاح",
+        icon: Icons.check_circle,
+        iconColor: Colors.green,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      interfaces.showAlert(
+        context,
+        "حدث خطأ أثناء تعديل اسم المستخدم",
         icon: Icons.error,
         iconColor: Colors.red,
       );
@@ -203,171 +491,177 @@ class _MyAccountState extends State<MyAccount> {
   }
 
   Future<void> changePassword() async {
+    if (isPasswordLoading) return;
+
     final oldPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
 
-    final result = await showDialog<Map<String, String>>(
-      context: context,
-      builder: (dialogContext) {
-        bool obscureOld = true;
-        bool obscureNew = true;
-        bool obscureConfirm = true;
-
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              title: const Text(
-                "تغيير كلمة المرور",
-                textAlign: TextAlign.center,
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      controller: oldPasswordController,
-                      obscureText: obscureOld,
-                      decoration: InputDecoration(
-                        hintText: "كلمة المرور القديمة",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setStateDialog(() {
-                              obscureOld = !obscureOld;
-                            });
-                          },
-                          icon: Icon(
-                            obscureOld
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: newPasswordController,
-                      obscureText: obscureNew,
-                      decoration: InputDecoration(
-                        hintText: "كلمة المرور الجديدة",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setStateDialog(() {
-                              obscureNew = !obscureNew;
-                            });
-                          },
-                          icon: Icon(
-                            obscureNew
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    TextField(
-                      controller: confirmPasswordController,
-                      obscureText: obscureConfirm,
-                      decoration: InputDecoration(
-                        hintText: "تأكيد كلمة المرور الجديدة",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            setStateDialog(() {
-                              obscureConfirm = !obscureConfirm;
-                            });
-                          },
-                          icon: Icon(
-                            obscureConfirm
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text(
-                    "إلغاء",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(dialogContext, {
-                      "oldPassword": oldPasswordController.text.trim(),
-                      "newPassword": newPasswordController.text.trim(),
-                      "confirmPassword": confirmPasswordController.text.trim(),
-                    });
-                  },
-                  child: const Text(
-                    "حفظ",
-                    style: TextStyle(color: Colors.green),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-
-    if (result == null || currentUser == null) return;
-
-    final oldPassword = result["oldPassword"] ?? "";
-    final newPassword = result["newPassword"] ?? "";
-    final confirmPassword = result["confirmPassword"] ?? "";
-
-    if (oldPassword.isEmpty || newPassword.isEmpty || confirmPassword.isEmpty) {
-      if (!mounted) return;
-      interfaces.showAlert(
-        context,
-        "يرجى ملء جميع الحقول",
-        icon: Icons.warning_amber_rounded,
-        iconColor: Colors.orange,
-      );
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      if (!mounted) return;
-      interfaces.showAlert(
-        context,
-        "كلمة المرور الجديدة يجب أن تكون 6 أحرف أو أكثر",
-        icon: Icons.warning_amber_rounded,
-        iconColor: Colors.orange,
-      );
-      return;
-    }
-
-    if (newPassword != confirmPassword) {
-      if (!mounted) return;
-      interfaces.showAlert(
-        context,
-        "كلمتا المرور الجديدتان غير متطابقتين",
-        icon: Icons.warning_amber_rounded,
-        iconColor: Colors.orange,
-      );
-      return;
-    }
-
     try {
-      final email = currentUser!.email;
+      final result = await showDialog<Map<String, String>>(
+        context: context,
+        builder: (dialogContext) {
+          bool obscureOld = true;
+          bool obscureNew = true;
+          bool obscureConfirm = true;
+
+          return StatefulBuilder(
+            builder: (context, setStateDialog) {
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                title: const Text(
+                  "تغيير كلمة المرور",
+                  textAlign: TextAlign.center,
+                ),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextField(
+                        controller: oldPasswordController,
+                        obscureText: obscureOld,
+                        decoration: InputDecoration(
+                          hintText: "كلمة المرور القديمة",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setStateDialog(() {
+                                obscureOld = !obscureOld;
+                              });
+                            },
+                            icon: Icon(
+                              obscureOld
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: newPasswordController,
+                        obscureText: obscureNew,
+                        decoration: InputDecoration(
+                          hintText: "كلمة المرور الجديدة",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setStateDialog(() {
+                                obscureNew = !obscureNew;
+                              });
+                            },
+                            icon: Icon(
+                              obscureNew
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: confirmPasswordController,
+                        obscureText: obscureConfirm,
+                        decoration: InputDecoration(
+                          hintText: "تأكيد كلمة المرور الجديدة",
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          suffixIcon: IconButton(
+                            onPressed: () {
+                              setStateDialog(() {
+                                obscureConfirm = !obscureConfirm;
+                              });
+                            },
+                            icon: Icon(
+                              obscureConfirm
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    child: const Text(
+                      "إلغاء",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(dialogContext, {
+                        "oldPassword": oldPasswordController.text.trim(),
+                        "newPassword": newPasswordController.text.trim(),
+                        "confirmPassword": confirmPasswordController.text
+                            .trim(),
+                      });
+                    },
+                    child: const Text(
+                      "حفظ",
+                      style: TextStyle(color: Colors.green),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      );
+
+      final user = currentUser;
+      if (result == null || user == null) return;
+
+      final oldPassword = result["oldPassword"] ?? "";
+      final newPassword = result["newPassword"] ?? "";
+      final confirmPassword = result["confirmPassword"] ?? "";
+
+      if (oldPassword.isEmpty ||
+          newPassword.isEmpty ||
+          confirmPassword.isEmpty) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "يرجى ملء جميع الحقول",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "كلمة المرور الجديدة يجب أن تكون 6 أحرف أو أكثر",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      if (newPassword != confirmPassword) {
+        if (!mounted) return;
+        interfaces.showAlert(
+          context,
+          "كلمتا المرور الجديدتان غير متطابقتين",
+          icon: Icons.warning_amber_rounded,
+          iconColor: Colors.orange,
+        );
+        return;
+      }
+
+      final email = user.email;
       if (email == null || email.isEmpty) {
         if (!mounted) return;
         interfaces.showAlert(
@@ -379,13 +673,17 @@ class _MyAccountState extends State<MyAccount> {
         return;
       }
 
+      if (mounted) {
+        setState(() => isPasswordLoading = true);
+      }
+
       final credential = EmailAuthProvider.credential(
         email: email,
         password: oldPassword,
       );
 
-      await currentUser!.reauthenticateWithCredential(credential);
-      await currentUser!.updatePassword(newPassword);
+      await user.reauthenticateWithCredential(credential);
+      await user.updatePassword(newPassword);
 
       if (!mounted) return;
       interfaces.showAlert(
@@ -422,6 +720,10 @@ class _MyAccountState extends State<MyAccount> {
         icon: Icons.error,
         iconColor: Colors.red,
       );
+    } finally {
+      if (mounted) {
+        setState(() => isPasswordLoading = false);
+      }
     }
   }
 
@@ -449,7 +751,9 @@ class _MyAccountState extends State<MyAccount> {
 
   @override
   Widget build(BuildContext context) {
-    if (currentUser == null) {
+    final user = currentUser;
+
+    if (user == null) {
       return Scaffold(
         appBar: interfaces.showAppBar(context, title: "حسابي", actions: false),
         body: const Center(child: Text("لا يوجد مستخدم مسجل دخول")),
@@ -458,7 +762,7 @@ class _MyAccountState extends State<MyAccount> {
 
     final userStream = FirebaseFirestore.instance
         .collection("users")
-        .doc(currentUser!.uid)
+        .doc(user.uid)
         .snapshots();
 
     return Scaffold(
@@ -487,7 +791,7 @@ class _MyAccountState extends State<MyAccount> {
           final fullName = "$firstName $lastName".trim();
           final userName = (data["userName"] ?? "").toString();
           final phone = (data["phone"] ?? "").toString();
-          final email = (data["email"] ?? "").toString();
+          final email = (data["email"] ?? user.email ?? "").toString();
           final photoUrl = (data["photoUrl"] ?? "").toString();
 
           return SingleChildScrollView(
@@ -497,7 +801,7 @@ class _MyAccountState extends State<MyAccount> {
                 const SizedBox(height: 10),
                 InkWell(
                   borderRadius: BorderRadius.circular(55),
-                  onTap: isPhotoLoading ? null : () => showImageSourceDialog(),
+                  onTap: isPhotoLoading ? null : showImageSourceDialog,
                   child: Stack(
                     children: [
                       CircleAvatar(
@@ -569,48 +873,33 @@ class _MyAccountState extends State<MyAccount> {
                   ),
                 ),
                 const SizedBox(height: 10),
-
                 buildOptionTile(
                   icon: Icons.badge_outlined,
                   title: "تغيير الاسم",
                   onTap: () {
-                    updateField(
-                      title: "تغيير الاسم",
-                      fieldName: "firstName",
-                      currentValue: firstName,
-                    );
+                    updateName(firstName: firstName, lastName: lastName);
                   },
                 ),
-
                 buildOptionTile(
                   icon: Icons.phone_android,
                   title: "تغيير رقم الهاتف",
                   onTap: () {
-                    updateField(
-                      title: "تغيير رقم الهاتف",
-                      fieldName: "phone",
-                      currentValue: phone,
-                      keyboardType: TextInputType.phone,
-                    );
+                    updatePhone(currentValue: phone);
                   },
                 ),
-
                 buildOptionTile(
                   icon: Icons.lock_outline,
-                  title: "تغيير كلمة المرور",
+                  title: isPasswordLoading
+                      ? "جاري تغيير كلمة المرور..."
+                      : "تغيير كلمة المرور",
                   onTap: changePassword,
                   iconColor: Colors.redAccent,
                 ),
-
                 buildOptionTile(
                   icon: Icons.alternate_email,
                   title: "تغيير اسم المستخدم",
                   onTap: () {
-                    updateField(
-                      title: "تغيير اسم المستخدم",
-                      fieldName: "userName",
-                      currentValue: userName,
-                    );
+                    updateUserName(currentValue: userName);
                   },
                   iconColor: Colors.blueAccent,
                 ),
