@@ -247,6 +247,10 @@ exports.sendNotificationToAllUsers = onCall(
         const routePath = (request.data.routePath || "").toString().trim();
         const routeTitle = (request.data.routeTitle || "").toString().trim();
 
+        const targetType = (request.data.targetType || "").toString().trim();
+        const targetId = (request.data.targetId || "").toString().trim();
+        const targetName = (request.data.targetName || "").toString().trim();
+
         if (!title || !body) {
             throw new HttpsError("invalid-argument", "العنوان والنص مطلوبان");
         }
@@ -271,6 +275,9 @@ exports.sendNotificationToAllUsers = onCall(
                 action: "",
                 routePath,
                 routeTitle,
+                targetType,
+                targetId,
+                targetName,
                 isRead: false,
                 createdAt: FieldValue.serverTimestamp(),
             });
@@ -289,6 +296,9 @@ exports.sendNotificationToAllUsers = onCall(
                 senderId: uid,
                 routePath,
                 routeTitle,
+                targetType,
+                targetId,
+                targetName,
                 click_action: "FLUTTER_NOTIFICATION_CLICK",
             },
             android: {

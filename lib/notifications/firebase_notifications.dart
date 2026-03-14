@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:mood01/navi_go.dart';
 
 final FlutterLocalNotificationsPlugin localNotifications =
     FlutterLocalNotificationsPlugin();
@@ -71,8 +74,16 @@ class FirebaseNotifications {
 
     await localNotifications.initialize(
       settings: initSettings,
-      onDidReceiveNotificationResponse: (response) {
-        debugPrint("تم الضغط على الإشعار: ${response.payload}");
+      onDidReceiveNotificationResponse: (response) async {
+        final payload = response.payload;
+        if (payload == null || payload.isEmpty) return;
+
+        try {
+          final data = Map<String, dynamic>.from(jsonDecode(payload));
+          await _handleNotificationNavigation(data);
+        } catch (e) {
+          debugPrint("خطأ في قراءة payload: $e");
+        }
       },
     );
 
@@ -88,7 +99,6 @@ class FirebaseNotifications {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
       final notification = message.notification;
-
       if (notification == null) return;
 
       await localNotifications.show(
@@ -106,17 +116,67 @@ class FirebaseNotifications {
           ),
           iOS: DarwinNotificationDetails(),
         ),
-        payload: message.data.toString(),
+        payload: jsonEncode(message.data),
       );
     });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      debugPrint("تم فتح التطبيق من الإشعار: ${message.data}");
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) async {
+      await _handleNotificationNavigation(message.data);
     });
 
     final initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
-      debugPrint("تم فتح التطبيق وهو مغلق من إشعار: ${initialMessage.data}");
+      await _handleNotificationNavigation(initialMessage.data);
+    }
+  }
+
+  static Future<void> _handleNotificationNavigation(
+    Map<String, dynamic> data,
+  ) async {
+    final type = (data["type"] ?? "").toString();
+    final senderId = (data["senderId"] ?? "").toString();
+    final routePath = (data["routePath"] ?? "").toString();
+
+    final targetType = (data["targetType"] ?? "").toString();
+    final targetId = (data["targetId"] ?? "").toString();
+    final targetName = (data["targetName"] ?? "").toString();
+
+    if (type == "chat" && senderId.isNotEmpty) {
+      NaviGo.router.push("/chat/$senderId");
+      return;
+    }
+
+    if (type == "friend_request") {
+      NaviGo.router.push("/fellows");
+      return;
+    }
+
+    if (type == "security_login") {
+      NaviGo.router.push("/browse");
+      return;
+    }
+
+    if (type == "broadcast") {
+      if (targetType.isNotEmpty &&
+          targetId.isNotEmpty &&
+          targetName.isNotEmpty) {
+        final safeName = Uri.encodeComponent(targetName);
+
+        if (targetType == "collegeDepartments") {
+          NaviGo.router.push("/departments/$targetId/$safeName");
+          return;
+        }
+
+        if (targetType == "departmentCourses") {
+          NaviGo.router.push("/courses/$targetId/$safeName");
+          return;
+        }
+      }
+
+      if (routePath.isNotEmpty) {
+        NaviGo.router.push(routePath);
+        return;
+      }
     }
   }
 

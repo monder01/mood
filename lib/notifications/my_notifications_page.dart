@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mood01/chats/chat_page.dart';
 import 'package:mood01/friends/user_fellows_page.dart';
 import 'package:mood01/global/my_account.dart';
+import 'package:mood01/notifications/notification_target_navigator.dart';
 
 class MyNotificationsPage extends StatefulWidget {
   const MyNotificationsPage({super.key});
@@ -15,6 +16,9 @@ class MyNotificationsPage extends StatefulWidget {
 
 class _MyNotificationsPageState extends State<MyNotificationsPage> {
   final currentUser = FirebaseAuth.instance.currentUser;
+  late final Stream<QuerySnapshot> notificationsStream;
+
+  final Map<String, double> dragProgress = {};
 
   Future<void> markAsRead(String notificationId) async {
     if (currentUser == null) return;
@@ -92,6 +96,19 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    if (currentUser != null) {
+      notificationsStream = FirebaseFirestore.instance
+          .collection("users")
+          .doc(currentUser!.uid)
+          .collection("notifications")
+          .orderBy("createdAt", descending: true)
+          .snapshots();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (currentUser == null) {
       return Scaffold(
@@ -102,13 +119,6 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
         body: const Center(child: Text("لا يوجد مستخدم مسجل دخول")),
       );
     }
-
-    final notificationsStream = FirebaseFirestore.instance
-        .collection("users")
-        .doc(currentUser!.uid)
-        .collection("notifications")
-        .orderBy("createdAt", descending: true)
-        .snapshots();
 
     return Scaffold(
       appBar: AppBar(
@@ -170,112 +180,157 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
               final createdAt = data["createdAt"] as Timestamp?;
               final senderId = data["senderId"] ?? "";
               final routePath = data["routePath"] ?? "/";
+              final progress = dragProgress[doc.id] ?? 0.0;
 
               return Dismissible(
                 key: ValueKey(doc.id),
                 direction: DismissDirection.endToStart,
+                resizeDuration: const Duration(milliseconds: 300),
+                movementDuration: const Duration(milliseconds: 200),
+                background: Container(
+                  alignment: Alignment.centerLeft,
+                  padding: const EdgeInsets.only(left: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.black12,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(Icons.delete, color: Colors.red.shade300),
+                ),
+                onUpdate: (details) {
+                  setState(() {
+                    dragProgress[doc.id] = details.progress.clamp(0.0, 1.0);
+                  });
+                },
                 onDismissed: (direction) async {
+                  dragProgress.remove(doc.id);
                   await deleteNotification(doc.id);
                 },
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(16),
-                  onTap: () async {
-                    if (!isRead) {
-                      await markAsRead(doc.id);
-                    }
 
-                    if (type == "chat") {
-                      if (!context.mounted) return;
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatPage(otherUserId: senderId),
-                        ),
-                      );
-                    } else if (type == "friend_request") {
-                      if (!context.mounted) return;
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => UserFellowsPage(),
-                        ),
-                      );
-                    } else if (type == "security_login") {
-                      if (!context.mounted) return;
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const MyAccount(),
-                        ),
-                      );
-                    } else if (type == "broadcast") {
-                      if (!context.mounted) return;
-                      await context.push(routePath);
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isRead
-                          ? Colors.white
-                          : Colors.greenAccent.shade100,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.greenAccent, width: 1.2),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 4,
-                          offset: Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: getNotificationColor(
-                            type,
-                          ).withValues(alpha: 0.12),
-                          child: Icon(
-                            getNotificationIcon(type),
-                            color: getNotificationColor(type),
+                child: Opacity(
+                  opacity: (1 - (progress * 1.8)).clamp(0.0, 1.0),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () async {
+                      if (!isRead) {
+                        await markAsRead(doc.id);
+                      }
+
+                      if (type == "chat") {
+                        if (!context.mounted) return;
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ChatPage(otherUserId: senderId),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                title,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(body, style: const TextStyle(fontSize: 14)),
-                              const SizedBox(height: 6),
-                              Text(
-                                formatTime(createdAt),
-                                style: const TextStyle(
-                                  color: Colors.grey,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
+                        );
+                      } else if (type == "friend_request") {
+                        if (!context.mounted) return;
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => UserFellowsPage(),
                           ),
+                        );
+                      } else if (type == "security_login") {
+                        if (!context.mounted) return;
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const MyAccount(),
+                          ),
+                        );
+                      } else if (type == "broadcast") {
+                        final targetType = data["targetType"];
+                        final targetId = data["targetId"];
+                        final targetName = data["targetName"];
+
+                        if ((targetType ?? "").toString().isNotEmpty &&
+                            (targetId ?? "").toString().isNotEmpty &&
+                            (targetName ?? "").toString().isNotEmpty) {
+                          if (!context.mounted) return;
+                          await NotificationTargetNavigator.openTarget(
+                            context,
+                            targetType: targetType?.toString(),
+                            targetId: targetId?.toString(),
+                            targetName: targetName?.toString(),
+                          );
+                        } else if ((routePath ?? "").toString().isNotEmpty) {
+                          if (!context.mounted) return;
+                          await context.push(routePath);
+                        }
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isRead
+                            ? Colors.white
+                            : Colors.greenAccent.shade100,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: Colors.greenAccent,
+                          width: 1.2,
                         ),
-                        if (!isRead)
-                          Container(
-                            width: 10,
-                            height: 10,
-                            decoration: const BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 4,
+                            offset: Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 24,
+                            backgroundColor: getNotificationColor(
+                              type,
+                            ).withValues(alpha: 0.12),
+                            child: Icon(
+                              getNotificationIcon(type),
+                              color: getNotificationColor(type),
                             ),
                           ),
-                      ],
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  body,
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  formatTime(createdAt),
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          if (!isRead)
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: Colors.red,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

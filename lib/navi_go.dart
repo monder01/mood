@@ -1,7 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:mood01/auth/auth.dart';
 import 'package:mood01/global/browse_page.dart';
-import 'package:mood01/screens/home_page.dart';
 import 'package:mood01/auth/signin_page.dart';
 import 'package:mood01/auth/signup_page.dart';
 import 'package:mood01/screens/about_us_page.dart';
@@ -101,6 +100,7 @@ class NaviGo {
         builder: (context, state) {
           final collegeId = state.pathParameters['collegeId']!;
           final collegeName = state.pathParameters['collegeName']!;
+
           return UserBrowseDepartmentPage(
             collegeId: collegeId,
             collegeName: collegeName,
@@ -114,6 +114,7 @@ class NaviGo {
         builder: (context, state) {
           final departmentId = state.pathParameters['departmentId']!;
           final departmentName = state.pathParameters['departmentName']!;
+
           return UserBrowseCoursesPage(
             departmentId: departmentId,
             departmentName: departmentName,
@@ -127,6 +128,7 @@ class NaviGo {
         builder: (context, state) {
           final sectionId = state.pathParameters['sectionId']!;
           final sectionName = state.pathParameters['sectionName']!;
+
           return UserBrowseSectionsPage(
             sectionId: sectionId,
             sectionName: sectionName,
@@ -135,4 +137,13 @@ class NaviGo {
       ),
     ],
   );
+  String buildDynamicRoute(String template, Map<String, String> values) {
+    String result = template;
+
+    values.forEach((key, value) {
+      result = result.replaceAll(':$key', Uri.encodeComponent(value));
+    });
+
+    return result;
+  }
 }

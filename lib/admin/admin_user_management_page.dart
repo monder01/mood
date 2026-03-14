@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mood01/notifications/course_department_target_picker_page.dart';
 import 'package:mood01/notifications/route_picker_page.dart';
 import 'package:mood01/global/interfaces.dart';
 import 'package:mood01/notifications/user_route_tree.dart';
@@ -15,10 +16,15 @@ class AdminUserManagementPage extends StatefulWidget {
 }
 
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
+  bool hasCourseDepartmentTarget = false;
+  String? selectedTargetType;
+  String? selectedTargetId;
+  String? selectedTargetName;
+  //////////////////////////////////
   bool hasRoute = false;
   String? selectedRoutePath;
   String? selectedRouteTitle;
-
+  ///////////////////////////////////
   final interfaces = Interfaces();
   String searchText = "";
   final titleController = TextEditingController();
@@ -32,6 +38,9 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     required String body,
     String? routePath,
     String? routeTitle,
+    String? targetType,
+    String? targetId,
+    String? targetName,
   }) async {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
@@ -47,7 +56,6 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       await currentUser.getIdToken(true);
 
       final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
-
       final callable = functions.httpsCallable('sendNotificationToAllUsers');
 
       final result = await callable.call({
@@ -55,6 +63,10 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
         "body": body.trim(),
         "routePath": routePath,
         "routeTitle": routeTitle,
+
+        "targetType": targetType,
+        "targetId": targetId,
+        "targetName": targetName,
       });
 
       if (!context.mounted) return;
@@ -333,6 +345,23 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       setState(() {
         selectedRouteTitle = result["title"];
         selectedRoutePath = result["path"];
+      });
+    }
+  }
+
+  Future<void> openCourseDepartmentTargetPicker() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CourseDepartmentTargetPickerPage(),
+      ),
+    );
+
+    if (result != null && result is Map<String, dynamic>) {
+      setState(() {
+        selectedTargetType = result["targetType"];
+        selectedTargetId = result["targetId"];
+        selectedTargetName = result["targetName"];
       });
     }
   }
@@ -672,7 +701,13 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                               onChanged: (value) {
                                 setState(() {
                                   hasRoute = value;
-                                  if (!hasRoute) {
+
+                                  if (value) {
+                                    hasCourseDepartmentTarget = false;
+                                    selectedTargetType = null;
+                                    selectedTargetId = null;
+                                    selectedTargetName = null;
+                                  } else {
                                     selectedRoutePath = null;
                                     selectedRouteTitle = null;
                                   }
@@ -710,6 +745,47 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                               style: const TextStyle(color: Colors.grey),
                             ),
                           ],
+                        ],
+                        Card(
+                          child: ListTile(
+                            title: const Text("تنقل خاص بالأقسام أو المواد"),
+                            subtitle: const Text(
+                              "خيار جديد بدون التأثير على route القديم",
+                            ),
+                            trailing: Switch(
+                              value: hasCourseDepartmentTarget,
+                              activeTrackColor: Colors.greenAccent,
+                              onChanged: (value) {
+                                setState(() {
+                                  hasCourseDepartmentTarget = value;
+
+                                  if (value) {
+                                    hasRoute = false;
+                                    selectedRoutePath = null;
+                                    selectedRouteTitle = null;
+                                  } else {
+                                    selectedTargetType = null;
+                                    selectedTargetId = null;
+                                    selectedTargetName = null;
+                                  }
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+
+                        if (hasCourseDepartmentTarget) ...[
+                          const SizedBox(height: 8),
+                          OutlinedButton.icon(
+                            onPressed: openCourseDepartmentTargetPicker,
+                            icon: const Icon(Icons.route, color: Colors.black),
+                            label: Text(
+                              selectedTargetName == null
+                                  ? "اختيار كلية أو قسم"
+                                  : "المختار: $selectedTargetName",
+                              style: const TextStyle(color: Colors.black),
+                            ),
+                          ),
                         ],
 
                         const SizedBox(height: 40),
@@ -750,6 +826,16 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                                       );
                                       return;
                                     }
+                                    if (hasCourseDepartmentTarget &&
+                                        (selectedTargetType == null ||
+                                            selectedTargetId == null ||
+                                            selectedTargetName == null)) {
+                                      interfaces.showFlutterToast(
+                                        context,
+                                        "اختر الكلية أو القسم أولاً",
+                                      );
+                                      return;
+                                    }
 
                                     setState(() {
                                       isLoading = true;
@@ -757,13 +843,22 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
 
                                     await sendNotificationToAllUsersSafe(
                                       context: context,
-                                      title: title,
-                                      body: body,
+                                      title: titleController.text,
+                                      body: bodyController.text,
                                       routePath: hasRoute
                                           ? selectedRoutePath
                                           : null,
                                       routeTitle: hasRoute
                                           ? selectedRouteTitle
+                                          : null,
+                                      targetType: hasCourseDepartmentTarget
+                                          ? selectedTargetType
+                                          : null,
+                                      targetId: hasCourseDepartmentTarget
+                                          ? selectedTargetId
+                                          : null,
+                                      targetName: hasCourseDepartmentTarget
+                                          ? selectedTargetName
                                           : null,
                                     );
 
