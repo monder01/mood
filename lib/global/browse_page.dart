@@ -6,13 +6,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mood01/admin/admin_system_page.dart';
 import 'package:mood01/admin/admin_user_management_page.dart';
 import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/chats/my_conversations_page.dart';
 import 'package:mood01/global/my_account.dart';
+import 'package:mood01/global/system.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 import 'package:mood01/screens/about_us_page.dart';
-import 'package:mood01/admin/admin_browse_page.dart';
 import 'package:mood01/admin/admin_main_page.dart';
 import 'package:mood01/auth/users.dart';
 import 'package:mood01/student/discover_page.dart';
@@ -30,7 +31,9 @@ class Browsepage extends StatefulWidget {
 
 class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
   Users users = Users();
-  Interfaces interfaces = Interfaces();
+  final interfaces = Interfaces();
+  System system = System();
+
   bool isPhotoLoading = false;
   int currentIndex = 0, counter = 0;
 
@@ -42,7 +45,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
   final List<Widget> adminPages = const [
     AdminMainPage(),
     AdminUserManagementPage(),
-    AdminBrowsePage(),
+    AdminSystemPage(),
   ];
 
   // أضف هذا المتغير في أعلى الكلاس
@@ -156,10 +159,18 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> loadSystemInfo() async {
+    await system.getAppVersion();
+
+    if (!mounted) return;
+    setState(() {});
+  }
+
   @override
   void initState() {
     super.initState();
     loadUser();
+    loadSystemInfo();
     getFcmToken();
     WidgetsBinding.instance.addObserver(this);
     setOnlineStatus(true);
@@ -222,6 +233,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
             ),
           ),
 
+          // زملائي
           ListTile(
             leading: const Icon(Icons.history_edu),
             title: const Text("زملائي"),
@@ -244,6 +256,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
             },
           ),
 
+          // المحادثات
           ListTile(
             leading: const Icon(Icons.mail),
             title: const Text("محادثاتي"),
@@ -256,6 +269,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
           ),
           const Divider(),
 
+          // الحساب
           ListTile(
             leading: const Icon(Icons.person),
             title: const Text("الحساب"),
@@ -267,6 +281,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
             },
           ),
 
+          // الاعدادات
           ListTile(
             leading: const Icon(Icons.settings),
             title: const Text("الإعدادات"),
@@ -276,6 +291,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
           ),
           const Divider(),
 
+          // عن التطبيق
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: const Text("عن التطبيق"),
@@ -287,6 +303,37 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
             },
           ),
 
+          // تحديث التطبيق
+          ListTile(
+            leading: system.isUpdateAvailable == false
+                ? Icon(Icons.phone_android)
+                : Icon(Icons.update),
+            title: system.isUpdateAvailable == false
+                ? Text(
+                    "الاصدار محدث : ${system.appVersion}",
+                    style: const TextStyle(color: Colors.green),
+                  )
+                : Text(
+                    "هناك تحديث : ${system.appVersion}",
+                    style: const TextStyle(color: Colors.orange),
+                  ),
+            onTap: () async {
+              if (system.isUpdateAvailable == false) {
+                interfaces.showFlutterToast(context, "لا يوجد تحديثات");
+              } else {
+                final confirm = await interfaces.showConfirmationDialog(
+                  context,
+                  "هل تريد تحميل التحديث الجديد؟",
+                );
+
+                if (confirm) {
+                  await system.openSystemUrl();
+                }
+              }
+            },
+          ),
+
+          // تسجيل الخروج
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text(
@@ -386,8 +433,10 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                 label: "التحكم",
               ),
             BottomNavigationBarItem(
-              icon: const Icon(Icons.near_me_rounded),
-              label: "تصفح",
+              icon: users.role == "admin"
+                  ? Icon(Icons.phone_android_outlined)
+                  : Icon(Icons.near_me_rounded),
+              label: users.role == "admin" ? "النظام" : "تصفح",
             ),
           ],
         ),

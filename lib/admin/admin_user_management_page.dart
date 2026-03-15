@@ -1,11 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mood01/notifications/course_department_target_picker_page.dart';
-import 'package:mood01/notifications/route_picker_page.dart';
 import 'package:mood01/global/interfaces.dart';
-import 'package:mood01/notifications/user_route_tree.dart';
 
 class AdminUserManagementPage extends StatefulWidget {
   const AdminUserManagementPage({super.key});
@@ -16,70 +12,12 @@ class AdminUserManagementPage extends StatefulWidget {
 }
 
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
-  bool hasCourseDepartmentTarget = false;
-  String? selectedTargetType;
-  String? selectedTargetId;
-  String? selectedTargetName;
-  //////////////////////////////////
-  bool hasRoute = false;
-  String? selectedRoutePath;
-  String? selectedRouteTitle;
   ///////////////////////////////////
   final interfaces = Interfaces();
   String searchText = "";
-  final titleController = TextEditingController();
-  final bodyController = TextEditingController();
   bool isLoading = false;
   final currentUserId = FirebaseAuth.instance.currentUser!.uid;
   ////////////////////////////////////////////////////////////////////////////////
-  Future<void> sendNotificationToAllUsersSafe({
-    required BuildContext context,
-    required String title,
-    required String body,
-    String? routePath,
-    String? routeTitle,
-    String? targetType,
-    String? targetId,
-    String? targetName,
-  }) async {
-    try {
-      final currentUser = FirebaseAuth.instance.currentUser;
-
-      if (currentUser == null) {
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("لا يوجد مستخدم مسجل دخول")),
-        );
-        return;
-      }
-
-      await currentUser.getIdToken(true);
-
-      final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
-      final callable = functions.httpsCallable('sendNotificationToAllUsers');
-
-      final result = await callable.call({
-        "title": title.trim(),
-        "body": body.trim(),
-        "routePath": routePath,
-        "routeTitle": routeTitle,
-
-        "targetType": targetType,
-        "targetId": targetId,
-        "targetName": targetName,
-      });
-
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.data["message"] ?? "تم الإرسال بنجاح")),
-      );
-    } catch (e) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("فشل الإرسال: $e")));
-    }
-  }
 
   Future<void> showUserDetails(
     Map<String, dynamic> userData,
@@ -333,39 +271,6 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     );
   }
 
-  Future<void> openRoutePickerPage() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const RoutePickerPage(routesTree: userRouteTree),
-      ),
-    );
-
-    if (result != null && result is Map<String, dynamic>) {
-      setState(() {
-        selectedRouteTitle = result["title"];
-        selectedRoutePath = result["path"];
-      });
-    }
-  }
-
-  Future<void> openCourseDepartmentTargetPicker() async {
-    final result = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const CourseDepartmentTargetPickerPage(),
-      ),
-    );
-
-    if (result != null && result is Map<String, dynamic>) {
-      setState(() {
-        selectedTargetType = result["targetType"];
-        selectedTargetId = result["targetId"];
-        selectedTargetName = result["targetName"];
-      });
-    }
-  }
-
   Widget buildUserCard(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     final userId = doc.id;
@@ -494,13 +399,6 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
   }
 
   @override
-  void dispose() {
-    titleController.dispose();
-    bodyController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final usersStream = FirebaseFirestore.instance
         .collection("users")
@@ -523,7 +421,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
               ),
               tabs: const [
                 Tab(text: "إدارة المستخدمين"),
-                Tab(text: "إرسال إشعار"),
+                Tab(text: "قيد التطوير"),
               ],
             ),
 
@@ -633,269 +531,9 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
 
                   // send notification tab 2 content
                   Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextField(
-                          controller: titleController,
-                          decoration: const InputDecoration(
-                            hintText: "عنوان الإشعار",
-                            prefixIcon: Icon(
-                              Icons.title,
-                              color: Colors.greenAccent,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                              borderSide: BorderSide(
-                                color: Colors.greenAccent,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: bodyController,
-                          maxLines: 4,
-                          decoration: const InputDecoration(
-                            hintText: "نص الإشعار",
-                            prefixIcon: Icon(
-                              Icons.message,
-                              color: Colors.greenAccent,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                              borderSide: BorderSide(
-                                color: Colors.greenAccent,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        Card(
-                          child: ListTile(
-                            title: const Text("يحتوي على مسار تنقل"),
-                            subtitle: const Text(
-                              "فعّلها إذا أردت أن يفتح الإشعار صفحة معينة",
-                            ),
-                            trailing: Switch(
-                              value: hasRoute,
-                              activeTrackColor: Colors.greenAccent,
-                              onChanged: (value) {
-                                setState(() {
-                                  hasRoute = value;
-
-                                  if (value) {
-                                    hasCourseDepartmentTarget = false;
-                                    selectedTargetType = null;
-                                    selectedTargetId = null;
-                                    selectedTargetName = null;
-                                  } else {
-                                    selectedRoutePath = null;
-                                    selectedRouteTitle = null;
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-
-                        Card(
-                          child: ListTile(
-                            title: const Text("تنقل خاص بالأقسام أو المواد"),
-                            subtitle: const Text(
-                              "خيار جديد بدون التأثير على route القديم",
-                            ),
-                            trailing: Switch(
-                              value: hasCourseDepartmentTarget,
-                              activeTrackColor: Colors.greenAccent,
-                              onChanged: (value) {
-                                setState(() {
-                                  hasCourseDepartmentTarget = value;
-
-                                  if (value) {
-                                    hasRoute = false;
-                                    selectedRoutePath = null;
-                                    selectedRouteTitle = null;
-                                  } else {
-                                    selectedTargetType = null;
-                                    selectedTargetId = null;
-                                    selectedTargetName = null;
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-
-                        if (hasRoute) ...[
-                          const SizedBox(height: 8),
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.greenAccent),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: openRoutePickerPage,
-                            icon: const Icon(
-                              Icons.folder_open,
-                              color: Colors.green,
-                            ),
-                            label: Text(
-                              selectedRouteTitle == null
-                                  ? "اختر المسار"
-                                  : "المسار المختار: $selectedRouteTitle",
-                              style: const TextStyle(color: Colors.black),
-                            ),
-                          ),
-                          if (selectedRoutePath != null) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              "Path: $selectedRoutePath",
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ],
-
-                        if (hasCourseDepartmentTarget) ...[
-                          const SizedBox(height: 8),
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.greenAccent),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: openCourseDepartmentTargetPicker,
-                            icon: const Icon(
-                              Icons.folder_open,
-                              color: Colors.green,
-                            ),
-                            label: Text(
-                              selectedTargetName == null
-                                  ? "اختيار كلية أو قسم"
-                                  : "المختار: $selectedTargetName",
-                              style: const TextStyle(color: Colors.black),
-                            ),
-                          ),
-                        ],
-
-                        const SizedBox(height: 40),
-
-                        Center(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
-                              elevation: 5,
-                              shadowColor: Colors.black,
-                              maximumSize: const Size(300, 50),
-                              minimumSize: const Size(300, 50),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              side: const BorderSide(
-                                color: Colors.greenAccent,
-                                width: 1,
-                              ),
-                            ),
-                            onPressed: isLoading
-                                ? null
-                                : () async {
-                                    final title = titleController.text.trim();
-                                    final body = bodyController.text.trim();
-
-                                    if (title.isEmpty || body.isEmpty) {
-                                      interfaces.showFlutterToast(
-                                        context,
-                                        "يرجى ملء جميع الحقول",
-                                      );
-                                      return;
-                                    }
-
-                                    if (hasRoute && selectedRoutePath == null) {
-                                      interfaces.showFlutterToast(
-                                        context,
-                                        "يرجى اختيار مسار أولاً",
-                                      );
-                                      return;
-                                    }
-                                    if (hasCourseDepartmentTarget &&
-                                        (selectedTargetType == null ||
-                                            selectedTargetId == null ||
-                                            selectedTargetName == null)) {
-                                      interfaces.showFlutterToast(
-                                        context,
-                                        "اختر الكلية أو القسم أولاً",
-                                      );
-                                      return;
-                                    }
-
-                                    setState(() {
-                                      isLoading = true;
-                                    });
-
-                                    await sendNotificationToAllUsersSafe(
-                                      context: context,
-                                      title: titleController.text,
-                                      body: bodyController.text,
-                                      routePath: hasRoute
-                                          ? selectedRoutePath
-                                          : null,
-                                      routeTitle: hasRoute
-                                          ? selectedRouteTitle
-                                          : null,
-                                      targetType: hasCourseDepartmentTarget
-                                          ? selectedTargetType
-                                          : null,
-                                      targetId: hasCourseDepartmentTarget
-                                          ? selectedTargetId
-                                          : null,
-                                      targetName: hasCourseDepartmentTarget
-                                          ? selectedTargetName
-                                          : null,
-                                    );
-
-                                    setState(() {
-                                      isLoading = false;
-                                    });
-                                  },
-                            child: isLoading
-                                ? const Center(
-                                    child: CircularProgressIndicator(
-                                      color: Colors.greenAccent,
-                                    ),
-                                  )
-                                : const Text(
-                                    "ارسل الإشعار لجميع المستخدمين",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ],
+                      children: [Center(child: const Text("قيد التطوير"))],
                     ),
                   ),
                 ],

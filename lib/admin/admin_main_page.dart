@@ -1,10 +1,10 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mood01/admin/add_college_page.dart';
-import 'package:mood01/admin/add_course_page.dart';
-import 'package:mood01/admin/add_department_page.dart';
-import 'package:mood01/admin/add_section_page.dart';
+import 'package:mood01/admin/adds/add_college_page.dart';
+import 'package:mood01/admin/adds/add_course_page.dart';
+import 'package:mood01/admin/adds/add_department_page.dart';
+import 'package:mood01/admin/adds/add_section_page.dart';
 import 'package:mood01/global/interfaces.dart';
 
 class AdminMainPage extends StatefulWidget {
