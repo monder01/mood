@@ -9,6 +9,16 @@ import 'package:mood01/notifications/my_notifications_page.dart';
 class Interfaces {
   bool isLoading = false;
 
+  // elevatad button style
+  ButtonStyle elevatedButtonStyle(double width, double height) =>
+      ElevatedButton.styleFrom(
+        elevation: 5,
+        side: const BorderSide(color: Colors.greenAccent, width: 2),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        minimumSize: Size(width, height),
+        maximumSize: Size(width, height),
+      );
+
   // show appbar
   AppBar showAppBar(
     BuildContext context, {
@@ -261,24 +271,17 @@ class Interfaces {
   ) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
         elevation: 5,
         minimumSize: Size(width, height),
         maximumSize: Size(width, height),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        side: const BorderSide(color: Colors.greenAccent, width: 2),
       ),
       onPressed: isLoading ? null : onPressed,
       child: isLoading
           ? CircularProgressIndicator(color: Colors.greenAccent)
           : Text(
               text,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
             ),
     );
   }

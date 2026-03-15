@@ -174,30 +174,30 @@ class _SettingPageState extends State<SettingPage> {
                         : Icons.light_mode,
                     title: "الوضع الداكن",
                     subtitle: isDarkMode ? "مفعل" : "متوقف",
-                    onTap: () {
+                    onTap: () async {
+                      final newValue = !isDarkMode;
+
                       setState(() {
-                        isDarkMode = !isDarkMode;
-                        appThemeMode.value = isDarkMode
-                            ? ThemeMode.dark
-                            : ThemeMode.light;
+                        isDarkMode = newValue;
                       });
+
+                      await ThemeController.saveTheme(newValue);
                       showDevMessage(
-                        message: "قيد التطوير، قد لا يكون ملائم للإستخدام",
+                        message: "الخاصية تحت التطوير, يفضل عدم استخدامها",
                       );
                     },
                     trailing: Switch(
                       activeTrackColor: Colors.greenAccent,
                       activeThumbColor: Colors.white,
                       value: isDarkMode,
-                      onChanged: (value) {
+                      onChanged: (value) async {
                         setState(() {
                           isDarkMode = value;
-                          appThemeMode.value = value
-                              ? ThemeMode.dark
-                              : ThemeMode.light;
                         });
+
+                        await ThemeController.saveTheme(value);
                         showDevMessage(
-                          message: "قيد التطوير، قد لا يكون ملائم للإستخدام",
+                          message: "الخاصية تحت التطوير, يفضل عدم استخدامها",
                         );
                       },
                     ),

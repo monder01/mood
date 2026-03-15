@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/global/theme_controller.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 import 'package:mood01/navi_go.dart';
+import 'package:mood01/global/theme_controller.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -11,6 +11,7 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await FirebaseNotifications.init();
+  await ThemeController.loadTheme();
 
   runApp(const MyApp());
 }
@@ -20,6 +21,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeController = ThemeController();
+
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: appThemeMode,
       builder: (context, themeMode, child) {
@@ -34,12 +37,9 @@ class MyApp extends StatelessWidget {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-
           themeMode: themeMode,
-
-          theme: ThemeController().lightTheme(),
-
-          darkTheme: ThemeController().darkTheme(),
+          theme: themeController.lightTheme(),
+          darkTheme: themeController.darkTheme(),
         );
       },
     );

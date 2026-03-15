@@ -465,10 +465,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                           });
                         },
                         decoration: InputDecoration(
-                          label: const Text(
-                            "اسم الكلية",
-                            style: TextStyle(color: Colors.black54),
-                          ),
+                          label: const Text("اسم الكلية"),
                           prefixIcon: const Icon(
                             Icons.search,
                             color: Colors.greenAccent,
@@ -658,7 +655,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                             child: Switch(
                                               activeThumbColor: Colors.white,
                                               activeTrackColor:
-                                                  Colors.lightBlueAccent,
+                                                  Colors.greenAccent,
                                               value: data["isActive"] ?? false,
                                               onChanged: (value) async {
                                                 final confirm = await interfaces
@@ -704,10 +701,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                           });
                         },
                         decoration: InputDecoration(
-                          label: const Text(
-                            "اسم القسم",
-                            style: TextStyle(color: Colors.black54),
-                          ),
+                          label: const Text("اسم القسم"),
                           prefixIcon: const Icon(
                             Icons.search,
                             color: Colors.greenAccent,
@@ -788,7 +782,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: Theme.of(context).cardColor,
                                       borderRadius: BorderRadius.circular(26),
                                       boxShadow: const [
                                         BoxShadow(
@@ -875,7 +869,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                               Switch(
                                                 activeThumbColor: Colors.white,
                                                 activeTrackColor:
-                                                    Colors.lightBlueAccent,
+                                                    Colors.greenAccent,
                                                 value:
                                                     data["isActive"] ?? false,
                                                 onChanged: (value) async {
@@ -929,10 +923,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                           });
                         },
                         decoration: InputDecoration(
-                          label: const Text(
-                            "اسم المادة",
-                            style: TextStyle(color: Colors.black54),
-                          ),
+                          label: const Text("اسم المادة"),
                           prefixIcon: const Icon(
                             Icons.search,
                             color: Colors.greenAccent,
@@ -1002,15 +993,8 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                       showCoursesOptions(docs[index].reference);
                                     },
                                     title: Text(data["courseName"]),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "رمز المادة : ${data["courseCode"]}",
-                                        ),
-                                        Text(data["courseDescription"]),
-                                      ],
+                                    subtitle: Text(
+                                      "رمز المادة : ${data["courseCode"]}",
                                     ),
                                     trailing: Switch(
                                       activeTrackColor: Colors.greenAccent,

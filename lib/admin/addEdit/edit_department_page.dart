@@ -220,7 +220,7 @@ class _EditDepartmentPageState extends State<EditDepartmentPage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: Colors.greenAccent, width: 2),
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       boxShadow: const [
                         BoxShadow(
                           color: Colors.black26,
@@ -314,7 +314,6 @@ class _EditDepartmentPageState extends State<EditDepartmentPage> {
                               style: TextStyle(fontSize: 18),
                             ),
                             Switch(
-                              activeTrackColor: Colors.greenAccent,
                               value: haveSection,
                               onChanged: (value) {
                                 setState(() {
@@ -327,16 +326,22 @@ class _EditDepartmentPageState extends State<EditDepartmentPage> {
 
                         const SizedBox(height: 10),
 
-                        SwitchListTile(
-                          activeThumbColor: Colors.greenAccent.shade700,
-                          activeTrackColor: Colors.greenAccent.shade100,
-                          value: isActive,
-                          title: const Text("تفعيل القسم"),
-                          onChanged: (value) {
-                            setState(() {
-                              isActive = value;
-                            });
-                          },
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "تفعيل القسم",
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            Switch(
+                              value: isActive,
+                              onChanged: (value) {
+                                setState(() {
+                                  isActive = value;
+                                });
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),

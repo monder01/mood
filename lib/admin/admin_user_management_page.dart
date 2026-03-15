@@ -285,114 +285,108 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
     final isActive = data["isActive"] ?? true;
 
     return InkWell(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(10),
       onTap: () => showOptionsBottomSheet(userId, data),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: Colors.white,
-          border: Border.all(color: Colors.greenAccent, width: 1.5),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 5,
-              offset: Offset(0, 4),
-            ),
-          ],
+      child: Card(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: const BorderSide(color: Colors.greenAccent, width: 1.5),
         ),
-        child: Row(
-          children: [
-            Stack(
-              children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundImage: photoUrl.toString().isNotEmpty
-                      ? NetworkImage(photoUrl)
-                      : null,
-                  child: photoUrl.toString().isEmpty
-                      ? const Icon(Icons.person, size: 28)
-                      : null,
-                ),
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: BoxDecoration(
-                      color: isOnline ? Colors.green : Colors.grey,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            children: [
+              Stack(
                 children: [
-                  Text(
-                    "$firstName $lastName",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundImage: photoUrl.toString().isNotEmpty
+                        ? NetworkImage(photoUrl)
+                        : null,
+                    child: photoUrl.toString().isEmpty
+                        ? const Icon(Icons.person, size: 28)
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    child: Container(
+                      width: 12,
+                      height: 12,
+                      decoration: BoxDecoration(
+                        color: isOnline ? Colors.green : Colors.grey,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    "@$userName",
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    email,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 13),
                   ),
                 ],
               ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: role == "admin"
-                        ? Colors.blueAccent.withValues(alpha: 0.15)
-                        : Colors.grey.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    role,
-                    style: TextStyle(
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "$firstName $lastName",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "@$userName",
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      email,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
                       color: role == "admin"
-                          ? Colors.blueAccent
-                          : Colors.black54,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                          ? Colors.blueAccent.withValues(alpha: 0.15)
+                          : Colors.grey.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      role,
+                      style: TextStyle(
+                        color: role == "admin"
+                            ? Colors.blueAccent
+                            : Colors.black54,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 8),
-                Icon(
-                  isActive ? Icons.verified_user : Icons.block,
-                  color: isActive ? Colors.green : Colors.red,
-                ),
-              ],
-            ),
-          ],
+                  const SizedBox(height: 8),
+                  Icon(
+                    isActive ? Icons.verified_user : Icons.block,
+                    color: isActive ? Colors.green : Colors.red,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -428,7 +422,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                 children: [
                   // Users Tab 1 content
                   Padding(
-                    padding: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(5),
                     child: Column(
                       children: [
                         TextField(
@@ -515,7 +509,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                               return ListView.separated(
                                 itemCount: filteredUsers.length,
                                 separatorBuilder: (context, index) =>
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 5),
                                 itemBuilder: (context, index) {
                                   return buildUserCard(filteredUsers[index]);
                                 },

@@ -272,7 +272,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.black,
                                     ),
                                   ),
                                 ),
@@ -420,20 +419,9 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
 
                                 Center(
                                   child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: Colors.black,
-                                      elevation: 5,
-                                      shadowColor: Colors.black,
-                                      maximumSize: const Size(300, 50),
-                                      minimumSize: const Size(300, 50),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      side: const BorderSide(
-                                        color: Colors.greenAccent,
-                                        width: 1,
-                                      ),
+                                    style: interfaces.elevatedButtonStyle(
+                                      300,
+                                      50,
                                     ),
                                     onPressed: isSystemUpdating
                                         ? null
@@ -594,7 +582,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
                               selectedRouteTitle == null
                                   ? "اختر المسار"
                                   : "المسار المختار: $selectedRouteTitle",
-                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                           if (selectedRoutePath != null) ...[
@@ -624,7 +611,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
                               selectedTargetName == null
                                   ? "اختيار كلية أو قسم"
                                   : "المختار: $selectedTargetName",
-                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                         ],

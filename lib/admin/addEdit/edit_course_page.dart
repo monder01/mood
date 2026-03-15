@@ -185,7 +185,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
             children: [
               const Text(
                 "تفعيل/تعطيل",
-                style: TextStyle(color: Colors.black, fontSize: 16),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
               const SizedBox(width: 10),
               Switch(
