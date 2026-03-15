@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mood01/friends/friends.dart';
 import 'package:mood01/global/interfaces.dart';
-import 'package:mood01/notifications/my_notifications_page.dart';
 
 class SearchForFriendsPage extends StatefulWidget {
   const SearchForFriendsPage({super.key});
@@ -327,6 +326,13 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        leadingWidth: 40,
+        automaticallyImplyLeading: false,
+        titleSpacing: 2,
         title: TextField(
           decoration: const InputDecoration(
             hintText: "ابحث عن صديق",
@@ -360,20 +366,6 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
         ),
         toolbarHeight: 50,
         shadowColor: Colors.greenAccent,
-        actions: [
-          // notification
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MyNotificationsPage(),
-                ),
-              );
-            },
-            icon: const Icon(Icons.notifications),
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),

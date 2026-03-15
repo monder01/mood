@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mood01/admin/adds/add_college_page.dart';
-import 'package:mood01/admin/adds/add_course_page.dart';
-import 'package:mood01/admin/adds/add_department_page.dart';
-import 'package:mood01/admin/adds/add_section_page.dart';
+import 'package:mood01/admin/addEdit/add_college_page.dart';
+import 'package:mood01/admin/addEdit/add_course_page.dart';
+import 'package:mood01/admin/addEdit/add_department_page.dart';
+import 'package:mood01/admin/addEdit/add_section_page.dart';
+import 'package:mood01/admin/addEdit/edit_college_page.dart';
+import 'package:mood01/admin/addEdit/edit_course_page.dart';
+import 'package:mood01/admin/addEdit/edit_department_page.dart';
 import 'package:mood01/global/interfaces.dart';
 
 class AdminMainPage extends StatefulWidget {
@@ -93,8 +96,22 @@ class _AdminMainPageState extends State<AdminMainPage> {
                 ),
                 title: Text("تعديل بيانات $modifiedName"),
                 onTap: () async {
-                  Navigator.pop(context);
-                  // await pickFromGallery();
+                  if (collectionName == "colleges") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditCollegePage(collegeId: id),
+                      ),
+                    );
+                  } else if (collectionName == "departments") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EditDepartmentPage(departmentId: id),
+                      ),
+                    );
+                  }
                 },
               ),
               ListTile(
@@ -358,7 +375,13 @@ class _AdminMainPageState extends State<AdminMainPage> {
                 leading: const Icon(Icons.edit, color: Colors.greenAccent),
                 title: const Text("تعديل بيانات المادة"),
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          EditCoursePage(courseRef: courseRef),
+                    ),
+                  );
                 },
               ),
               ListTile(
