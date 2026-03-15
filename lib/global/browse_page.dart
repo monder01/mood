@@ -11,6 +11,7 @@ import 'package:mood01/admin/admin_user_management_page.dart';
 import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/chats/my_conversations_page.dart';
 import 'package:mood01/global/my_account.dart';
+import 'package:mood01/global/setting_page.dart';
 import 'package:mood01/global/system.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 import 'package:mood01/screens/about_us_page.dart';
@@ -286,7 +287,10 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
             leading: const Icon(Icons.settings),
             title: const Text("الإعدادات"),
             onTap: () {
-              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingPage()),
+              );
             },
           ),
           const Divider(),

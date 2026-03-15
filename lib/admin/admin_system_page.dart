@@ -239,8 +239,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
         child: Column(
           children: [
             TabBar(
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.black54,
               indicatorColor: Color.fromARGB(255, 90, 205, 150),
               labelStyle: TextStyle(
                 fontSize: 16,

@@ -112,24 +112,29 @@ class AboutAppPage extends StatelessWidget {
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.shade200,
+                          color: Colors.black26,
                           blurRadius: 5,
                           offset: const Offset(0, 3),
                         ),
                       ],
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.badge, size: 30), //company icon
+                      leading: Icon(
+                        Icons.badge,
+                        size: 30,
+                        color: Colors.greenAccent,
+                      ), //company icon
                       title: Text(
                         "المطور",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: Colors.black,
                         ),
                       ),
                       subtitle: Text(
                         "منذر الرعبوب",
-                        style: TextStyle(fontSize: 16),
+                        style: TextStyle(fontSize: 16, color: Colors.black),
                       ),
                     ),
                   ),
@@ -146,22 +151,30 @@ class AboutAppPage extends StatelessWidget {
                       color: Colors.white,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.shade200,
+                          color: Colors.black26,
                           blurRadius: 5,
                           offset: const Offset(0, 3),
                         ),
                       ],
                     ),
                     child: ListTile(
-                      leading: Icon(Icons.location_on, size: 30),
+                      leading: Icon(
+                        Icons.location_on,
+                        size: 30,
+                        color: Colors.greenAccent,
+                      ),
                       title: Text(
                         "الدولة",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: Colors.black,
                         ),
                       ),
-                      subtitle: Text("ليبيا", style: TextStyle(fontSize: 16)),
+                      subtitle: Text(
+                        "ليبيا",
+                        style: TextStyle(fontSize: 16, color: Colors.black),
+                      ),
                     ),
                   ),
                 ),
@@ -177,17 +190,21 @@ class AboutAppPage extends StatelessWidget {
                 color: Colors.white,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.shade200,
+                    color: Colors.black26,
                     blurRadius: 5,
                     offset: const Offset(0, 3),
                   ),
                 ],
               ),
               child: ListTile(
-                leading: Icon(Icons.email, size: 30),
+                leading: Icon(Icons.email, size: 30, color: Colors.greenAccent),
                 title: Text(
                   "البريد الألكتروني",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
                 ),
                 subtitle: InkWell(
                   onLongPress: () {
@@ -201,7 +218,7 @@ class AboutAppPage extends StatelessWidget {
                   },
                   child: Text(
                     "monther00147@gmail.com",
-                    style: TextStyle(fontSize: 16),
+                    style: TextStyle(fontSize: 16, color: Colors.black),
                   ),
                 ),
               ),

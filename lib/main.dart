@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mood01/global/theme_controller.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 import 'package:mood01/navi_go.dart';
 import 'firebase_options.dart';
@@ -19,17 +20,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      debugShowCheckedModeBanner: false,
-      routerConfig: NaviGo.router,
-      title: 'Mood01',
-      locale: const Locale('ar'),
-      supportedLocales: const [Locale('ar')],
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: appThemeMode,
+      builder: (context, themeMode, child) {
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          routerConfig: NaviGo.router,
+          title: 'Mood01',
+          locale: const Locale('ar'),
+          supportedLocales: const [Locale('ar')],
+          localizationsDelegates: const [
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+
+          themeMode: themeMode,
+
+          theme: ThemeController().lightTheme(),
+
+          darkTheme: ThemeController().darkTheme(),
+        );
+      },
     );
   }
 }

@@ -226,7 +226,7 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
             ),
           ),
           toolbarHeight: 40,
-          shadowColor: Colors.greenAccent,
+          shadowColor: Colors.grey,
           actions: [
             // if (users.role == "user")
             IconButton(
@@ -256,7 +256,11 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
             dividerColor: Colors.transparent,
             indicatorColor: Colors.white,
             indicatorWeight: 3,
-            labelColor: Colors.white,
+            labelStyle: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
             tabs: const [
               Tab(text: 'أصدقائي'),
               Tab(text: 'طلبات واردة'),
@@ -332,11 +336,15 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                                     padding: const EdgeInsets.all(8),
                                     margin: const EdgeInsets.only(bottom: 5),
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
                                       borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(
+                                        color: Colors.greenAccent,
+                                        width: 1.5,
+                                      ),
+                                      color: Colors.transparent,
                                       boxShadow: const [
                                         BoxShadow(
-                                          color: Colors.black26,
+                                          color: Colors.transparent,
                                           blurRadius: 5,
                                           offset: Offset(0, 4),
                                         ),

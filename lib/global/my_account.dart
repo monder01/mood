@@ -856,7 +856,7 @@ class _MyAccountState extends State<MyAccount> {
                 const SizedBox(height: 6),
                 Text(
                   email,
-                  style: const TextStyle(color: Colors.black54, fontSize: 14),
+                  style: const TextStyle(color: Colors.grey, fontSize: 14),
                 ),
                 const SizedBox(height: 25),
                 const Divider(height: 1),

@@ -26,7 +26,7 @@ class Interfaces {
       ),
     ),
     toolbarHeight: 50,
-    shadowColor: Colors.greenAccent,
+    shadowColor: Colors.black54,
     actions: actions
         ? [
             IconButton(
