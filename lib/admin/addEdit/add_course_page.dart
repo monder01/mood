@@ -28,107 +28,121 @@ class _AddCoursePageState extends State<AddCoursePage> {
   Interfaces interfaces = Interfaces();
   bool isSaving = false;
   Widget courseCard(int index) {
-    return Container(
+    return Dismissible(
       key: ValueKey(courses[index]),
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.greenAccent, width: 2),
-      ),
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 10,
-        children: [
-          interfaces.textField01(
-            label: "اسم المادة",
-            keyboardType: TextInputType.text,
-            controller: courses[index].courseNameController,
-          ),
-          interfaces.textField01(
-            label: "رمز المادة",
-            keyboardType: TextInputType.text,
-            controller: courses[index].courseCodeController,
-          ),
-          interfaces.textField01(
-            label: "وصف المادة",
-            keyboardType: TextInputType.text,
-            controller: courses[index].courseDescriptionController,
-            maxLines: 2,
-          ),
-          interfaces.textField01(
-            label: "رابط المادة",
-            keyboardType: TextInputType.text,
-            controller: courses[index].courseUrlController,
-            maxLines: 2,
-          ),
-          Row(
-            spacing: 10,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.greenAccent, width: 2),
+      confirmDismiss: (direction) async {
+        return courses.length > 1;
+      },
+      onDismissed: (direction) {
+        if (courses.length == 1) return;
+        setState(() {
+          courses[index].courseNameController.dispose();
+          courses[index].courseCodeController.dispose();
+          courses[index].courseDescriptionController.dispose();
+          courses[index].courseUrlController.dispose();
+          courses.removeAt(index);
+        });
+      },
+      child: Container(
+        key: ValueKey(courses[index]),
+        margin: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.greenAccent, width: 2),
+          boxShadow: [
+            BoxShadow(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.grey.shade800
+                  : Colors.grey.shade900,
+              blurRadius: 5,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 10,
+          children: [
+            interfaces.textField01(
+              label: "اسم المادة",
+              keyboardType: TextInputType.text,
+              controller: courses[index].courseNameController,
+            ),
+            interfaces.textField01(
+              label: "رمز المادة",
+              keyboardType: TextInputType.text,
+              controller: courses[index].courseCodeController,
+            ),
+            interfaces.textField01(
+              label: "وصف المادة",
+              keyboardType: TextInputType.text,
+              controller: courses[index].courseDescriptionController,
+              maxLines: 2,
+            ),
+            interfaces.textField01(
+              label: "رابط المادة",
+              keyboardType: TextInputType.text,
+              controller: courses[index].courseUrlController,
+              maxLines: 2,
+            ),
+            Row(
+              spacing: 10,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: Colors.greenAccent, width: 2),
+                  ),
+                  child: Row(
+                    spacing: 10,
+                    children: [
+                      Text("المادة رقم", style: TextStyle(fontSize: 16)),
+                      Text("${index + 1}", style: TextStyle(fontSize: 16)),
+                    ],
+                  ),
                 ),
-                child: Row(
+                Row(
                   spacing: 10,
                   children: [
-                    Text(
-                      "المادة رقم",
-                      style: TextStyle(color: Colors.black, fontSize: 16),
-                    ),
-                    Text(
-                      "${index + 1}",
-                      style: TextStyle(color: Colors.black, fontSize: 16),
+                    Text("تفعيل/تعطيل", style: TextStyle(fontSize: 16)),
+                    Switch(
+                      activeTrackColor: Colors.greenAccent,
+                      value: courses[index].isActive,
+                      onChanged: (value) {
+                        setState(() {
+                          courses[index].isActive = value;
+                        });
+                      },
                     ),
                   ],
                 ),
-              ),
-              Row(
-                spacing: 10,
-                children: [
-                  Text(
-                    "تفعيل/تعطيل",
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                  ),
-                  Switch(
-                    activeTrackColor: Colors.greenAccent,
-                    value: courses[index].isActive,
-                    onChanged: (value) {
-                      setState(() {
-                        courses[index].isActive = value;
-                        print(courses[index].isActive);
-                      });
-                    },
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  const Text(
-                    "حذف",
-                    style: TextStyle(color: Colors.black, fontSize: 16),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      if (courses.length == 1) return;
-                      setState(() {
-                        courses[index].courseNameController.dispose();
-                        courses[index].courseCodeController.dispose();
-                        courses[index].courseDescriptionController.dispose();
-                        courses.removeAt(index);
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ],
+                Row(
+                  children: [
+                    const Text("حذف", style: TextStyle(fontSize: 16)),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        if (courses.length == 1) return;
+                        setState(() {
+                          courses[index].courseNameController.dispose();
+                          courses[index].courseCodeController.dispose();
+                          courses[index].courseDescriptionController.dispose();
+                          courses[index].courseUrlController.dispose();
+                          courses.removeAt(index);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

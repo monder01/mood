@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mood01/auth/users.dart';
+import 'package:mood01/global/interfaces.dart';
 
 class Signinpage extends StatefulWidget {
   const Signinpage({super.key});
@@ -9,42 +10,11 @@ class Signinpage extends StatefulWidget {
 }
 
 class _SigninpageState extends State<Signinpage> {
+  final interfaces = Interfaces();
   Users users = Users();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  bool isLoading = false;
   bool isObscure = true;
-  Widget submitButton01(
-    BuildContext context,
-    String text,
-    VoidCallback onPressed,
-    double width,
-    double height,
-  ) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 5,
-        minimumSize: Size(width, height),
-        maximumSize: Size(width, height),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        side: const BorderSide(color: Colors.greenAccent, width: 2),
-      ),
-      onPressed: isLoading ? null : onPressed,
-      child: isLoading
-          ? CircularProgressIndicator(color: Colors.greenAccent)
-          : Text(
-              text,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,23 +59,9 @@ class _SigninpageState extends State<Signinpage> {
               decoration: InputDecoration(
                 label: const Text(
                   "البريد الالكتروني",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 prefixIcon: const Icon(Icons.email),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    color: Colors.greenAccent,
-                    width: 1,
-                  ),
-                ),
               ),
             ),
             const SizedBox(height: 10),
@@ -116,11 +72,7 @@ class _SigninpageState extends State<Signinpage> {
               decoration: InputDecoration(
                 label: const Text(
                   "كلمة المرور",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 prefixIcon: const Icon(Icons.lock),
                 suffixIcon: IconButton(
@@ -133,42 +85,31 @@ class _SigninpageState extends State<Signinpage> {
                       ? const Icon(Icons.visibility_off)
                       : const Icon(Icons.visibility),
                 ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: const BorderSide(
-                    color: Colors.greenAccent,
-                    width: 1,
-                  ),
-                ),
               ),
             ),
             const SizedBox(height: 20),
-            submitButton01(
+            interfaces.submitButton01(
               context,
               "تسجيل الدخول",
               () async {
                 if (!mounted) return;
                 setState(() {
-                  isLoading = true;
+                  interfaces.isLoading = true;
                 });
-
                 await users.signIn(
                   context,
                   emailController,
                   passwordController,
                 );
-
                 if (!mounted) return;
                 setState(() {
-                  isLoading = false;
+                  interfaces.isLoading = false;
                 });
               },
               300,
               70,
             ),
+
             const SizedBox(height: 50),
             Text(
               "عن طريق تسجيل الدخول ، فإنك توافق على شروط الخدمة وسياسة الخصوصية الخاصة بنا",

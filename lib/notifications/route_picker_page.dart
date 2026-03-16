@@ -80,7 +80,7 @@ class _RoutePickerPageState extends State<RoutePickerPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Theme.of(context).cardColor,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: Colors.greenAccent),
               ),
@@ -125,7 +125,7 @@ class _RoutePickerPageState extends State<RoutePickerPage> {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? Colors.greenAccent.withValues(alpha: 0.18)
-                          : Colors.white,
+                          : Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
                         color: isSelected ? Colors.green : Colors.grey.shade300,
@@ -166,25 +166,24 @@ class _RoutePickerPageState extends State<RoutePickerPage> {
               },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: confirmSelection,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.greenAccent,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: const Text(
-                  "تأكيد الاختيار",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
+        ],
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: confirmSelection,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.greenAccent,
+              foregroundColor: Colors.black,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+            child: const Text(
+              "تأكيد الاختيار",
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

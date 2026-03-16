@@ -75,9 +75,15 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.greenAccent, width: 2),
-        color: Colors.white,
-        boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 4)),
+        color: Theme.of(context).cardColor,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey.shade800
+                : Colors.grey.shade900,
+            blurRadius: 5,
+            offset: Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
@@ -110,10 +116,12 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.black),
-                    color: Colors.white,
-                    boxShadow: const [
+                    color: Theme.of(context).cardColor,
+                    boxShadow: [
                       BoxShadow(
-                        color: Colors.black26,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade800
+                            : Colors.grey.shade900,
                         blurRadius: 5,
                         offset: Offset(0, 4),
                       ),
@@ -258,7 +266,7 @@ class _AddDepartmentPageState extends State<AddDepartmentPage> {
       if (!mounted) return;
       Navigator.of(context, rootNavigator: true).pop();
     } catch (e) {
-      print("Error saving departments: $e");
+      debugPrint("Error saving departments: $e");
 
       if (!mounted) return;
 

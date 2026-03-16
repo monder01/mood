@@ -81,9 +81,12 @@ class _UserBrowseDepartmentPageState extends State<UserBrowseDepartmentPage> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
+                    color: Theme.of(context).cardColor,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade800
+                            : Colors.black.withValues(alpha: 0.30),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),

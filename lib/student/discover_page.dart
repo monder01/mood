@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mood01/global/interfaces.dart';
 import 'package:mood01/student/user_browse_courses_page.dart';
 import 'package:mood01/student/user_browse_department_page.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -13,6 +14,7 @@ class DiscoverPage extends StatefulWidget {
 
 class _DiscoverPageState extends State<DiscoverPage>
     with SingleTickerProviderStateMixin {
+  final interfaces = Interfaces();
   late TabController _tabController;
 
   String collegeSearch = "";
@@ -38,40 +40,10 @@ class _DiscoverPageState extends State<DiscoverPage>
     await launchUrl(url, mode: LaunchMode.externalApplication);
   }
 
-  InputDecoration searchDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      prefixIcon: const Icon(Icons.search, color: Colors.greenAccent),
-      filled: true,
-      fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-      border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(20),
-        borderSide: const BorderSide(color: Colors.greenAccent, width: 2),
-      ),
-    );
-  }
-
-  Widget buildSearchField({
-    required String hint,
-    required ValueChanged<String> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: TextField(
-        onChanged: (value) {
-          onChanged(value.toLowerCase().trim());
-        },
-        decoration: searchDecoration(hint),
-      ),
-    );
-  }
-
   Widget buildCollegeTab() {
     return Column(
       children: [
-        buildSearchField(
+        interfaces.buildSearchField(
           hint: "ابحث عن كلية",
           onChanged: (value) {
             setState(() {
@@ -255,9 +227,13 @@ class _DiscoverPageState extends State<DiscoverPage>
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
+                        color: Theme.of(context).cardColor,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade800
+                                : Colors.black.withValues(alpha: 0.6),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -340,7 +316,7 @@ class _DiscoverPageState extends State<DiscoverPage>
   Widget buildDepartmentTab() {
     return Column(
       children: [
-        buildSearchField(
+        interfaces.buildSearchField(
           hint: "ابحث عن قسم",
           onChanged: (value) {
             setState(() {
@@ -473,9 +449,13 @@ class _DiscoverPageState extends State<DiscoverPage>
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
+                        color: Theme.of(context).cardColor,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade800
+                                : Colors.black.withValues(alpha: 0.6),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -551,7 +531,7 @@ class _DiscoverPageState extends State<DiscoverPage>
   Widget buildCourseTab() {
     return Column(
       children: [
-        buildSearchField(
+        interfaces.buildSearchField(
           hint: "ابحث عن مادة",
           onChanged: (value) {
             setState(() {
@@ -718,10 +698,13 @@ class _DiscoverPageState extends State<DiscoverPage>
                     child: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(15),
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade800
+                                : Colors.black.withValues(alpha: 0.15),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -738,7 +721,7 @@ class _DiscoverPageState extends State<DiscoverPage>
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green,
+                                  color: Colors.greenAccent,
                                   fontSize: 15,
                                 ),
                               ),
@@ -777,8 +760,6 @@ class _DiscoverPageState extends State<DiscoverPage>
           children: [
             TabBar(
               controller: _tabController,
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.black54,
               indicatorColor: Color.fromARGB(255, 90, 205, 150),
               labelStyle: TextStyle(
                 fontSize: 16,

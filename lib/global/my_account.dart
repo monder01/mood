@@ -828,7 +828,7 @@ class _MyAccountState extends State<MyAccount> {
                         right: 0,
                         bottom: 0,
                         child: CircleAvatar(
-                          backgroundColor: Colors.grey.shade200,
+                          backgroundColor: Theme.of(context).cardColor,
                           radius: 16,
                           child: const Icon(
                             Icons.edit,

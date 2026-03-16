@@ -66,10 +66,10 @@ class Interfaces {
   );
 
   // show toast
-  void showFlutterToast(BuildContext context, String message) {
+  void showFlutterToast(BuildContext context, String message, {Color? color}) {
     Fluttertoast.showToast(
       gravity: ToastGravity.BOTTOM,
-      backgroundColor: Colors.grey,
+      backgroundColor: color ?? Colors.grey,
       textColor: Colors.white,
       msg: message,
     );
@@ -118,7 +118,6 @@ class Interfaces {
                 message, // عرض الرسالة المرسلة للتابع
                 textAlign: TextAlign.right, // محاذاة النص لليمين
                 style: TextStyle(
-                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ), // لون مميز للرسالة
@@ -135,8 +134,8 @@ class Interfaces {
               child: const Text(
                 'إلغاء',
                 style: TextStyle(
-                  color: Colors.black,
                   fontWeight: FontWeight.bold,
+                  color: Colors.red,
                 ),
               ),
             ),
@@ -147,10 +146,7 @@ class Interfaces {
                   Navigator.of(context).pop(true), // إرجاع true عند التأكيد
               child: const Text(
                 'تأكيد',
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -220,7 +216,6 @@ class Interfaces {
     required String label,
     required TextInputType keyboardType,
     required TextEditingController controller,
-    // add optional parameters for icon and icon color
     IconData? icon,
     Color? iconColor,
     int? maxLines,
@@ -233,29 +228,30 @@ class Interfaces {
       decoration: InputDecoration(
         label: Text(
           label,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black54,
-          ),
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        prefixText: keyboardType == TextInputType.phone ? "+218 " : null,
-        prefixStyle: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-        ),
+        suffixText: keyboardType == TextInputType.phone ? "+218 " : null,
+        prefixStyle: TextStyle(fontWeight: FontWeight.bold),
         prefixIcon: icon != null ? Icon(icon, color: iconColor) : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.black, width: 1),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.black, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.greenAccent, width: 1),
+      ),
+    );
+  }
+
+  // تصميم حقل البحث
+  Widget buildSearchField({
+    required String hint,
+    required ValueChanged<String> onChanged,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: TextField(
+        onChanged: (value) {
+          onChanged(value.toLowerCase().trim());
+        },
+        decoration: InputDecoration(
+          hint: Text(hint, style: const TextStyle(fontSize: 16)),
+          prefixIcon: const Icon(Icons.search, color: Colors.greenAccent),
+          contentPadding: const EdgeInsets.all(5),
         ),
       ),
     );
@@ -267,8 +263,9 @@ class Interfaces {
     String text,
     VoidCallback onPressed,
     double width,
-    double height,
-  ) {
+    double height, {
+    double? fontSize,
+  }) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
         elevation: 5,
@@ -281,7 +278,13 @@ class Interfaces {
           ? CircularProgressIndicator(color: Colors.greenAccent)
           : Text(
               text,
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
+              maxLines: 2,
+              textAlign: TextAlign.center,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: fontSize ?? 22,
+              ),
             ),
     );
   }

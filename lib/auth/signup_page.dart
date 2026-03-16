@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mood01/auth/users.dart';
+import 'package:mood01/global/interfaces.dart';
 
 class Signuppage extends StatefulWidget {
   const Signuppage({super.key});
@@ -9,6 +10,7 @@ class Signuppage extends StatefulWidget {
 }
 
 class _SignuppageState extends State<Signuppage> {
+  final interfaces = Interfaces();
   Users users = Users();
   TextEditingController usernameController = TextEditingController();
   TextEditingController firstnameController = TextEditingController();
@@ -17,80 +19,8 @@ class _SignuppageState extends State<Signuppage> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
-  bool isLoading = false;
 
   // تصميم حقل النص
-  Widget textField01({
-    required String label,
-    required TextInputType keyboardType,
-    required TextEditingController controller,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: keyboardType == TextInputType.visiblePassword ? true : false,
-      decoration: InputDecoration(
-        label: Text(
-          label,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black54,
-          ),
-        ),
-        prefixText: keyboardType == TextInputType.phone ? "+218 " : null,
-        prefixStyle: TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.black, width: 1),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.black, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(20),
-          borderSide: const BorderSide(color: Colors.greenAccent, width: 1),
-        ),
-      ),
-    );
-  }
-
-  // تصميم زر الإرسال
-  Widget submitButton01(
-    BuildContext context,
-    String text,
-    VoidCallback onPressed,
-    double width,
-    double height,
-  ) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 5,
-        minimumSize: Size(width, height),
-        maximumSize: Size(width, height),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        side: const BorderSide(color: Colors.greenAccent, width: 2),
-      ),
-      onPressed: isLoading ? null : onPressed,
-      child: isLoading
-          ? CircularProgressIndicator(color: Colors.greenAccent)
-          : Text(
-              text,
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 22,
-              ),
-            ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,18 +37,16 @@ class _SignuppageState extends State<Signuppage> {
                 "assets/icons/monther.png",
                 width: 200,
                 height: 200,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.broken_image, size: 200),
               ),
             ),
             const Text(
               "انشئ حسابك في مزاجي!",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
-            textField01(
+            interfaces.textField01(
               label: "اسم المستخدم",
               keyboardType: TextInputType.text,
               controller: usernameController,
@@ -129,14 +57,14 @@ class _SignuppageState extends State<Signuppage> {
               spacing: 10,
               children: [
                 Expanded(
-                  child: textField01(
+                  child: interfaces.textField01(
                     label: "الاسم الاول",
                     keyboardType: TextInputType.text,
                     controller: firstnameController,
                   ),
                 ),
                 Expanded(
-                  child: textField01(
+                  child: interfaces.textField01(
                     label: "الاسم الاخير",
                     keyboardType: TextInputType.text,
                     controller: lastNameController,
@@ -145,36 +73,36 @@ class _SignuppageState extends State<Signuppage> {
               ],
             ),
             const SizedBox(height: 10),
-            textField01(
+            interfaces.textField01(
               label: "رقم الهاتف",
               keyboardType: TextInputType.phone,
               controller: phoneController,
             ),
             const SizedBox(height: 10),
-            textField01(
+            interfaces.textField01(
               label: "البريد الالكتروني",
               keyboardType: TextInputType.emailAddress,
               controller: emailController,
             ),
             const SizedBox(height: 10),
-            textField01(
+            interfaces.textField01(
               label: "كلمة المرور",
               keyboardType: TextInputType.visiblePassword,
               controller: passwordController,
             ),
             const SizedBox(height: 10),
-            textField01(
+            interfaces.textField01(
               label: "تأكيد كلمة المرور",
               keyboardType: TextInputType.visiblePassword,
               controller: confirmPasswordController,
             ),
             const SizedBox(height: 20),
-            submitButton01(
+            interfaces.submitButton01(
               context,
               "إنشاء الحساب",
               () async {
                 setState(() {
-                  isLoading = true;
+                  interfaces.isLoading = true;
                 });
                 await users.signUp(
                   context,
@@ -187,7 +115,7 @@ class _SignuppageState extends State<Signuppage> {
                   confirmPasswordController,
                 );
                 setState(() {
-                  isLoading = false;
+                  interfaces.isLoading = false;
                 });
               },
               300,

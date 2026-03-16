@@ -20,6 +20,8 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         title: const Text("تصفح الكليات"),
         automaticallyImplyLeading: false,
       ),
@@ -136,9 +138,12 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
+                    color: Theme.of(context).cardColor,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade800
+                            : Colors.black.withValues(alpha: 0.30),
                         blurRadius: 8,
                         offset: const Offset(0, 4),
                       ),

@@ -219,14 +219,7 @@ class _CourseDepartmentTargetPickerPageState
           children: [
             TabBar(
               controller: tabController,
-              labelColor: Colors.black,
-              unselectedLabelColor: Colors.black54,
-              indicatorColor: Color.fromARGB(255, 90, 205, 150),
-              labelStyle: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.greenAccent,
-              ),
+              labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               tabs: const [
                 Tab(text: "كلية"),
                 Tab(text: "قسم"),

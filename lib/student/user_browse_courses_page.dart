@@ -87,13 +87,23 @@ class _UserBrowseCoursesPageState extends State<UserBrowseCoursesPage> {
               final courseUrl = course["courseUrl"] ?? "";
 
               return InkWell(
+                borderRadius: BorderRadius.circular(15),
                 onTap: () async {
                   final confirm = await interfaces.showConfirmationDialog(
                     context,
                     "هل أنت متاكد من عرض هذه المادة؟\n سيتم توجيهك لرابط المادة.",
                   );
                   if (!confirm) return;
-
+                  if (!context.mounted) return;
+                  if (courseUrl.isEmpty ||
+                      courseUrl == null ||
+                      courseUrl == "") {
+                    interfaces.showFlutterToast(
+                      context,
+                      "لم يتم إضافة ملفات لهذه المادة بعد.",
+                    );
+                    return;
+                  }
                   await openCourseUrl(courseUrl);
                 },
 
@@ -132,19 +142,14 @@ class _UserBrowseCoursesPageState extends State<UserBrowseCoursesPage> {
                   );
                 },
 
-                child: Container(
-                  decoration: BoxDecoration(
+                child: Card(
+                  elevation: 3,
+                  shadowColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.grey.shade700
+                      : Colors.black.withValues(alpha: 0.30),
+                  shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.15),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
                   ),
-
                   child: Padding(
                     padding: const EdgeInsets.all(8),
                     child: Row(

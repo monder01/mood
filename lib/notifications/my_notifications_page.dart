@@ -138,7 +138,9 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
           ),
         ),
         toolbarHeight: 50,
-        shadowColor: Colors.greenAccent,
+        shadowColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey.shade700
+            : Colors.grey.shade900,
         actions: [
           IconButton(
             onPressed: () async {
@@ -163,6 +165,8 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
                 return;
               }
               await markAllAsRead();
+              if (!context.mounted) return;
+              interfaces.showFlutterToast(context, "تم تحديد الكل كمقروء");
             },
             icon: const Icon(Icons.done_all),
           ),
@@ -223,8 +227,19 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
                         alignment: Alignment.centerLeft,
                         padding: const EdgeInsets.only(left: 20),
                         decoration: BoxDecoration(
-                          color: Colors.black12,
+                          color: Theme.of(context).cardColor,
                           borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade900,
+                              blurRadius: 5,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Icon(Icons.delete, color: Colors.red.shade300),
                       ),
@@ -242,7 +257,7 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
                       },
 
                       child: Opacity(
-                        opacity: (1 - (progress * 1.8)).clamp(0.0, 1.0),
+                        opacity: (1 - (progress * 1.5)).clamp(0.0, 1.0),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(16),
                           onTap: () async {
@@ -302,17 +317,20 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
                               color: isRead
-                                  ? Colors.white
-                                  : Colors.greenAccent.shade100,
+                                  ? Theme.of(context).cardColor
+                                  : Theme.of(context).brightness ==
+                                        Brightness.dark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade300,
                               borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: Colors.greenAccent,
-                                width: 1.2,
-                              ),
-                              boxShadow: const [
+                              boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black12,
-                                  blurRadius: 4,
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey.shade800
+                                      : Colors.grey.shade400,
+                                  blurRadius: 2,
                                   offset: Offset(0, 3),
                                 ),
                               ],

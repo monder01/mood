@@ -72,7 +72,6 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
           ),
-          backgroundColor: Colors.white,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
             child: Column(
@@ -111,13 +110,17 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
   }
 
   ButtonStyle buttonStyle01() => ElevatedButton.styleFrom(
-    backgroundColor: Colors.white,
-    foregroundColor: Colors.black,
+    backgroundColor: Theme.of(context).brightness == Brightness.dark
+        ? Colors.grey.shade900
+        : Colors.white,
+    foregroundColor: Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black,
     elevation: 5,
     minimumSize: const Size(135, 40),
     maximumSize: const Size(135, 40),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-    side: const BorderSide(color: Colors.greenAccent, width: 2),
+    side: const BorderSide(color: Colors.greenAccent, width: 1.5),
   );
 
   void friendShowProfile(Map<String, dynamic> userData) {
@@ -129,7 +132,6 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(25),
           ),
-          backgroundColor: Colors.white,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
             child: Column(
@@ -226,7 +228,7 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
             ),
           ),
           toolbarHeight: 40,
-          shadowColor: Colors.grey,
+          shadowColor: Colors.grey.shade700,
           actions: [
             // if (users.role == "user")
             IconButton(
@@ -256,6 +258,7 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
             dividerColor: Colors.transparent,
             indicatorColor: Colors.white,
             indicatorWeight: 3,
+            unselectedLabelColor: Colors.black54,
             labelStyle: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -337,14 +340,14 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                                     margin: const EdgeInsets.only(bottom: 5),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(
-                                        color: Colors.greenAccent,
-                                        width: 1.5,
-                                      ),
-                                      color: Colors.transparent,
-                                      boxShadow: const [
+                                      color: Theme.of(context).cardColor,
+                                      boxShadow: [
                                         BoxShadow(
-                                          color: Colors.transparent,
+                                          color:
+                                              Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.grey.shade800
+                                              : Colors.grey.shade500,
                                           blurRadius: 5,
                                           offset: Offset(0, 4),
                                         ),
@@ -458,10 +461,14 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(20),
-                                color: Colors.white,
-                                boxShadow: const [
+                                color: Theme.of(context).cardColor,
+                                boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black26,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.grey.shade800
+                                        : Colors.grey.shade400,
                                     blurRadius: 5,
                                     offset: Offset(0, 4),
                                   ),
@@ -503,6 +510,7 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                                       ),
                                     ],
                                   ),
+                                  SizedBox(height: 10),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceEvenly,
@@ -531,10 +539,7 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                                                   isLoading02 = false;
                                                 });
                                               },
-                                        child: const Text(
-                                          "قبول",
-                                          style: TextStyle(color: Colors.black),
-                                        ),
+                                        child: const Text("قبول"),
                                       ),
                                       ElevatedButton(
                                         style: buttonStyle01(),
@@ -602,84 +607,51 @@ class _UserFellowsPageState extends State<UserFellowsPage> {
                           if (userData == null) return const SizedBox();
                           return InkWell(
                             onTap: () => showProfile(userData),
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20),
-                                color: Colors.white,
-                                boxShadow: const [
-                                  BoxShadow(
-                                    color: Colors.black26,
-                                    blurRadius: 5,
-                                    offset: Offset(0, 4),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  CircleAvatar(
-                                    backgroundImage:
-                                        (userData['photoUrl'] ?? '').isNotEmpty
-                                        ? NetworkImage(userData['photoUrl'])
-                                        : null,
-                                    child: (userData['photoUrl'] ?? '').isEmpty
-                                        ? const Icon(Icons.person)
-                                        : null,
-                                  ),
-                                  const SizedBox(width: 10),
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${userData['firstName']} ${userData['lastName']}",
-                                      ),
-                                      Text(
-                                        "${userData['userName']}@",
-                                        style: const TextStyle(
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const Spacer(),
-                                  TextButton(
-                                    style: TextButton.styleFrom(
-                                      backgroundColor: Colors.white,
-                                      foregroundColor: Colors.red,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      elevation: 3,
-                                      shadowColor: Colors.black,
-                                    ),
-                                    onPressed: isLoading03
-                                        ? null
-                                        : () async {
-                                            final confirm = await interfaces
-                                                .showConfirmationDialog(
-                                                  context,
-                                                  " هل تريد إلغاء طلب الصداقة ❌ ؟",
-                                                );
+                            child: Card(
+                              child: ListTile(
+                                leading: CircleAvatar(
+                                  radius: 25,
+                                  backgroundImage:
+                                      (userData['photoUrl'] ?? '').isNotEmpty
+                                      ? NetworkImage(userData['photoUrl'])
+                                      : null,
+                                  child: (userData['photoUrl'] ?? '').isEmpty
+                                      ? const Icon(Icons.person)
+                                      : null,
+                                ),
+                                title: Text(
+                                  "${userData['firstName']} ${userData['lastName']}",
+                                ),
+                                subtitle: Text(
+                                  "${userData['userName']}@",
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                                trailing: interfaces.submitButton01(
+                                  context,
+                                  "إلغاء الإرسال",
+                                  () async {
+                                    final confirm = await interfaces
+                                        .showConfirmationDialog(
+                                          context,
+                                          " هل تريد إلغاء طلب الصداقة ❌ ؟",
+                                        );
 
-                                            if (!confirm) return;
-                                            setState(() {
-                                              isLoading03 = true;
-                                            });
-                                            await friendService
-                                                .cancelSentRequest(
-                                                  currentUserId,
-                                                  sentId,
-                                                );
-                                            setState(() {
-                                              isLoading03 = false;
-                                            });
-                                          },
-                                    child: Text("إلغاء الإرسال"),
-                                  ),
-                                ],
+                                    if (!confirm) return;
+                                    setState(() {
+                                      interfaces.isLoading = true;
+                                    });
+                                    await friendService.cancelSentRequest(
+                                      currentUserId,
+                                      sentId,
+                                    );
+                                    setState(() {
+                                      interfaces.isLoading = false;
+                                    });
+                                  },
+                                  100,
+                                  40,
+                                  fontSize: 12,
+                                ),
                               ),
                             ),
                           );

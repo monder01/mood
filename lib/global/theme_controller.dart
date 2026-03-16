@@ -18,6 +18,7 @@ class ThemeController {
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.greenAccent,
         foregroundColor: Colors.black,
+        shadowColor: Colors.greenAccent,
         elevation: 1,
       ),
 
@@ -32,6 +33,20 @@ class ThemeController {
       textTheme: const TextTheme(
         bodyMedium: TextStyle(color: Colors.black87),
         bodyLarge: TextStyle(color: Colors.black87),
+      ),
+
+      // Text Selection
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: Colors.greenAccent,
+      ),
+
+      // TabBar
+      tabBarTheme: const TabBarThemeData(
+        labelColor: Colors.black,
+        unselectedLabelColor: Colors.black54,
+        indicatorColor: Colors.greenAccent,
+        labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
       ),
 
       // Switch
@@ -56,26 +71,26 @@ class ThemeController {
         fillColor: Colors.grey.shade100,
 
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(color: Colors.grey.shade400),
         ),
 
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(20),
           borderSide: BorderSide(color: Colors.grey.shade400),
         ),
 
         focusedBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
           borderSide: BorderSide(color: Colors.greenAccent, width: 2),
         ),
 
         errorBorder: const OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
           borderSide: BorderSide(color: Colors.red),
         ),
 
-        labelStyle: const TextStyle(color: Colors.black87),
+        labelStyle: const TextStyle(color: Colors.black54),
         hintStyle: const TextStyle(color: Colors.grey),
       ),
 
@@ -122,6 +137,7 @@ class ThemeController {
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF1E1E1E),
         foregroundColor: Colors.white,
+        shadowColor: Colors.white70,
         elevation: 1,
       ),
 
@@ -138,6 +154,16 @@ class ThemeController {
         bodyLarge: TextStyle(color: Colors.white70),
       ),
 
+      // TabBar
+      tabBarTheme: const TabBarThemeData(
+        labelColor: Colors.white,
+        unselectedLabelColor: Colors.white70,
+        indicatorColor: Colors.greenAccent,
+        labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        unselectedLabelStyle: TextStyle(fontWeight: FontWeight.normal),
+      ),
+
+      // Switch
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -159,17 +185,17 @@ class ThemeController {
         fillColor: Color(0xFF1E1E1E),
 
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
           borderSide: BorderSide(color: Colors.grey),
         ),
 
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
           borderSide: BorderSide(color: Colors.grey),
         ),
 
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
+          borderRadius: BorderRadius.all(Radius.circular(20)),
           borderSide: BorderSide(color: Colors.greenAccent, width: 2),
         ),
 

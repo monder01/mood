@@ -205,11 +205,12 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
         children: [
           DrawerHeader(
             decoration: BoxDecoration(color: Colors.greenAccent[200]),
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 CircleAvatar(
+                  backgroundColor: Theme.of(context).cardColor,
                   radius: 40,
                   child: ClipOval(
                     child: users.photoUrl != null && users.photoUrl!.isNotEmpty
@@ -219,15 +220,31 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                             height: 80,
                             fit: BoxFit.cover,
                           )
-                        : Icon(Icons.person, size: 50, color: Colors.black54),
+                        : Icon(Icons.person, size: 50),
                   ),
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text("${users.name}", style: TextStyle(fontSize: 20)),
-                    Text("${users.email}", style: TextStyle(fontSize: 14)),
+                    Text(
+                      "${users.name}",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade800
+                            : Colors.black,
+                      ),
+                    ),
+                    Text(
+                      "${users.email}",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.grey.shade800
+                            : Colors.black.withValues(alpha: 0.6),
+                      ),
+                    ),
                   ],
                 ),
               ],

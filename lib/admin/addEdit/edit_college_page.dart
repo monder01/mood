@@ -28,6 +28,16 @@ class _EditCollegePageState extends State<EditCollegePage> {
   bool loadingImage = false;
   bool loadingData = true;
 
+  final List<String> items = [
+    "جامعة طرابلس",
+    "جامعة بنغازي",
+    "جامعة عمر المختار",
+    "جامعة الزيتونة",
+    "جامعة الزاوية",
+    "جامعة سبها",
+    "جامعة مصراتة",
+  ];
+
   Future<void> loadCollegeData() async {
     try {
       final snapshot = await FirebaseFirestore.instance
@@ -37,12 +47,13 @@ class _EditCollegePageState extends State<EditCollegePage> {
 
       if (!snapshot.exists) {
         if (!mounted) return;
-        interfaces.showAlert(
+        await interfaces.showAlert(
           context,
           "الكلية غير موجودة",
           icon: Icons.error,
           iconColor: Colors.red,
         );
+        if (!mounted) return;
         Navigator.pop(context);
         return;
       }
@@ -93,7 +104,7 @@ class _EditCollegePageState extends State<EditCollegePage> {
     try {
       if (collegeNameController.text.trim().isEmpty ||
           selectedUniversity == null) {
-        interfaces.showAlert(
+        await interfaces.showAlert(
           context,
           "الرجاء تعبئة جميع الحقول المطلوبة",
           icon: Icons.error,
@@ -131,12 +142,14 @@ class _EditCollegePageState extends State<EditCollegePage> {
 
       if (!mounted) return;
 
-      interfaces.showAlert(
+      await interfaces.showAlert(
         context,
         "تم تعديل الكلية بنجاح",
         icon: Icons.done,
         iconColor: Colors.green,
       );
+
+      if (!mounted) return;
 
       Navigator.pop(context, true);
     } catch (e) {
@@ -188,7 +201,6 @@ class _EditCollegePageState extends State<EditCollegePage> {
                     child: Text(
                       "يمكنك تعديل بيانات الكلية التالية :",
                       style: TextStyle(
-                        color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -229,16 +241,21 @@ class _EditCollegePageState extends State<EditCollegePage> {
                       ),
                       elevation: WidgetStateProperty.all(5),
                     ),
-                    dropdownMenuEntries: const [
-                      DropdownMenuEntry(value: "طرابلس", label: "جامعة طرابلس"),
-                      DropdownMenuEntry(value: "بنغازي", label: "جامعة بنغازي"),
-                    ],
+                    dropdownMenuEntries: items
+                        .map(
+                          (university) => DropdownMenuEntry(
+                            label: university,
+                            value: university,
+                          ),
+                        )
+                        .toList(),
                     onSelected: (v) {
                       setState(() {
                         selectedUniversity = v;
                       });
                     },
                   ),
+
                   const SizedBox(height: 15),
 
                   GestureDetector(
@@ -260,12 +277,15 @@ class _EditCollegePageState extends State<EditCollegePage> {
                       width: 400,
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(10),
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
-                            color: Colors.grey,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade900,
                             blurRadius: 5,
                             offset: Offset(0, 3),
                           ),
@@ -312,48 +332,34 @@ class _EditCollegePageState extends State<EditCollegePage> {
                   ),
 
                   const SizedBox(height: 20),
-
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      elevation: 3,
-                      minimumSize: const Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        side: const BorderSide(
-                          color: Colors.greenAccent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                    onPressed: loadingCollege
-                        ? null
-                        : () async {
-                            final confirm = await interfaces.showConfirmationDialog(
-                              context,
-                              "هل أنت متأكد من جميع البيانات؟ سوف يتم تعديل الكلية",
-                              icon: Icons.question_mark_outlined,
-                            );
-
-                            if (!confirm) return;
-                            await updateCollege();
-                          },
-                    child: loadingCollege
-                        ? const CircularProgressIndicator(
-                            color: Colors.greenAccent,
-                          )
-                        : const Text(
-                            "تعديل الكلية",
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                  ),
                 ],
               ),
             ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        child: interfaces.submitButton01(
+          context,
+          "تعديل الكلية",
+          () async {
+            final confirm = await interfaces.showConfirmationDialog(
+              context,
+              "هل أنت متأكد من جميع البيانات؟ سوف يتم تعديل الكلية",
+              icon: Icons.question_mark_outlined,
+            );
+
+            if (!confirm) return;
+            setState(() {
+              interfaces.isLoading = true;
+            });
+            await updateCollege();
+            setState(() {
+              interfaces.isLoading = false;
+            });
+          },
+          double.infinity,
+          50,
+        ),
+      ),
     );
   }
 }

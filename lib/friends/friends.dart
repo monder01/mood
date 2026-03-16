@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class FriendService {
   final friendsRef = FirebaseFirestore.instance.collection('friends');
@@ -6,8 +7,9 @@ class FriendService {
   /// إرسال طلب صداقة
   Future<void> sendFriendRequest(
     String currentUserId,
-    String targetUserId,
-  ) async {
+    String targetUserId, {
+    required BuildContext context,
+  }) async {
     final currentDoc = friendsRef.doc(currentUserId);
     final targetDoc = friendsRef.doc(targetUserId);
 
@@ -41,6 +43,7 @@ class FriendService {
       );
       if (!requests.contains(currentUserId)) requests.add(currentUserId);
       await targetDoc.update({'friendRequests': requests});
+      if (!context.mounted) return;
     }
   }
 

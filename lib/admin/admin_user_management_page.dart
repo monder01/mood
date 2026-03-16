@@ -288,10 +288,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
       borderRadius: BorderRadius.circular(10),
       onTap: () => showOptionsBottomSheet(userId, data),
       child: Card(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-          side: const BorderSide(color: Colors.greenAccent, width: 1.5),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Row(
@@ -372,7 +369,7 @@ class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
                       style: TextStyle(
                         color: role == "admin"
                             ? Colors.blueAccent
-                            : Colors.black54,
+                            : Theme.of(context).textTheme.bodyMedium!.color,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),

@@ -21,7 +21,15 @@ class _AddCollegePageState extends State<AddCollegePage> {
   bool loadingCollege = false, loadingImage = false;
   String? selectedUniversity;
 
-  final List<String> items = ["جامعة طرابلس", "جامعة بنغازي"];
+  final List<String> items = [
+    "جامعة طرابلس",
+    "جامعة بنغازي",
+    "جامعة عمر المختار",
+    "جامعة الزيتونة",
+    "جامعة الزاوية",
+    "جامعة سبها",
+    "جامعة مصراتة",
+  ];
   Future<void> pickImage() async {
     final picked = await ImagePicker().pickImage(
       source: ImageSource.gallery,
@@ -73,14 +81,11 @@ class _AddCollegePageState extends State<AddCollegePage> {
       });
 
       if (!mounted) return;
-
-      interfaces.showAlert(
+      interfaces.showFlutterToast(
         context,
         "تم إضافة الكلية بنجاح",
-        icon: Icons.done,
-        iconColor: Colors.green,
+        color: Colors.green[400],
       );
-
       collegeNameController.clear();
       setState(() {
         selectedUniversity = null;
@@ -105,7 +110,11 @@ class _AddCollegePageState extends State<AddCollegePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
+      appBar: interfaces.showAppBar(
+        context,
+        title: "إضافة كلية",
+        actions: false,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(8.0),
         child: Column(
@@ -116,11 +125,7 @@ class _AddCollegePageState extends State<AddCollegePage> {
               alignment: Alignment.centerRight,
               child: Text(
                 "الرجاء تعبئة جميع الحقول التالية :",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
             ),
             SizedBox(height: 15),
@@ -134,7 +139,7 @@ class _AddCollegePageState extends State<AddCollegePage> {
             const SizedBox(height: 15),
 
             DropdownMenu(
-              hintText: "اختر الجامعة",
+              label: const Text("الجامعة :"),
               initialSelection: selectedUniversity,
               width: double.infinity,
               inputDecorationTheme: InputDecorationTheme(
@@ -154,11 +159,13 @@ class _AddCollegePageState extends State<AddCollegePage> {
                 ),
                 elevation: WidgetStateProperty.all(5),
               ),
-              dropdownMenuEntries: [
-                DropdownMenuEntry(value: "طرابلس", label: "جامعة طرابلس"),
-                DropdownMenuEntry(value: "بنغازي", label: "جامعة بنغازي"),
-              ],
-              onSelected: (v) => setState(() => selectedUniversity = v),
+              dropdownMenuEntries: items
+                  .map((e) => DropdownMenuEntry(label: e, value: e))
+                  .toList(),
+              onSelected: (v) => setState(() {
+                selectedUniversity = v;
+                debugPrint(v);
+              }),
             ),
             const SizedBox(height: 15),
 
@@ -175,7 +182,7 @@ class _AddCollegePageState extends State<AddCollegePage> {
                 width: 400,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(10),
                   boxShadow: const [
@@ -213,43 +220,26 @@ class _AddCollegePageState extends State<AddCollegePage> {
               title: const Text("تفعيل الكلية"),
               onChanged: (v) => setState(() => isActive = v),
             ),
-
-            const SizedBox(height: 20),
-
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                elevation: 3,
-                minimumSize: const Size(double.infinity, 50),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  side: const BorderSide(color: Colors.greenAccent, width: 2),
-                ),
-              ),
-              onPressed: loadingCollege
-                  ? null
-                  : () async {
-                      final confirm = await interfaces.showConfirmationDialog(
-                        context,
-                        " هل أنت متاكد من جميع البيانات؟، سوف يتم اضافة الكلية",
-                        icon: Icons.question_mark_outlined,
-                      );
-
-                      if (!confirm) return;
-                      await addCollege();
-                    },
-              child: loadingCollege
-                  ? const CircularProgressIndicator(color: Colors.greenAccent)
-                  : const Text(
-                      "إضافة الكلية",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
           ],
+        ),
+      ),
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        child: interfaces.submitButton01(
+          context,
+          "إضافة الكلية",
+          () async {
+            final confirm = await interfaces.showConfirmationDialog(
+              context,
+              " هل أنت متاكد من جميع البيانات؟، سوف يتم اضافة الكلية",
+              icon: Icons.question_mark_outlined,
+            );
+
+            if (!confirm) return;
+            await addCollege();
+          },
+          double.infinity,
+          50,
         ),
       ),
     );

@@ -105,11 +105,14 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                     return Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(18),
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
-                            color: Colors.black12,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade800
+                                : Colors.black12,
                             blurRadius: 5,
                             offset: Offset(0, 3),
                           ),
@@ -167,11 +170,14 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Theme.of(context).cardColor,
                         borderRadius: BorderRadius.circular(18),
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
-                            color: Colors.black12,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey.shade800
+                                : Colors.black12,
                             blurRadius: 5,
                             offset: Offset(0, 3),
                           ),
@@ -248,9 +254,13 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                                     youOrMe,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.grey,
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.grey.shade800
+                                          : Colors.grey,
                                     ),
                                   ),
                                 ),

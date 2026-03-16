@@ -38,8 +38,12 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
 
   // ستايل الأزرار
   ButtonStyle buttonStyle() => ElevatedButton.styleFrom(
-    backgroundColor: Colors.white,
-    foregroundColor: Colors.black,
+    backgroundColor: Theme.of(context).brightness == Brightness.dark
+        ? Theme.of(context).cardColor
+        : Colors.white,
+    foregroundColor: Theme.of(context).brightness == Brightness.dark
+        ? Colors.white
+        : Colors.black,
     elevation: 2,
     side: const BorderSide(color: Colors.greenAccent, width: 1.5),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
@@ -155,6 +159,7 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
                                       await friendService.sendFriendRequest(
                                         currentUserId,
                                         userId,
+                                        context: context,
                                       );
                                       setState(() {
                                         isLoadingButton = false;
@@ -288,18 +293,7 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
                               color: Colors.greenAccent,
                             ),
                             label: const Text("مراسلة"),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
-                              elevation: 2,
-                              side: const BorderSide(
-                                color: Colors.greenAccent,
-                                width: 1.5,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                            ),
+                            style: buttonStyle(),
                           ),
                         ),
                       ],
@@ -333,29 +327,14 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
         leadingWidth: 40,
         automaticallyImplyLeading: false,
         titleSpacing: 2,
-        title: TextField(
-          decoration: const InputDecoration(
-            hintText: "ابحث عن صديق",
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: EdgeInsets.symmetric(vertical: 0),
-            labelStyle: TextStyle(color: Colors.black54),
-            prefixIcon: Icon(Icons.search),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-              borderSide: BorderSide(color: Colors.greenAccent, width: 2),
-            ),
-          ),
+        title: interfaces.buildSearchField(
+          hint: "ابحث عن صديق",
           onChanged: (value) {
             setState(() {
               searchText = value.toLowerCase();
             });
           },
         ),
-
         backgroundColor: Colors.greenAccent[200],
         elevation: 5,
         shape: RoundedRectangleBorder(
@@ -365,7 +344,9 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
           ),
         ),
         toolbarHeight: 50,
-        shadowColor: Colors.greenAccent,
+        shadowColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey.shade800
+            : Colors.greenAccent,
       ),
       body: Padding(
         padding: const EdgeInsets.all(10),
@@ -437,17 +418,6 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
                                       "${userData['firstName']} ${userData['lastName']}",
                                     ),
                                     subtitle: Text("${userData['userName']}@"),
-                                    trailing: userData['isOnline'] == true
-                                        ? const Icon(
-                                            Icons.circle,
-                                            color: Colors.green,
-                                            size: 12,
-                                          )
-                                        : const Icon(
-                                            Icons.circle,
-                                            color: Colors.red,
-                                            size: 12,
-                                          ),
                                   ),
                                 );
                               },

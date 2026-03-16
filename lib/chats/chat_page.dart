@@ -210,7 +210,7 @@ class _ChatPageState extends State<ChatPage> {
                         decoration: BoxDecoration(
                           color: isMe
                               ? Colors.greenAccent
-                              : Colors.grey.shade300,
+                              : Colors.grey.shade400,
                           borderRadius: isMe
                               ? const BorderRadius.only(
                                   topLeft: Radius.circular(12),
@@ -225,7 +225,10 @@ class _ChatPageState extends State<ChatPage> {
                         ),
                         child: Text(
                           data["text"] ?? "",
-                          style: const TextStyle(fontSize: 15),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                     );
