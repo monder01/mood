@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/student/user_comments_page.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserBrowseCoursesPage extends StatefulWidget {
@@ -29,6 +30,53 @@ class _UserBrowseCoursesPageState extends State<UserBrowseCoursesPage> {
   Future<void> openCourseUrl(String cUrl) async {
     final Uri courseUrl = Uri.parse(cUrl);
     await launchUrl(courseUrl, mode: LaunchMode.externalApplication);
+  }
+
+  void showOptionsDialog(String courseUrl, String courseId) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: const Icon(Icons.remove_red_eye),
+                title: const Text("عرض المادة"),
+                onTap: () async {
+                  Navigator.pop(context);
+
+                  if (courseUrl.isEmpty ||
+                      courseUrl == "" ||
+                      courseUrl == "https://") {
+                    interfaces.showFlutterToast(
+                      context,
+                      "لم يتم إضافة ملفات لهذه المادة بعد.",
+                    );
+                    return;
+                  }
+
+                  await openCourseUrl(courseUrl);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.comment),
+                title: const Text("التعليقات"),
+                onTap: () {
+                  Navigator.pop(context);
+
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => UserCommentsPage(courseId: courseId),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -88,25 +136,7 @@ class _UserBrowseCoursesPageState extends State<UserBrowseCoursesPage> {
 
               return InkWell(
                 borderRadius: BorderRadius.circular(15),
-                onTap: () async {
-                  final confirm = await interfaces.showConfirmationDialog(
-                    context,
-                    "هل أنت متاكد من عرض هذه المادة؟\n سيتم توجيهك لرابط المادة.",
-                  );
-                  if (!confirm) return;
-                  if (!context.mounted) return;
-                  if (courseUrl.isEmpty ||
-                      courseUrl == null ||
-                      courseUrl == "") {
-                    interfaces.showFlutterToast(
-                      context,
-                      "لم يتم إضافة ملفات لهذه المادة بعد.",
-                    );
-                    return;
-                  }
-                  await openCourseUrl(courseUrl);
-                },
-
+                onTap: () => showOptionsDialog(courseUrl, course.id),
                 onLongPress: () {
                   showDialog(
                     context: context,

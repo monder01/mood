@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:mood01/global/interfaces.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class System {
+  static List<String> activeAyas = [];
+  String systemId = 'VSMYggbeAwkzLPP7hMJp';
   String? appVersion; // نسخة التطبيق في الجهاز
   String? systemVersion; // النسخة المطلوبة من السيرفر
   String? systemState;
@@ -11,6 +14,117 @@ class System {
   Timestamp? systemUpdatedAt;
   bool isUpdateAvailable = false;
 
+  // تحميل الايات النشطة
+  Future<void> loadActiveAyas() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection("system")
+        .doc(systemId)
+        .collection("QuranVerses")
+        .where("isActive", isEqualTo: true)
+        .limit(2)
+        .get();
+
+    activeAyas = snapshot.docs
+        .map((doc) => doc.data()["verse"]?.toString() ?? "")
+        .toList();
+  }
+
+  // تفعيل او تعطيل الاية في النظام
+  Future<void> toggleAyaActive(BuildContext context, String ayaId) async {
+    try {
+      final ayaRef = FirebaseFirestore.instance
+          .collection("system")
+          .doc(systemId)
+          .collection("QuranVerses")
+          .doc(ayaId);
+
+      final ayaSnap = await ayaRef.get();
+
+      if (!ayaSnap.exists) {
+        if (!context.mounted) return;
+        Interfaces().showFlutterToast(context, "الآية غير موجودة");
+        return;
+      }
+
+      final data = ayaSnap.data();
+      final bool isActive = data?["isActive"] == true;
+
+      if (isActive) {
+        await ayaRef.update({
+          "isActive": false,
+          "updatedAt": FieldValue.serverTimestamp(),
+        });
+
+        if (!context.mounted) return;
+        Interfaces().showFlutterToast(context, "تم تعطيل الآية");
+        return;
+      }
+
+      final activeVerses = await FirebaseFirestore.instance
+          .collection("system")
+          .doc("VSMYggbeAwkzLPP7hMJp")
+          .collection("QuranVerses")
+          .where("isActive", isEqualTo: true)
+          .get();
+
+      if (activeVerses.docs.length >= 2) {
+        if (!context.mounted) return;
+        Interfaces().showFlutterToast(
+          context,
+          "لا يمكن تفعيل أكثر من آيتين",
+          color: Colors.red,
+        );
+        return;
+      }
+
+      await ayaRef.update({
+        "isActive": true,
+        "updatedAt": FieldValue.serverTimestamp(),
+      });
+
+      if (!context.mounted) return;
+      Interfaces().showFlutterToast(
+        context,
+        "تم تفعيل الآية",
+        color: Colors.green,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Interfaces().showFlutterToast(
+        context,
+        "فشل تغيير حالة الآية: $e",
+        color: Colors.red,
+      );
+    }
+  }
+
+  // حذف الآية من قاعدة البيانات
+  Future<void> deleteAya(BuildContext context, String ayaId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection("system")
+          .doc(systemId)
+          .collection("QuranVerses")
+          .doc(ayaId)
+          .delete();
+
+      if (!context.mounted) return;
+      Interfaces().showFlutterToast(
+        context,
+        "تم حذف الآية",
+        color: Colors.green,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      Interfaces().showFlutterToast(
+        context,
+        "فشل حذف الآية: $e",
+        color: Colors.red,
+      );
+    }
+  }
+
+  // حصول على نسخة التطبيق
   Future<void> getAppVersion() async {
     final info = await PackageInfo.fromPlatform();
 
@@ -19,7 +133,7 @@ class System {
 
     final snapshot = await FirebaseFirestore.instance
         .collection('system')
-        .doc('VSMYggbeAwkzLPP7hMJp')
+        .doc(systemId)
         .get();
 
     if (!snapshot.exists) return;

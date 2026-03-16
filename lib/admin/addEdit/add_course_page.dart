@@ -27,6 +27,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
   List<Course> courses = [];
   Interfaces interfaces = Interfaces();
   bool isSaving = false;
+
   Widget courseCard(int index) {
     return Dismissible(
       key: ValueKey(courses[index]),
@@ -153,6 +154,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
     setState(() {
       isSaving = true;
     });
+
     String nameId = "";
 
     try {
@@ -165,10 +167,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
         String description = course.courseDescriptionController.text.trim();
         String url = course.courseUrlController.text.trim();
 
-        if (name.isEmpty ||
-            code.isEmpty ||
-            description.isEmpty ||
-            url.isEmpty) {
+        if (name.isEmpty || code.isEmpty || description.isEmpty) {
           interfaces.showAlert(
             context,
             "هناك حقول فارغة لم يتم تعبئتها",
@@ -178,8 +177,14 @@ class _AddCoursePageState extends State<AddCoursePage> {
           return;
         }
 
-        if (url.contains("http://") || url.contains("https://")) {
-        } else {
+        if (url.isEmpty || url == "") {
+          interfaces.showFlutterToast(
+            context,
+            "يرجى التأكد من كتابة رابط المادة لاحقا",
+          );
+        }
+
+        if (!url.contains("http://") && !url.contains("https://")) {
           url = "https://$url";
         }
 
@@ -189,9 +194,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
           nameId = "sectionId";
         }
 
-        DocumentReference doc = firestore
-            .collection(widget.collectionName!)
-            .doc(widget.departmentId)
+        DocumentReference<Map<String, dynamic>> doc = firestore
             .collection("courses")
             .doc();
 
@@ -237,6 +240,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
       c.courseNameController.dispose();
       c.courseCodeController.dispose();
       c.courseDescriptionController.dispose();
+      c.courseUrlController.dispose();
     }
     super.dispose();
   }

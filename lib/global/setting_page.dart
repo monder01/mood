@@ -211,10 +211,6 @@ class _SettingPageState extends State<SettingPage> {
             sectionTitle("التطبيق :"),
             Container(
               margin: const EdgeInsets.symmetric(vertical: 5),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey, width: 1),
-              ),
               child: Column(
                 children: [
                   settingTile(

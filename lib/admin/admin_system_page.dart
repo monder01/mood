@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:mood01/admin/addEdit/add_quran_page.dart';
 import 'package:mood01/global/interfaces.dart';
 import 'package:mood01/global/system.dart';
 import 'package:mood01/notifications/course_department_target_picker_page.dart';
@@ -21,11 +22,49 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
   final system = System();
 
   final versionController = TextEditingController();
-  final stateController = TextEditingController();
   final updateLinkController = TextEditingController();
+  final ayah =
+      "﴿ ۞ وَقَضَىٰ رَبُّكَ أَلَّا تَعْبُدُوا إِلَّا إِيَّاهُ وَبِالْوَالِدَيْنِ إِحْسَانًا ۚ إِمَّا يَبْلُغَنَّ عِندَكَ الْكِبَرَ أَحَدُهُمَا أَوْ كِلَاهُمَا فَلَا تَقُل لَّهُمَا أُفٍّ وَلَا تَنْهَرْهُمَا وَقُل لَّهُمَا قَوْلًا كَرِيمًا﴾";
 
   bool isSystemLoading = false;
   bool isSystemUpdating = false;
+
+  void showAyaOptions(BuildContext context, String ayaId, bool isAyaActive) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return SafeArea(
+          child: Wrap(
+            children: [
+              ListTile(
+                leading: Icon(
+                  isAyaActive
+                      ? Icons.remove_red_eye
+                      : Icons.remove_red_eye_outlined,
+                  color: isAyaActive ? Colors.redAccent : Colors.greenAccent,
+                ),
+                title: isAyaActive
+                    ? const Text("تعطيل الاية")
+                    : const Text("تفعيل الاية"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await system.toggleAyaActive(context, ayaId);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.delete, color: Colors.redAccent),
+                title: const Text("حذف الاية"),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await system.deleteAya(context, ayaId);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Future<void> loadSystemInfo() async {
     try {
@@ -36,7 +75,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
       await system.getAppVersion();
 
       versionController.text = system.systemVersion ?? "";
-      stateController.text = system.systemState ?? "";
       updateLinkController.text = system.systemUpdateLink?.toString() ?? "";
 
       if (!mounted) return;
@@ -54,10 +92,9 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
 
   Future<void> updateSystemInfo() async {
     final version = versionController.text.trim();
-    final state = stateController.text.trim();
     final updateLink = updateLinkController.text.trim();
 
-    if (version.isEmpty || state.isEmpty || updateLink.isEmpty) {
+    if (version.isEmpty || updateLink.isEmpty) {
       interfaces.showFlutterToast(context, "يرجى ملء جميع الحقول");
       return;
     }
@@ -97,10 +134,9 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
 
       await FirebaseFirestore.instance
           .collection("system")
-          .doc("VSMYggbeAwkzLPP7hMJp")
+          .doc(system.systemId)
           .update({
             "version": version,
-            "state": state,
             "updateLink": updateLink,
             "updatedAt": FieldValue.serverTimestamp(),
           });
@@ -224,7 +260,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
   @override
   void dispose() {
     versionController.dispose();
-    stateController.dispose();
     updateLinkController.dispose();
     titleController.dispose();
     bodyController.dispose();
@@ -235,7 +270,7 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: DefaultTabController(
-        length: 2,
+        length: 3,
         child: Column(
           children: [
             TabBar(
@@ -248,6 +283,7 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
               tabs: const [
                 Tab(text: "معلومات النظام"),
                 Tab(text: "إرسال الإشعارات"),
+                Tab(text: "الأيات المعروضة"),
               ],
             ),
             Expanded(
@@ -303,64 +339,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
                                 ),
                                 const SizedBox(height: 10),
 
-                                DropdownMenu(
-                                  hintText: stateController.text,
-                                  initialSelection: stateController.text,
-                                  width: double.infinity,
-                                  inputDecorationTheme:
-                                      const InputDecorationTheme(
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(20),
-                                          ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(20),
-                                          ),
-                                          borderSide: BorderSide(
-                                            color: Colors.greenAccent,
-                                            width: 2,
-                                          ),
-                                        ),
-                                      ),
-                                  onSelected: (value) {
-                                    setState(() {
-                                      stateController.text = value!;
-                                    });
-                                  },
-                                  menuStyle: MenuStyle(
-                                    padding: WidgetStateProperty.all(
-                                      const EdgeInsets.all(10),
-                                    ),
-                                    shape: WidgetStateProperty.all(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                    ),
-                                    elevation: WidgetStateProperty.all(5),
-                                  ),
-                                  dropdownMenuEntries: [
-                                    DropdownMenuEntry(
-                                      label: "نسخة مستقرة",
-                                      value: "stable",
-                                    ),
-                                    DropdownMenuEntry(
-                                      label: "قيد التطوير",
-                                      value: "underDevelopment",
-                                    ),
-                                    DropdownMenuEntry(
-                                      label: "نسخة تجريبية",
-                                      value: "beta",
-                                    ),
-                                    DropdownMenuEntry(
-                                      label: "تحديث جديد",
-                                      value: "update",
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 10),
-
                                 TextField(
                                   controller: updateLinkController,
                                   maxLines: 2,
@@ -404,18 +382,8 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
                                     ),
                                   ),
                                 ),
-                                Card(
-                                  child: ListTile(
-                                    leading: const Icon(Icons.update),
-                                    title: Text(
-                                      system.isUpdateAvailable == true
-                                          ? "يوجد تحديث متاح"
-                                          : "لا يوجد تحديث",
-                                    ),
-                                  ),
-                                ),
 
-                                const SizedBox(height: 30),
+                                const SizedBox(height: 10),
 
                                 Center(
                                   child: ElevatedButton(
@@ -618,99 +586,184 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
                         const SizedBox(height: 40),
 
                         Center(
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: Colors.black,
-                              elevation: 5,
-                              shadowColor: Colors.black,
-                              maximumSize: const Size(300, 50),
-                              minimumSize: const Size(300, 50),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              side: const BorderSide(
-                                color: Colors.greenAccent,
-                                width: 1,
-                              ),
-                            ),
-                            onPressed: isLoading
-                                ? null
-                                : () async {
-                                    final title = titleController.text.trim();
-                                    final body = bodyController.text.trim();
+                          child: interfaces.submitButton01(
+                            context,
+                            "ارسل الإشعار لجميع المستخدمين",
+                            () async {
+                              final title = titleController.text.trim();
+                              final body = bodyController.text.trim();
 
-                                    if (title.isEmpty || body.isEmpty) {
-                                      interfaces.showFlutterToast(
-                                        context,
-                                        "يرجى ملء جميع الحقول",
-                                      );
-                                      return;
-                                    }
+                              if (title.isEmpty || body.isEmpty) {
+                                interfaces.showFlutterToast(
+                                  context,
+                                  "يرجى ملء جميع الحقول",
+                                );
+                                return;
+                              }
 
-                                    if (hasRoute && selectedRoutePath == null) {
-                                      interfaces.showFlutterToast(
-                                        context,
-                                        "يرجى اختيار مسار أولاً",
-                                      );
-                                      return;
-                                    }
-                                    if (hasCourseDepartmentTarget &&
-                                        (selectedTargetType == null ||
-                                            selectedTargetId == null ||
-                                            selectedTargetName == null)) {
-                                      interfaces.showFlutterToast(
-                                        context,
-                                        "اختر الكلية أو القسم أولاً",
-                                      );
-                                      return;
-                                    }
+                              if (hasRoute && selectedRoutePath == null) {
+                                interfaces.showFlutterToast(
+                                  context,
+                                  "يرجى اختيار مسار أولاً",
+                                );
+                                return;
+                              }
+                              if (hasCourseDepartmentTarget &&
+                                  (selectedTargetType == null ||
+                                      selectedTargetId == null ||
+                                      selectedTargetName == null)) {
+                                interfaces.showFlutterToast(
+                                  context,
+                                  "اختر الكلية أو القسم أولاً",
+                                );
+                                return;
+                              }
 
-                                    setState(() {
-                                      isLoading = true;
-                                    });
+                              setState(() {
+                                interfaces.isLoading = true;
+                              });
 
-                                    await sendNotificationToAllUsersSafe(
-                                      context: context,
-                                      title: titleController.text,
-                                      body: bodyController.text,
-                                      routePath: hasRoute
-                                          ? selectedRoutePath
-                                          : null,
-                                      routeTitle: hasRoute
-                                          ? selectedRouteTitle
-                                          : null,
-                                      targetType: hasCourseDepartmentTarget
-                                          ? selectedTargetType
-                                          : null,
-                                      targetId: hasCourseDepartmentTarget
-                                          ? selectedTargetId
-                                          : null,
-                                      targetName: hasCourseDepartmentTarget
-                                          ? selectedTargetName
-                                          : null,
-                                    );
+                              await sendNotificationToAllUsersSafe(
+                                context: context,
+                                title: titleController.text,
+                                body: bodyController.text,
+                                routePath: hasRoute ? selectedRoutePath : null,
+                                routeTitle: hasRoute
+                                    ? selectedRouteTitle
+                                    : null,
+                                targetType: hasCourseDepartmentTarget
+                                    ? selectedTargetType
+                                    : null,
+                                targetId: hasCourseDepartmentTarget
+                                    ? selectedTargetId
+                                    : null,
+                                targetName: hasCourseDepartmentTarget
+                                    ? selectedTargetName
+                                    : null,
+                              );
 
-                                    setState(() {
-                                      isLoading = false;
-                                    });
-                                  },
-                            child: isLoading
-                                ? const Center(
-                                    child: CircularProgressIndicator(
-                                      color: Colors.greenAccent,
-                                    ),
-                                  )
-                                : const Text(
-                                    "ارسل الإشعار لجميع المستخدمين",
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                              setState(() {
+                                interfaces.isLoading = false;
+                              });
+                            },
+                            double.infinity,
+                            50,
                           ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // ayat tab 3 content
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        /// زر إضافة آية
+                        interfaces.submitButton01(
+                          context,
+                          "إضافة آية",
+                          () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => AddQuranVersesPage(
+                                  systemDocId: system.systemId,
+                                ),
+                              ),
+                            );
+                          },
+                          double.infinity,
+                          50,
+                        ),
+
+                        const SizedBox(height: 15),
+
+                        /// عرض الآيات
+                        Expanded(
+                          child:
+                              StreamBuilder<
+                                QuerySnapshot<Map<String, dynamic>>
+                              >(
+                                stream: FirebaseFirestore.instance
+                                    .collection("system")
+                                    .doc(system.systemId)
+                                    .collection("QuranVerses")
+                                    .snapshots(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(
+                                        color: Colors.greenAccent,
+                                      ),
+                                    );
+                                  }
+
+                                  if (snapshot.hasError) {
+                                    return const Center(
+                                      child: Text("حدث خطأ أثناء تحميل الآيات"),
+                                    );
+                                  }
+
+                                  if (!snapshot.hasData ||
+                                      snapshot.data!.docs.isEmpty) {
+                                    return const Center(
+                                      child: Text("لا توجد آيات مفعلة"),
+                                    );
+                                  }
+
+                                  final docs = snapshot.data!.docs;
+
+                                  return ListView.builder(
+                                    itemCount: docs.length,
+                                    itemBuilder: (context, index) {
+                                      final data = docs[index].data();
+                                      final verse =
+                                          data["verse"]?.toString() ?? "";
+                                      final isActive = data["isActive"];
+
+                                      return InkWell(
+                                        borderRadius: BorderRadius.circular(16),
+                                        onTap: () {
+                                          showAyaOptions(
+                                            context,
+                                            docs[index].id,
+                                            isActive,
+                                          );
+                                        },
+                                        child: Container(
+                                          margin: const EdgeInsets.symmetric(
+                                            vertical: 8,
+                                          ),
+                                          padding: const EdgeInsets.all(16),
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(context).cardColor,
+                                            borderRadius: BorderRadius.circular(
+                                              16,
+                                            ),
+                                            border: Border.all(
+                                              color: isActive
+                                                  ? Colors.greenAccent
+                                                  : Colors.grey,
+                                              width: 2,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            verse,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              height: 1.7,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                              ),
                         ),
                       ],
                     ),

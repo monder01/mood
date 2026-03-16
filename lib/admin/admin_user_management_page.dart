@@ -12,7 +12,6 @@ class AdminUserManagementPage extends StatefulWidget {
 }
 
 class _AdminUserManagementPageState extends State<AdminUserManagementPage> {
-  ///////////////////////////////////
   final interfaces = Interfaces();
   String searchText = "";
   bool isLoading = false;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:marquee/marquee.dart';
+import 'package:mood01/global/system.dart';
 import 'package:mood01/student/user_browse_department_page.dart';
 
 class UserBrowsePage extends StatefulWidget {
@@ -22,7 +24,25 @@ class _UserBrowsePageState extends State<UserBrowsePage> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
-        title: const Text("تصفح الكليات"),
+        title: SizedBox(
+          height: 40,
+          child: Marquee(
+            text: System.activeAyas.isNotEmpty
+                ? System.activeAyas[1]
+                : "لا توجد آية مفعلة",
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            scrollAxis: Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            blankSpace: 80,
+            velocity: 40,
+            pauseAfterRound: const Duration(seconds: 1),
+            startPadding: 10,
+            accelerationDuration: const Duration(milliseconds: 500),
+            accelerationCurve: Curves.linear,
+            decelerationDuration: const Duration(milliseconds: 500),
+            decelerationCurve: Curves.easeOut,
+          ),
+        ),
         automaticallyImplyLeading: false,
       ),
 

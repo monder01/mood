@@ -1,28 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/notifications/firebase_notifications.dart';
 import 'package:mood01/navi_go.dart';
 import 'package:mood01/global/theme_controller.dart';
-import 'firebase_options.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  await FirebaseNotifications.init();
-
   runApp(const MyApp());
-
-  // تحميل الثيم بعد تشغيل التطبيق
-  ThemeController.loadTheme();
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // Router ثابت حتى لا يعاد إنشاؤه
   static final router = NaviGo.router;
 
   @override
@@ -49,7 +38,6 @@ class MyApp extends StatelessWidget {
           themeMode: themeMode,
 
           theme: ThemeController().lightTheme(),
-
           darkTheme: ThemeController().darkTheme(),
         );
       },

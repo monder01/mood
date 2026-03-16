@@ -204,7 +204,7 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
                 return ListView.separated(
                   padding: const EdgeInsets.all(10),
                   itemCount: notifications.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final doc = notifications[index];
                     final data = doc.data() as Map<String, dynamic>;
