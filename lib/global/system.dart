@@ -42,7 +42,7 @@ class System {
 
       if (!ayaSnap.exists) {
         if (!context.mounted) return;
-        Interfaces().showFlutterToast(context, "الآية غير موجودة");
+        Interfaces().showFlutterToast("الآية غير موجودة");
         return;
       }
 
@@ -56,7 +56,7 @@ class System {
         });
 
         if (!context.mounted) return;
-        Interfaces().showFlutterToast(context, "تم تعطيل الآية");
+        Interfaces().showFlutterToast("تم تعطيل الآية");
         return;
       }
 
@@ -70,7 +70,6 @@ class System {
       if (activeVerses.docs.length >= 2) {
         if (!context.mounted) return;
         Interfaces().showFlutterToast(
-          context,
           "لا يمكن تفعيل أكثر من آيتين",
           color: Colors.red,
         );
@@ -83,15 +82,10 @@ class System {
       });
 
       if (!context.mounted) return;
-      Interfaces().showFlutterToast(
-        context,
-        "تم تفعيل الآية",
-        color: Colors.green,
-      );
+      Interfaces().showFlutterToast("تم تفعيل الآية", color: Colors.green);
     } catch (e) {
       if (!context.mounted) return;
       Interfaces().showFlutterToast(
-        context,
         "فشل تغيير حالة الآية: $e",
         color: Colors.red,
       );
@@ -109,18 +103,10 @@ class System {
           .delete();
 
       if (!context.mounted) return;
-      Interfaces().showFlutterToast(
-        context,
-        "تم حذف الآية",
-        color: Colors.green,
-      );
+      Interfaces().showFlutterToast("تم حذف الآية", color: Colors.green);
     } catch (e) {
       if (!context.mounted) return;
-      Interfaces().showFlutterToast(
-        context,
-        "فشل حذف الآية: $e",
-        color: Colors.red,
-      );
+      Interfaces().showFlutterToast("فشل حذف الآية: $e", color: Colors.red);
     }
   }
 

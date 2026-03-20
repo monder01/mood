@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/global/system.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutAppPage extends StatelessWidget {
@@ -64,7 +65,7 @@ class AboutAppPage extends StatelessWidget {
 
             const SizedBox(height: 5),
 
-            const Text("الإصدار 1.0.0", style: TextStyle(color: Colors.grey)),
+            Text(System().systemVersion ?? " "),
 
             const SizedBox(height: 20),
 
@@ -211,10 +212,7 @@ class AboutAppPage extends StatelessWidget {
                     Clipboard.setData(
                       const ClipboardData(text: "monther00147@gmail.com"),
                     );
-                    interfaces.showFlutterToast(
-                      context,
-                      "تم نسخ البريد الإلكتروني",
-                    );
+                    interfaces.showFlutterToast("تم نسخ البريد الإلكتروني");
                   },
                   child: Text(
                     "monther00147@gmail.com",

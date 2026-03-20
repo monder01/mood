@@ -70,7 +70,7 @@ class _UserCommentsPageState extends State<UserCommentsPage> {
     final text = commentController.text.trim();
 
     if (text.isEmpty || isSending) {
-      interfaces.showFlutterToast(context, "أكتب شيئا! 😑");
+      interfaces.showFlutterToast("أكتب شيئا! 😑");
       return;
     }
 
@@ -88,18 +88,10 @@ class _UserCommentsPageState extends State<UserCommentsPage> {
       commentController.clear();
 
       if (!mounted) return;
-      interfaces.showFlutterToast(
-        context,
-        "تم إضافة التعليق",
-        color: Colors.green,
-      );
+      interfaces.showFlutterToast("تم إضافة التعليق", color: Colors.green);
     } catch (e) {
       if (!mounted) return;
-      interfaces.showFlutterToast(
-        context,
-        "فشل اضافة التعليق: $e",
-        color: Colors.red,
-      );
+      interfaces.showFlutterToast("فشل اضافة التعليق: $e", color: Colors.red);
     }
 
     if (!mounted) return;

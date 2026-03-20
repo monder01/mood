@@ -48,9 +48,9 @@ class _SettingPageState extends State<SettingPage> {
 
   void showDevMessage({String? message}) {
     if (message != null && message.isNotEmpty) {
-      interfaces.showFlutterToast(context, message);
+      interfaces.showFlutterToast(message);
     } else {
-      interfaces.showFlutterToast(context, "قيد التطوير، لن يحدث شيء الآن");
+      interfaces.showFlutterToast("قيد التطوير، لن يحدث شيء الآن");
     }
   }
 
@@ -119,7 +119,6 @@ class _SettingPageState extends State<SettingPage> {
                         isProfilePrivate = !isProfilePrivate;
                       });
                       interfaces.showFlutterToast(
-                        context,
                         "التحكم في ظهور حسابك في البحث",
                       );
                     },

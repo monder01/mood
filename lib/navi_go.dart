@@ -5,6 +5,7 @@ import 'package:mood01/auth/signin_page.dart';
 import 'package:mood01/auth/signup_page.dart';
 import 'package:mood01/screens/about_us_page.dart';
 import 'package:mood01/notifications/my_notifications_page.dart';
+import 'package:mood01/screens/home_page.dart';
 import 'package:mood01/screens/splash_page.dart';
 import 'package:mood01/student/discover_page.dart';
 import 'package:mood01/student/user_browse_page.dart';
@@ -24,6 +25,12 @@ class NaviGo {
         path: '/',
         name: 'splash',
         builder: (context, state) => const SplashPage(),
+      ),
+
+      GoRoute(
+        path: '/home',
+        name: 'home',
+        builder: (context, state) => const Homepage(),
       ),
 
       GoRoute(
@@ -144,7 +151,45 @@ class NaviGo {
       ),
     ],
   );
-  String buildDynamicRoute(String template, Map<String, String> values) {
+
+  // ========= مسارات جاهزة =========
+
+  static const String splash = '/';
+  static const String signin = '/signin';
+  static const String signup = '/signup';
+  static const String browse = '/browse';
+  static const String about = '/about';
+  static const String discover = '/discover';
+  static const String browseColleges = '/browse-colleges';
+  static const String searchFriends = '/search-friends';
+  static const String fellows = '/fellows';
+  static const String conversations = '/conversations';
+  static const String notifications = '/notifications';
+  static const String home = '/home';
+
+  static String chatPath(String otherUserId) {
+    return '/chat/${Uri.encodeComponent(otherUserId)}';
+  }
+
+  static String departmentsPath({
+    required String collegeId,
+    required String collegeName,
+  }) {
+    return '/departments/${Uri.encodeComponent(collegeId)}/${Uri.encodeComponent(collegeName)}';
+  }
+
+  static String coursesPath({
+    required String departmentId,
+    required String departmentName,
+  }) {
+    return '/courses/${Uri.encodeComponent(departmentId)}/${Uri.encodeComponent(departmentName)}';
+  }
+
+  static String commentsPath(String courseId) {
+    return '/comments/${Uri.encodeComponent(courseId)}';
+  }
+
+  static String buildDynamicRoute(String template, Map<String, String> values) {
     String result = template;
 
     values.forEach((key, value) {

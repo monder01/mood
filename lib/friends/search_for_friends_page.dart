@@ -284,18 +284,6 @@ class _SearchForFriendsPageState extends State<SearchForFriendsPage> {
                               style: buttonStyle(),
                             ),
                           ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton.icon(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.message_outlined,
-                              color: Colors.greenAccent,
-                            ),
-                            label: const Text("مراسلة"),
-                            style: buttonStyle(),
-                          ),
-                        ),
                       ],
                     ),
                     const SizedBox(height: 10),

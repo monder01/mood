@@ -3,7 +3,7 @@ description: "A new Flutter project."
 
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
-version: 1.0.13
+version: 1.0.14
 
 environment:
   sdk: ^3.10.1
@@ -19,6 +19,7 @@ dependencies:
   firebase_messaging: ^16.1.2
   cloud_functions: ^6.0.7
   flutter_local_notifications: ^21.0.0
+  file_picker: ^10.3.10
   image_picker: ^1.2.1
   url_launcher: ^6.3.2
   fluttertoast: ^9.0.0
@@ -39,7 +40,7 @@ flutter_launcher_icons:
   android: true
   ios: true
   
-  image_path: "assets/icons/moodLogo03.png"
+  image_path: "assets/icons/ControlMon.png"
 
   # adaptive_icon_background: "#00000000"
   # adaptive_icon_foreground: "assets/icons/moodLogo03.png"

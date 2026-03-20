@@ -82,7 +82,6 @@ class _AddCollegePageState extends State<AddCollegePage> {
 
       if (!mounted) return;
       interfaces.showFlutterToast(
-        context,
         "تم إضافة الكلية بنجاح",
         color: Colors.green[400],
       );

@@ -86,7 +86,7 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
       setState(() {
         isSystemLoading = false;
       });
-      interfaces.showFlutterToast(context, "فشل تحميل معلومات النظام: $e");
+      interfaces.showFlutterToast("فشل تحميل معلومات النظام: $e");
     }
   }
 
@@ -95,7 +95,7 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
     final updateLink = updateLinkController.text.trim();
 
     if (version.isEmpty || updateLink.isEmpty) {
-      interfaces.showFlutterToast(context, "يرجى ملء جميع الحقول");
+      interfaces.showFlutterToast("يرجى ملء جميع الحقول");
       return;
     }
 
@@ -103,27 +103,24 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
     if (uri == null ||
         !(uri.scheme == "http" || uri.scheme == "https") ||
         uri.host.isEmpty) {
-      interfaces.showFlutterToast(context, "رابط التحديث غير صالح");
+      interfaces.showFlutterToast("رابط التحديث غير صالح");
       return;
     }
     // check if version format is valid
     final versionRegex = RegExp(r'^\d+\.\d+\.\d+$');
     if (!versionRegex.hasMatch(version)) {
-      interfaces.showFlutterToast(context, "صيغة النسخة غير صالحة");
+      interfaces.showFlutterToast("صيغة النسخة غير صالحة");
       return;
     }
 
     final versionParts = version.split('.').map(int.parse).toList();
     if (versionParts.length != 3) {
-      interfaces.showFlutterToast(context, "صيغة النسخة غير صالحة");
+      interfaces.showFlutterToast("صيغة النسخة غير صالحة");
       return;
     }
 
     if (system.systemVersion == version) {
-      interfaces.showFlutterToast(
-        context,
-        "الاصدار المستخدم هو نفسه الاصدار الجديد!",
-      );
+      interfaces.showFlutterToast("الاصدار المستخدم هو نفسه الاصدار الجديد!");
       return;
     }
 
@@ -144,10 +141,10 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
       await system.getAppVersion();
 
       if (!mounted) return;
-      interfaces.showFlutterToast(context, "تم تحديث معلومات النظام بنجاح");
+      interfaces.showFlutterToast("تم تحديث معلومات النظام بنجاح");
     } catch (e) {
       if (!mounted) return;
-      interfaces.showFlutterToast(context, "فشل تحديث معلومات النظام: $e");
+      interfaces.showFlutterToast("فشل تحديث معلومات النظام: $e");
     } finally {
       setState(() {
         isSystemUpdating = false;
@@ -595,7 +592,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
 
                               if (title.isEmpty || body.isEmpty) {
                                 interfaces.showFlutterToast(
-                                  context,
                                   "يرجى ملء جميع الحقول",
                                 );
                                 return;
@@ -603,7 +599,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
 
                               if (hasRoute && selectedRoutePath == null) {
                                 interfaces.showFlutterToast(
-                                  context,
                                   "يرجى اختيار مسار أولاً",
                                 );
                                 return;
@@ -613,7 +608,6 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
                                       selectedTargetId == null ||
                                       selectedTargetName == null)) {
                                 interfaces.showFlutterToast(
-                                  context,
                                   "اختر الكلية أو القسم أولاً",
                                 );
                                 return;

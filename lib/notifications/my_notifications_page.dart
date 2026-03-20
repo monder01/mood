@@ -145,7 +145,7 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
           IconButton(
             onPressed: () async {
               if (isEmpty) {
-                interfaces.showFlutterToast(context, "لا توجد إشعارات");
+                interfaces.showFlutterToast("لا توجد إشعارات");
                 return;
               }
               if (!context.mounted) return;
@@ -161,12 +161,12 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
           IconButton(
             onPressed: () async {
               if (isEmpty) {
-                interfaces.showFlutterToast(context, "لا توجد إشعارات");
+                interfaces.showFlutterToast("لا توجد إشعارات");
                 return;
               }
               await markAllAsRead();
               if (!context.mounted) return;
-              interfaces.showFlutterToast(context, "تم تحديد الكل كمقروء");
+              interfaces.showFlutterToast("تم تحديد الكل كمقروء");
             },
             icon: const Icon(Icons.done_all),
           ),
@@ -414,7 +414,7 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
               doc.reference.delete();
             }
           });
-      Interfaces().showFlutterToast(context, "تم حذف جميع الاشعارات بنجاح");
+      Interfaces().showFlutterToast("تم حذف جميع الاشعارات بنجاح");
       setState(() {
         isdeleteMode = false;
       });
@@ -423,13 +423,13 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
       setState(() {
         isdeleteMode = false;
       });
-      Interfaces().showFlutterToast(context, "حدث خطأ اثناء حذف الاشعارات");
+      Interfaces().showFlutterToast("حدث خطأ اثناء حذف الاشعارات");
     } catch (e) {
       debugPrint('Error: $e');
       setState(() {
         isdeleteMode = false;
       });
-      Interfaces().showFlutterToast(context, "حدث خطأ اثناء حذف الاشعارات");
+      Interfaces().showFlutterToast("حدث خطأ اثناء حذف الاشعارات");
     } finally {
       setState(() {
         isdeleteMode = false;

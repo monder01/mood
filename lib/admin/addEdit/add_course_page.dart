@@ -178,10 +178,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
         }
 
         if (url.isEmpty || url == "") {
-          interfaces.showFlutterToast(
-            context,
-            "يرجى التأكد من كتابة رابط المادة لاحقا",
-          );
+          interfaces.showFlutterToast("يرجى التأكد من كتابة رابط المادة لاحقا");
         }
 
         if (!url.contains("http://") && !url.contains("https://")) {

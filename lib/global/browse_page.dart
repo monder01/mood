@@ -100,7 +100,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     if (!mounted) return;
 
     // إظهار تنبيه للمستخدم والعودة للرئيسية
-    interfaces.showFlutterToast(context, message);
+    interfaces.showFlutterToast(message);
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const Homepage()),
@@ -340,7 +340,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                   ),
             onTap: () async {
               if (system.isUpdateAvailable == false) {
-                interfaces.showFlutterToast(context, "لا يوجد تحديثات");
+                interfaces.showFlutterToast("لا يوجد تحديثات");
               } else {
                 final confirm = await interfaces.showConfirmationDialog(
                   context,

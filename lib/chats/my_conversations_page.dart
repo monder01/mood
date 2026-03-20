@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mood01/chats/chat_page.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/navi_go.dart';
 
 class MyConversationsPage extends StatefulWidget {
   const MyConversationsPage({super.key});
@@ -12,40 +13,18 @@ class MyConversationsPage extends StatefulWidget {
 }
 
 class _MyConversationsPageState extends State<MyConversationsPage> {
-  final currentUser = FirebaseAuth.instance.currentUser!;
+  User? get currentUser => FirebaseAuth.instance.currentUser;
 
-  Stream<QuerySnapshot> getMyChats() {
+  Stream<QuerySnapshot<Map<String, dynamic>>> getMyChats() {
+    if (currentUser == null) {
+      return const Stream.empty();
+    }
+
     return FirebaseFirestore.instance
         .collection("chats")
-        .where("participants", arrayContains: currentUser.uid)
+        .where("participants", arrayContains: currentUser!.uid)
         .orderBy("updatedAt", descending: true)
         .snapshots();
-  }
-
-  Future<Map<String, dynamic>?> getOtherUserData(
-    List<dynamic> participants,
-  ) async {
-    try {
-      final otherUserId = participants.firstWhere(
-        (id) => id != currentUser.uid,
-        orElse: () => null,
-      );
-
-      if (otherUserId == null) return null;
-
-      final userDoc = await FirebaseFirestore.instance
-          .collection("users")
-          .doc(otherUserId)
-          .get();
-
-      if (!userDoc.exists) return null;
-
-      final data = userDoc.data() ?? {};
-      data["uid"] = otherUserId;
-      return data;
-    } catch (e) {
-      return null;
-    }
   }
 
   String formatLastMessage(dynamic value) {
@@ -55,20 +34,35 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
     return text;
   }
 
+  Map<String, dynamic> getOtherUserDataFromChat(Map<String, dynamic> chatData) {
+    final userData = Map<String, dynamic>.from(chatData["userData"] ?? {});
+
+    for (final entry in userData.entries) {
+      if (entry.key != currentUser?.uid) {
+        return Map<String, dynamic>.from(entry.value ?? {});
+      }
+    }
+
+    return {};
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (currentUser == null) {
+      return Scaffold(
+        appBar: Interfaces().showAppBar(context, title: "", actions: false),
+        body: const Center(child: Text("لا يوجد مستخدم مسجل دخول")),
+      );
+    }
+
     return Scaffold(
-      appBar: Interfaces().showAppBar(
-        context,
-        title: "محادثاتي",
-        actions: false,
-      ),
-      body: StreamBuilder<QuerySnapshot>(
+      appBar: Interfaces().showAppBar(context, title: "", actions: false),
+      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: getMyChats(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.greenAccent),
+            return Center(
+              child: CircularProgressIndicator(color: Colors.cyan[600]),
             );
           }
 
@@ -93,79 +87,47 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
             separatorBuilder: (context, index) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final chatDoc = chats[index];
-              final chatData = chatDoc.data() as Map<String, dynamic>;
-              final participants = List<dynamic>.from(
-                chatData["participants"] ?? [],
-              );
+              final chatData = chatDoc.data();
 
-              return FutureBuilder<Map<String, dynamic>?>(
-                future: getOtherUserData(participants),
+              final otherUserData = getOtherUserDataFromChat(chatData);
+
+              final otherUserId = otherUserData["uid"]?.toString() ?? "";
+              final firstName = otherUserData["firstName"]?.toString() ?? "";
+              final lastName = otherUserData["lastName"]?.toString() ?? "";
+              final photoUrl = otherUserData["photoUrl"]?.toString() ?? "";
+              final lastMessage = formatLastMessage(chatData["lastMessage"]);
+
+              if (otherUserId.isEmpty) {
+                return const SizedBox();
+              }
+
+              final fullName = "$firstName $lastName".trim();
+              final displayName = fullName.isEmpty ? "مستخدم" : fullName;
+
+              String lastMessageText = "";
+              if (chatData["lastSenderId"] == currentUser!.uid) {
+                lastMessageText = "أنت: $lastMessage";
+              } else {
+                lastMessageText = "$displayName: $lastMessage";
+              }
+
+              return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+                stream: FirebaseFirestore.instance
+                    .collection("users")
+                    .doc(otherUserId)
+                    .snapshots(),
                 builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
-                    return Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).cardColor,
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? Colors.grey.shade800
-                                : Colors.black12,
-                            blurRadius: 5,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: const Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 28,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.greenAccent,
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(child: Text("جاري تحميل البيانات...")),
-                        ],
-                      ),
-                    );
-                  }
+                  bool isOnline = false;
 
-                  final userData = userSnapshot.data;
-
-                  if (userData == null) {
-                    return const SizedBox();
-                  }
-
-                  final otherUserId = userData["uid"] ?? "";
-                  final firstName = userData["firstName"] ?? "";
-                  final lastName = userData["lastName"] ?? "";
-                  final userName = userData["userName"] ?? "";
-                  final photoUrl = userData["photoUrl"] ?? "";
-                  final isOnline = userData["isOnline"] ?? false;
-                  final lastMessage = formatLastMessage(
-                    chatData["lastMessage"],
-                  );
-                  String youOrMe = "";
-                  if (chatData["lastSenderId"] == currentUser.uid) {
-                    youOrMe = "أنت : $lastMessage";
-                  } else {
-                    youOrMe = "$firstName : $lastMessage";
+                  if (userSnapshot.hasData && userSnapshot.data!.exists) {
+                    final liveUserData = userSnapshot.data!.data() ?? {};
+                    isOnline = liveUserData["isOnline"] == true;
                   }
 
                   return InkWell(
                     borderRadius: BorderRadius.circular(18),
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ChatPage(otherUserId: otherUserId),
-                        ),
-                      );
+                      context.push(NaviGo.chatPath(otherUserId));
                     },
                     child: Container(
                       padding: const EdgeInsets.all(12),
@@ -179,7 +141,7 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                                 ? Colors.grey.shade800
                                 : Colors.black12,
                             blurRadius: 5,
-                            offset: Offset(0, 3),
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
@@ -189,10 +151,10 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                             children: [
                               CircleAvatar(
                                 radius: 28,
-                                backgroundImage: photoUrl.toString().isNotEmpty
+                                backgroundImage: photoUrl.isNotEmpty
                                     ? NetworkImage(photoUrl)
                                     : null,
-                                child: photoUrl.toString().isEmpty
+                                child: photoUrl.isEmpty
                                     ? const Icon(Icons.person, size: 28)
                                     : null,
                               ),
@@ -222,22 +184,12 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "$firstName $lastName",
+                                  displayName,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  "@$userName",
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 13,
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -247,11 +199,15 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                                     vertical: 4,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: Colors.greenAccent,
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.grey.shade800
+                                        : Colors.grey.shade300,
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   child: Text(
-                                    youOrMe,
+                                    lastMessageText,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
@@ -259,8 +215,8 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
                                       color:
                                           Theme.of(context).brightness ==
                                               Brightness.dark
-                                          ? Colors.grey.shade800
-                                          : Colors.grey,
+                                          ? Colors.grey.shade400
+                                          : Colors.grey.shade700,
                                     ),
                                   ),
                                 ),

@@ -66,7 +66,7 @@ class Interfaces {
   );
 
   // show toast
-  void showFlutterToast(BuildContext context, String message, {Color? color}) {
+  void showFlutterToast(String message, {Color? color}) {
     Fluttertoast.showToast(
       gravity: ToastGravity.BOTTOM,
       backgroundColor: color ?? Colors.grey,
@@ -286,40 +286,6 @@ class Interfaces {
                 fontSize: fontSize ?? 22,
               ),
             ),
-    );
-  }
-
-  // تصميم زر الإرسال
-  Widget elevatedButton01(
-    String text,
-    VoidCallback onPressed,
-    double width,
-    double height,
-    IconData icon,
-    Color iconColor,
-  ) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 5,
-        minimumSize: Size(width, height),
-        maximumSize: Size(width, height),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        side: const BorderSide(color: Colors.greenAccent, width: 2),
-      ),
-      onPressed: () {},
-      child: Row(
-        spacing: 5,
-        children: [
-          Icon(icon, color: iconColor),
-          const SizedBox(width: 5),
-          Text(
-            text,
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
     );
   }
 }

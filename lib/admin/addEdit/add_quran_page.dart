@@ -51,7 +51,6 @@ class _AddQuranVersesPageState extends State<AddQuranVersesPage> {
         isLoadingActiveCount = false;
       });
       interfaces.showFlutterToast(
-        context,
         "فشل تحميل عدد الآيات المفعلة",
         color: Colors.red,
       );
@@ -206,7 +205,6 @@ class _AddQuranVersesPageState extends State<AddQuranVersesPage> {
                             (activeCountInFirestore + currentLocalActive) >=
                                 2) {
                           interfaces.showFlutterToast(
-                            context,
                             "فقط آيتان يمكن أن تكونا مفعّلتين",
                             color: Colors.red,
                           );

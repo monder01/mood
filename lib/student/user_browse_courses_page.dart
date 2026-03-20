@@ -49,7 +49,6 @@ class _UserBrowseCoursesPageState extends State<UserBrowseCoursesPage> {
                       courseUrl == "" ||
                       courseUrl == "https://") {
                     interfaces.showFlutterToast(
-                      context,
                       "لم يتم إضافة ملفات لهذه المادة بعد.",
                     );
                     return;
