@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mood01/auth/users.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 
 class Signinpage extends StatefulWidget {
   const Signinpage({super.key});

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mood01/navi_go.dart';
-import 'package:mood01/global/theme_controller.dart';
+import 'package:mood01/designs/theme_controller.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {

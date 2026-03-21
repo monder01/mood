@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/navi_go.dart';
 
 class MyConversationsPage extends StatefulWidget {
@@ -62,7 +62,7 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child: CircularProgressIndicator(color: Colors.cyan[600]),
+              child: CircularProgressIndicator(color: Colors.greenAccent),
             );
           }
 

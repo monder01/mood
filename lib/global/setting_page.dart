@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/global/interfaces.dart';
-import 'package:mood01/global/theme_controller.dart';
+import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/theme_controller.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});

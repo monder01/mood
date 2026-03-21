@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mood01/friends/friends.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 
 class SearchForFriendsPage extends StatefulWidget {
   const SearchForFriendsPage({super.key});

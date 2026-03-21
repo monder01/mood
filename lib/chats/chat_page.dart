@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ChatPage extends StatefulWidget {
@@ -352,7 +352,7 @@ class _ChatPageState extends State<ChatPage> {
             margin: const EdgeInsets.symmetric(vertical: 4),
             constraints: const BoxConstraints(maxWidth: 280, maxHeight: 320),
             decoration: BoxDecoration(
-              color: isMe ? Colors.cyan[600] : Colors.grey.shade400,
+              color: isMe ? Colors.greenAccent : Colors.grey.shade400,
               borderRadius: bubbleRadius,
             ),
             clipBehavior: Clip.antiAlias,
@@ -462,7 +462,7 @@ class _ChatPageState extends State<ChatPage> {
           padding: const EdgeInsets.all(10),
           constraints: const BoxConstraints(maxWidth: 280),
           decoration: BoxDecoration(
-            color: isMe ? Colors.cyan[600] : Colors.grey.shade400,
+            color: isMe ? Colors.greenAccent : Colors.grey.shade400,
             borderRadius: bubbleRadius,
           ),
           child: Row(
@@ -508,7 +508,7 @@ class _ChatPageState extends State<ChatPage> {
       padding: const EdgeInsets.all(8),
       constraints: const BoxConstraints(maxWidth: 280),
       decoration: BoxDecoration(
-        color: isMe ? Colors.cyan[600] : Colors.grey.shade400,
+        color: isMe ? Colors.greenAccent : Colors.grey.shade400,
         borderRadius: bubbleRadius,
       ),
       child: Text(
@@ -534,7 +534,9 @@ class _ChatPageState extends State<ChatPage> {
   Widget build(BuildContext context) {
     if (loading || chatId == null) {
       return Scaffold(
-        body: Center(child: CircularProgressIndicator(color: Colors.cyan[600])),
+        body: Center(
+          child: CircularProgressIndicator(color: Colors.greenAccent),
+        ),
       );
     }
 
@@ -547,7 +549,7 @@ class _ChatPageState extends State<ChatPage> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.cyan[600],
+        backgroundColor: Colors.greenAccent,
         elevation: 5,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
@@ -556,7 +558,9 @@ class _ChatPageState extends State<ChatPage> {
           ),
         ),
         toolbarHeight: 60,
-        shadowColor: Colors.cyan,
+        shadowColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey.shade800
+            : Colors.grey.shade900,
         actions: [
           Padding(
             padding: const EdgeInsets.only(left: 10),
@@ -592,14 +596,15 @@ class _ChatPageState extends State<ChatPage> {
       ),
       body: Column(
         children: [
-          if (isUploadingFile) LinearProgressIndicator(color: Colors.cyan[600]),
+          if (isUploadingFile)
+            LinearProgressIndicator(color: Colors.greenAccent),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: messagesStream,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return Center(
-                    child: CircularProgressIndicator(color: Colors.cyan[600]),
+                    child: CircularProgressIndicator(color: Colors.greenAccent),
                   );
                 }
 
@@ -648,7 +653,7 @@ class _ChatPageState extends State<ChatPage> {
                               icon: const Icon(Icons.attach_file),
                             ),
                             IconButton(
-                              icon: Icon(Icons.send, color: Colors.cyan[600]),
+                              icon: Icon(Icons.send, color: Colors.greenAccent),
                               onPressed: sendMessage,
                             ),
                           ],

@@ -8,7 +8,7 @@ import 'package:mood01/admin/addEdit/add_section_page.dart';
 import 'package:mood01/admin/addEdit/edit_college_page.dart';
 import 'package:mood01/admin/addEdit/edit_course_page.dart';
 import 'package:mood01/admin/addEdit/edit_department_page.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 
 class AdminMainPage extends StatefulWidget {
   const AdminMainPage({super.key});

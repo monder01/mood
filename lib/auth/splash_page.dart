@@ -1,10 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mood01/auth/presence_service.dart';
+import 'package:mood01/designs/theme_controller.dart';
+import 'package:mood01/firebase_options.dart';
 import 'package:mood01/global/system.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
-import 'package:mood01/global/theme_controller.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:mood01/firebase_options.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -14,7 +17,8 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage> {
-  final system = System();
+  final system = System.current;
+
   @override
   void initState() {
     super.initState();
@@ -37,13 +41,40 @@ class _SplashPageState extends State<SplashPage> {
       // تحميل معلومات النظام والآيات
       await system.getAppVersion();
       await system.loadActiveAyas();
+
+      // online status start
+      await PresenceService.startPresence();
+
+      // فحص المستخدم الحالي
+      final user = FirebaseAuth.instance.currentUser;
+
+      if (!mounted) return;
+
+      // إذا لم يوجد مستخدم مسجل دخول
+      if (user == null) {
+        context.go('/home');
+        return;
+      }
+
+      // إذا يوجد مستخدم، نفحص هل وثيقته موجودة
+      final userDoc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid)
+          .get();
+
+      if (!mounted) return;
+
+      if (userDoc.exists) {
+        context.go('/browse');
+      } else {
+        context.go('/home');
+      }
     } catch (e) {
       debugPrint("Splash error: $e");
+
+      if (!mounted) return;
+      context.go('/home');
     }
-
-    if (!mounted) return;
-
-    context.go('/authWrapper');
   }
 
   @override
@@ -52,27 +83,17 @@ class _SplashPageState extends State<SplashPage> {
 
     return Scaffold(
       backgroundColor: isDark ? Colors.black : Colors.white,
-
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset("assets/icons/monther.png", width: 200, height: 200),
-
-            const SizedBox(height: 20),
-
-            Text(
-              "MOOD",
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2,
-                color: isDark ? Colors.white : Colors.black,
-              ),
+            Image.asset(
+              "assets/icons/ControlMon01.png",
+              width: 250,
+              height: 250,
             ),
 
             const SizedBox(height: 25),
-
             const CircularProgressIndicator(color: Colors.greenAccent),
           ],
         ),

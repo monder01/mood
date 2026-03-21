@@ -3,7 +3,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/admin/addEdit/add_quran_page.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/global/system.dart';
 import 'package:mood01/notifications/course_department_target_picker_page.dart';
 import 'package:mood01/notifications/route_picker_page.dart';

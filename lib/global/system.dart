@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class System {
+  static final System current = System();
+
   static List<String> activeAyas = [];
   String systemId = 'VSMYggbeAwkzLPP7hMJp';
   String? appVersion; // نسخة التطبيق في الجهاز
@@ -110,7 +112,6 @@ class System {
     }
   }
 
-  // حصول على نسخة التطبيق
   Future<void> getAppVersion() async {
     final info = await PackageInfo.fromPlatform();
 
@@ -133,16 +134,17 @@ class System {
     final link = data['updateLink']?.toString();
     if (link != null && link.isNotEmpty) {
       systemUpdateLink = Uri.tryParse(link);
+    } else {
+      systemUpdateLink = null;
     }
 
-    // فحص التحديث
     if (appVersion != null && systemVersion != null) {
-      isUpdateAvailable = _compareVersions(appVersion!, systemVersion!);
+      isUpdateAvailable = compareVersions(appVersion!, systemVersion!);
     }
   }
 
-  // مقارنة النسخ بشكل صحيح
-  bool _compareVersions(String current, String server) {
+  // مقارنة النسخ
+  bool compareVersions(String current, String server) {
     final currentParts = current.split('.').map(int.parse).toList();
     final serverParts = server.split('.').map(int.parse).toList();
 

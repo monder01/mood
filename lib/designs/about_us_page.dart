@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/global/system.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutAppPage extends StatelessWidget {
   AboutAppPage({super.key});
   final interfaces = Interfaces();
+  System get system => System.current;
   Future<void> openEmail() async {
     final Uri emailUri = Uri(
       scheme: 'mailto',
@@ -52,22 +53,15 @@ class AboutAppPage extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         child: Column(
           children: [
-            const SizedBox(height: 10),
-
-            Image.asset("assets/icons/monther.png", width: 150, height: 150),
-
             const SizedBox(height: 5),
 
-            const Text(
-              "مزاجي",
-              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            Image.asset(
+              "assets/icons/ControlMon01.png",
+              width: 180,
+              height: 180,
             ),
 
-            const SizedBox(height: 5),
-
-            Text(System().systemVersion ?? " "),
-
-            const SizedBox(height: 20),
+            Text("V${system.appVersion ?? " "}"),
 
             /// 🔹 وصف التطبيق
             Container(

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood01/chats/chat_page.dart';
 import 'package:mood01/friends/user_fellows_page.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/global/my_account.dart';
 import 'package:mood01/notifications/notification_target_navigator.dart';
 

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:mood01/auth/presence_service.dart';
 import 'package:mood01/auth/session_service.dart';
+import 'package:mood01/designs/home_page.dart';
 import 'package:mood01/global/browse_page.dart';
-import 'package:mood01/global/interfaces.dart';
+import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/notifications/firebase_notifications.dart';
 
 class Users {
   String? id;
@@ -121,6 +124,9 @@ class Users {
       }
 
       await SessionService.saveSessionAfterLogin();
+
+      // online status start
+      await PresenceService.startPresence();
 
       if (!context.mounted) return;
 
@@ -261,6 +267,9 @@ class Users {
 
       await SessionService.saveSessionAfterLogin();
 
+      // online status start
+      await PresenceService.startPresence();
+
       if (!context.mounted) return;
 
       Navigator.pushReplacement(
@@ -318,6 +327,49 @@ class Users {
       Interfaces().showAlert(
         context,
         "حدث خطأ غير متوقع : \n$e",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
+    }
+  }
+
+  // تسجيل الخروج
+  Future<void> signOut(BuildContext context) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+
+      await PresenceService.markOfflineNow();
+      await PresenceService.disposePresence();
+
+      await FirebaseNotifications.unsubscribeFromAllUsersTopic();
+
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection("users")
+            .doc(user.uid)
+            .update({
+              "isOnline": false,
+              "lastLogin": FieldValue.serverTimestamp(),
+              "messageToken": "",
+            });
+      }
+
+      await SessionService.clearLocalSession();
+      await FirebaseAuth.instance.signOut();
+
+      if (!context.mounted) return;
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const Homepage()),
+        (route) => false,
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+
+      Interfaces().showAlert(
+        context,
+        "حدث خطأ أثناء تسجيل الخروج: $e",
         icon: Icons.error,
         iconColor: Colors.red,
       );
