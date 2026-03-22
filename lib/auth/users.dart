@@ -9,17 +9,34 @@ import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 
 class Users {
-  String? id;
-  String? email;
-  String? name;
-  String? userName;
-  String? photoUrl;
-  String? phoneNumber;
-  String? role;
-  String? messageToken;
+  static Users? current;
+  String? userName,
+      email,
+      name,
+      firstName,
+      lastName,
+      password,
+      phone,
+      lastLogin, // last login time = last seen time
+      messageToken,
+      photoUrl,
+      role,
+      id,
+      activeSessionId,
+      phoneNumber;
+  bool? isActive, isOnline, isPremium, isPrivate;
 
   Users({
     this.id,
+    this.password,
+    this.firstName,
+    this.lastName,
+    this.lastLogin,
+    this.isActive,
+    this.isOnline,
+    this.isPremium,
+    this.isPrivate,
+    this.activeSessionId,
     this.email,
     this.name,
     this.userName,
@@ -53,7 +70,7 @@ class Users {
         messageToken: userDoc.get("messageToken") ?? "",
       );
     } catch (e) {
-      print("Error fetching user data: $e");
+      debugPrint("Error fetching user data: $e");
       return null;
     }
   }

@@ -9,7 +9,120 @@ import 'package:mood01/notifications/my_notifications_page.dart';
 class Interfaces {
   bool isLoading = false;
 
-  // elevatad button style
+  void showProfile(BuildContext context, Map<String, dynamic> userData) {
+    // عرض نافذة بروفايل المستخدم بشكل ممتع وبسيط
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 25),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                InkWell(
+                  borderRadius: BorderRadius.circular(60),
+                  onTap: () {
+                    Navigator.pop(context);
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return Container(
+                          alignment: Alignment.center,
+                          child: Image.network(
+                            userData['photoUrl'] ?? '',
+                            errorBuilder: (context, error, stackTrace) =>
+                                CircleAvatar(
+                                  radius: 60,
+                                  child: const Icon(Icons.person, size: 60),
+                                ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundImage: (userData['photoUrl'] ?? '').isNotEmpty
+                        ? NetworkImage(userData['photoUrl'])
+                        : null,
+                    child: (userData['photoUrl'] ?? '').isEmpty
+                        ? const Icon(Icons.person, size: 60)
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  "${userData['firstName']} ${userData['lastName']}",
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                Text(
+                  "${userData['userName']}@",
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget threeDcontainer(
+    BuildContext context,
+    Color containerColor, {
+    IconData? icon,
+    Color? iconColor,
+    String? assetPath,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(5),
+      decoration: BoxDecoration(
+        color: containerColor,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey.shade800
+                : Colors.grey.shade900,
+            blurRadius: 2,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: icon != null
+          ? Icon(icon, color: iconColor ?? Colors.white)
+          : assetPath != null
+          ? CircleAvatar(child: Image.asset(assetPath))
+          : null,
+    );
+  }
+
+  // container decoration
+  BoxDecoration containerDecoration(BuildContext context) => BoxDecoration(
+    color: Theme.of(context).cardColor,
+    borderRadius: BorderRadius.circular(20),
+    border: Border.all(color: Colors.greenAccent, width: 2),
+    boxShadow: [
+      BoxShadow(
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.grey.shade800
+            : Colors.grey.shade800,
+        blurRadius: 4,
+        offset: Offset(0, 3),
+      ),
+    ],
+  );
+
+  // elevated button style
   ButtonStyle elevatedButtonStyle(double width, double height) =>
       ElevatedButton.styleFrom(
         elevation: 5,
