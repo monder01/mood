@@ -1,13 +1,13 @@
 import 'package:go_router/go_router.dart';
-import 'package:mood01/browse/browse_page.dart';
+import 'package:mood01/browse/admin_browse_page.dart';
 import 'package:mood01/auth/signin_page.dart';
 import 'package:mood01/auth/signup_page.dart';
 import 'package:mood01/designs/about_us_page.dart';
+import 'package:mood01/global/my_account.dart';
+import 'package:mood01/global/setting_page.dart';
 import 'package:mood01/notifications/my_notifications_page.dart';
 import 'package:mood01/designs/home_page.dart';
 import 'package:mood01/auth/splash_page.dart';
-import 'package:mood01/friends/search_for_friends_page.dart';
-import 'package:mood01/friends/user_fellows_page.dart';
 import 'package:mood01/chats/chat_page.dart';
 
 class NaviGo {
@@ -51,21 +51,21 @@ class NaviGo {
       ),
 
       GoRoute(
-        path: '/search-friends',
-        name: 'searchFriends',
-        builder: (context, state) => const SearchForFriendsPage(),
-      ),
-
-      GoRoute(
-        path: '/fellows',
-        name: 'fellows',
-        builder: (context, state) => const UserFellowsPage(),
-      ),
-
-      GoRoute(
         path: '/notifications',
         name: 'notifications',
         builder: (context, state) => const MyNotificationsPage(),
+      ),
+
+      GoRoute(
+        path: '/my-account',
+        name: 'myAccount',
+        builder: (context, state) => const MyAccount(),
+      ),
+
+      GoRoute(
+        path: '/setting',
+        name: 'setting',
+        builder: (context, state) => const SettingPage(),
       ),
 
       GoRoute(

@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mood01/auth/users.dart';
+import 'package:mood01/auth/admin.dart';
 import 'package:mood01/designs/interfaces.dart';
 
 class MyAccount extends StatefulWidget {
@@ -17,7 +17,7 @@ class MyAccount extends StatefulWidget {
 
 class _MyAccountState extends State<MyAccount> {
   final interfaces = Interfaces();
-  final Users users = Users();
+  final Admin admin = Admin();
   final ImagePicker picker = ImagePicker();
 
   bool isPhotoLoading = false;
@@ -58,17 +58,17 @@ class _MyAccountState extends State<MyAccount> {
 
       final ref = FirebaseStorage.instance
           .ref()
-          .child("users")
+          .child("admin")
           .child("${user.uid}.jpg");
 
       await ref.putFile(file);
       final imageUrl = await ref.getDownloadURL();
 
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+      await FirebaseFirestore.instance.collection("admin").doc(user.uid).update(
         {"photoUrl": imageUrl},
       );
 
-      users.photoUrl = imageUrl;
+      admin.photoUrl = imageUrl;
 
       if (!mounted) return;
       interfaces.showAlert(
@@ -165,7 +165,7 @@ class _MyAccountState extends State<MyAccount> {
     if (user == null) return false;
 
     final snapshot = await FirebaseFirestore.instance
-        .collection("users")
+        .collection("admin")
         .where("userName", isEqualTo: userName)
         .get();
 
@@ -274,7 +274,7 @@ class _MyAccountState extends State<MyAccount> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+      await FirebaseFirestore.instance.collection("admin").doc(user.uid).update(
         {"firstName": newFirstName, "lastName": newLastName},
       );
 
@@ -360,7 +360,7 @@ class _MyAccountState extends State<MyAccount> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+      await FirebaseFirestore.instance.collection("admin").doc(user.uid).update(
         {"phone": phoneToSave},
       );
 
@@ -468,7 +468,7 @@ class _MyAccountState extends State<MyAccount> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+      await FirebaseFirestore.instance.collection("admin").doc(user.uid).update(
         {"userName": userName},
       );
 
@@ -761,7 +761,7 @@ class _MyAccountState extends State<MyAccount> {
     }
 
     final userStream = FirebaseFirestore.instance
-        .collection("users")
+        .collection("admin")
         .doc(user.uid)
         .snapshots();
 

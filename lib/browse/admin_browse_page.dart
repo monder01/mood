@@ -10,7 +10,7 @@ import 'package:mood01/browse/admin_main_page.dart';
 import 'package:mood01/browse/admin_system_page.dart';
 import 'package:mood01/browse/admin_user_management_page.dart';
 import 'package:mood01/auth/session_service.dart';
-import 'package:mood01/auth/users.dart';
+import 'package:mood01/auth/admin.dart';
 import 'package:mood01/chats/coworkers_page.dart';
 import 'package:mood01/designs/about_us_page.dart';
 import 'package:mood01/designs/interfaces.dart';
@@ -26,7 +26,7 @@ class Browsepage extends StatefulWidget {
 }
 
 class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
-  Users users = Users();
+  Admin admin = Admin();
   final interfaces = Interfaces();
   final System system = System();
 
@@ -46,7 +46,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     if (user == null) return;
 
     _sessionSubscription = FirebaseFirestore.instance
-        .collection("users")
+        .collection("admin")
         .doc(user.uid)
         .snapshots()
         .listen((snapshot) async {
@@ -79,7 +79,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     _sessionSubscription = null;
 
     if (!mounted) return;
-    await users.signOut(context);
+    await admin.signOut(context);
 
     if (!mounted) return;
     interfaces.showFlutterToast(message);
@@ -94,7 +94,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
       if (fcmToken == null || fcmToken.isEmpty) return;
 
       final doc = await FirebaseFirestore.instance
-          .collection("users")
+          .collection("admin")
           .doc(firebaseUser.uid)
           .get();
 
@@ -102,7 +102,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
 
       if (currentToken != fcmToken) {
         await FirebaseFirestore.instance
-            .collection("users")
+            .collection("admin")
             .doc(firebaseUser.uid)
             .set({"messageToken": fcmToken}, SetOptions(merge: true));
       }
@@ -112,12 +112,12 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
   }
 
   Future<void> loadUser() async {
-    final user = await users.getCurrentUser();
+    final user = await admin.getCurrentUser();
     if (!mounted) return;
 
     if (user != null) {
       setState(() {
-        users = user;
+        admin = user;
       });
     }
   }
@@ -161,9 +161,9 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                   backgroundColor: Theme.of(context).cardColor,
                   radius: 40,
                   child: ClipOval(
-                    child: users.photoUrl != null && users.photoUrl!.isNotEmpty
+                    child: admin.photoUrl != null && admin.photoUrl!.isNotEmpty
                         ? Image.network(
-                            users.photoUrl!,
+                            admin.photoUrl!,
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
@@ -174,7 +174,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                 Column(
                   children: [
                     Text(
-                      users.name ?? "",
+                      admin.name ?? "",
                       style: TextStyle(
                         fontSize: 20,
                         color: Theme.of(context).brightness == Brightness.dark
@@ -183,7 +183,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                       ),
                     ),
                     Text(
-                      users.email ?? "",
+                      admin.email ?? "",
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(context).brightness == Brightness.dark
@@ -288,7 +288,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
               if (!confirm) return;
               if (!mounted) return;
 
-              await users.signOut(context);
+              await admin.signOut(context);
             },
           ),
         ],

@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mood01/friends/search_for_friends_page.dart';
 import 'package:mood01/notifications/my_notifications_page.dart';
 
 class Interfaces {
@@ -152,17 +151,6 @@ class Interfaces {
     shadowColor: Colors.black54,
     actions: actions
         ? [
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const SearchForFriendsPage(),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.search),
-            ),
             IconButton(
               onPressed: () {
                 Navigator.push(

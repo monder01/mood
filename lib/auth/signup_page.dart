@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/auth/users.dart';
+import 'package:mood01/auth/admin.dart';
 import 'package:mood01/designs/interfaces.dart';
 
 class Signuppage extends StatefulWidget {
@@ -11,7 +11,7 @@ class Signuppage extends StatefulWidget {
 
 class _SignuppageState extends State<Signuppage> {
   final interfaces = Interfaces();
-  Users users = Users();
+  Admin admin = Admin();
   TextEditingController usernameController = TextEditingController();
   TextEditingController firstnameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
@@ -104,7 +104,7 @@ class _SignuppageState extends State<Signuppage> {
                 setState(() {
                   interfaces.isLoading = true;
                 });
-                await users.signUp(
+                await admin.signUp(
                   context,
                   usernameController,
                   firstnameController,

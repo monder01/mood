@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mood01/auth/users.dart';
+import 'package:mood01/auth/admin.dart';
 import 'package:mood01/designs/interfaces.dart';
 
 class Signinpage extends StatefulWidget {
@@ -11,7 +11,7 @@ class Signinpage extends StatefulWidget {
 
 class _SigninpageState extends State<Signinpage> {
   final interfaces = Interfaces();
-  Users users = Users();
+  Admin admin = Admin();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   bool isObscure = true;
@@ -96,7 +96,7 @@ class _SigninpageState extends State<Signinpage> {
                 setState(() {
                   interfaces.isLoading = true;
                 });
-                await users.signIn(
+                await admin.signIn(
                   context,
                   emailController,
                   passwordController,

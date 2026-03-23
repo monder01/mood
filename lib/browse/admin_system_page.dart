@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:mood01/addEdit/add_quran_page.dart';
+import 'package:mood01/adminTabs/quran_tab.dart';
 import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/global/system.dart';
 import 'package:mood01/notifications/course_department_target_picker_page.dart';
@@ -248,6 +248,318 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
     }
   }
 
+  Widget systemInfo() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: isSystemLoading
+          ? const Center(
+              child: CircularProgressIndicator(color: Colors.greenAccent),
+            )
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: const Text(
+                      "الرجاء ملء جميع الحقول عند تحديث معلومات النظام :",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  TextField(
+                    controller: versionController,
+                    decoration: const InputDecoration(
+                      hintText: "الإصدار",
+                      prefixIcon: Icon(
+                        Icons.system_update,
+                        color: Colors.greenAccent,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                        borderSide: BorderSide(
+                          color: Colors.greenAccent,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  TextField(
+                    controller: updateLinkController,
+                    maxLines: 2,
+                    decoration: const InputDecoration(
+                      hintText: "رابط التحديث",
+                      prefixIcon: Icon(Icons.link, color: Colors.greenAccent),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                        borderSide: BorderSide(
+                          color: Colors.greenAccent,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.phone_android),
+                      title: Text(
+                        "نسخة التطبيق الحالية: ${system.appVersion ?? ''}",
+                      ),
+                    ),
+                  ),
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.cloud_done),
+                      title: Text("نسخة النظام: ${system.systemVersion ?? ''}"),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Center(
+                    child: ElevatedButton(
+                      style: interfaces.elevatedButtonStyle(300, 50),
+                      onPressed: isSystemUpdating
+                          ? null
+                          : () async {
+                              await updateSystemInfo();
+                            },
+                      child: isSystemUpdating
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: Colors.greenAccent,
+                              ),
+                            )
+                          : const Text(
+                              "تحديث معلومات النظام",
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+    );
+  }
+
+  Widget sendNotificationTab() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: titleController,
+            decoration: const InputDecoration(
+              hintText: "عنوان الإشعار",
+              prefixIcon: Icon(Icons.title, color: Colors.greenAccent),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+                borderSide: BorderSide(color: Colors.greenAccent, width: 2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            controller: bodyController,
+            maxLines: 4,
+            decoration: const InputDecoration(
+              hintText: "نص الإشعار",
+              prefixIcon: Icon(Icons.message, color: Colors.greenAccent),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+                borderSide: BorderSide(color: Colors.greenAccent, width: 2),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          Card(
+            child: ListTile(
+              title: const Text("يحتوي على مسار تنقل"),
+              subtitle: const Text(
+                "فعّلها إذا أردت أن يفتح الإشعار صفحة معينة",
+              ),
+              trailing: Switch(
+                value: hasRoute,
+                activeTrackColor: Colors.greenAccent,
+                onChanged: (value) {
+                  setState(() {
+                    hasRoute = value;
+
+                    if (value) {
+                      hasCourseDepartmentTarget = false;
+                      selectedTargetType = null;
+                      selectedTargetId = null;
+                      selectedTargetName = null;
+                    } else {
+                      selectedRoutePath = null;
+                      selectedRouteTitle = null;
+                    }
+                  });
+                },
+              ),
+            ),
+          ),
+
+          Card(
+            child: ListTile(
+              title: const Text("تنقل خاص بالأقسام أو المواد"),
+              subtitle: const Text("خيار جديد بدون التأثير على route القديم"),
+              trailing: Switch(
+                value: hasCourseDepartmentTarget,
+                activeTrackColor: Colors.greenAccent,
+                onChanged: (value) {
+                  setState(() {
+                    hasCourseDepartmentTarget = value;
+
+                    if (value) {
+                      hasRoute = false;
+                      selectedRoutePath = null;
+                      selectedRouteTitle = null;
+                    } else {
+                      selectedTargetType = null;
+                      selectedTargetId = null;
+                      selectedTargetName = null;
+                    }
+                  });
+                },
+              ),
+            ),
+          ),
+
+          if (hasRoute) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.greenAccent),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: openRoutePickerPage,
+              icon: const Icon(Icons.folder_open, color: Colors.green),
+              label: Text(
+                selectedRouteTitle == null
+                    ? "اختر المسار"
+                    : "المسار المختار: $selectedRouteTitle",
+              ),
+            ),
+            if (selectedRoutePath != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                "Path: $selectedRoutePath",
+                style: const TextStyle(color: Colors.grey),
+              ),
+            ],
+          ],
+
+          if (hasCourseDepartmentTarget) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                side: const BorderSide(color: Colors.greenAccent),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: openCourseDepartmentTargetPicker,
+              icon: const Icon(Icons.folder_open, color: Colors.green),
+              label: Text(
+                selectedTargetName == null
+                    ? "اختيار كلية أو قسم"
+                    : "المختار: $selectedTargetName",
+              ),
+            ),
+          ],
+
+          const SizedBox(height: 40),
+
+          Center(
+            child: interfaces.submitButton01(
+              context,
+              "ارسل الإشعار لجميع المستخدمين",
+              () async {
+                final title = titleController.text.trim();
+                final body = bodyController.text.trim();
+
+                if (title.isEmpty || body.isEmpty) {
+                  interfaces.showFlutterToast("يرجى ملء جميع الحقول");
+                  return;
+                }
+
+                if (hasRoute && selectedRoutePath == null) {
+                  interfaces.showFlutterToast("يرجى اختيار مسار أولاً");
+                  return;
+                }
+                if (hasCourseDepartmentTarget &&
+                    (selectedTargetType == null ||
+                        selectedTargetId == null ||
+                        selectedTargetName == null)) {
+                  interfaces.showFlutterToast("اختر الكلية أو القسم أولاً");
+                  return;
+                }
+
+                setState(() {
+                  interfaces.isLoading = true;
+                });
+
+                await sendNotificationToAllUsersSafe(
+                  context: context,
+                  title: titleController.text,
+                  body: bodyController.text,
+                  routePath: hasRoute ? selectedRoutePath : null,
+                  routeTitle: hasRoute ? selectedRouteTitle : null,
+                  targetType: hasCourseDepartmentTarget
+                      ? selectedTargetType
+                      : null,
+                  targetId: hasCourseDepartmentTarget ? selectedTargetId : null,
+                  targetName: hasCourseDepartmentTarget
+                      ? selectedTargetName
+                      : null,
+                );
+
+                setState(() {
+                  interfaces.isLoading = false;
+                });
+              },
+              double.infinity,
+              50,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget quranTab() {
+    return const QuranTab();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -287,481 +599,12 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
               child: TabBarView(
                 children: [
                   // system info tab 1 content
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: isSystemLoading
-                        ? const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.greenAccent,
-                            ),
-                          )
-                        : SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerRight,
-                                  child: const Text(
-                                    "الرجاء ملء جميع الحقول عند تحديث معلومات النظام :",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-
-                                TextField(
-                                  controller: versionController,
-                                  decoration: const InputDecoration(
-                                    hintText: "الإصدار",
-                                    prefixIcon: Icon(
-                                      Icons.system_update,
-                                      color: Colors.greenAccent,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(20),
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(20),
-                                      ),
-                                      borderSide: BorderSide(
-                                        color: Colors.greenAccent,
-                                        width: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-
-                                TextField(
-                                  controller: updateLinkController,
-                                  maxLines: 2,
-                                  decoration: const InputDecoration(
-                                    hintText: "رابط التحديث",
-                                    prefixIcon: Icon(
-                                      Icons.link,
-                                      color: Colors.greenAccent,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(20),
-                                      ),
-                                    ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(20),
-                                      ),
-                                      borderSide: BorderSide(
-                                        color: Colors.greenAccent,
-                                        width: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-
-                                Card(
-                                  child: ListTile(
-                                    leading: const Icon(Icons.phone_android),
-                                    title: Text(
-                                      "نسخة التطبيق الحالية: ${system.appVersion ?? ''}",
-                                    ),
-                                  ),
-                                ),
-                                Card(
-                                  child: ListTile(
-                                    leading: const Icon(Icons.cloud_done),
-                                    title: Text(
-                                      "نسخة النظام: ${system.systemVersion ?? ''}",
-                                    ),
-                                  ),
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Center(
-                                  child: ElevatedButton(
-                                    style: interfaces.elevatedButtonStyle(
-                                      300,
-                                      50,
-                                    ),
-                                    onPressed: isSystemUpdating
-                                        ? null
-                                        : () async {
-                                            await updateSystemInfo();
-                                          },
-                                    child: isSystemUpdating
-                                        ? const Center(
-                                            child: CircularProgressIndicator(
-                                              color: Colors.greenAccent,
-                                            ),
-                                          )
-                                        : const Text(
-                                            "تحديث معلومات النظام",
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                  ),
-
+                  systemInfo(),
                   // send notification tab 2 content
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        TextField(
-                          controller: titleController,
-                          decoration: const InputDecoration(
-                            hintText: "عنوان الإشعار",
-                            prefixIcon: Icon(
-                              Icons.title,
-                              color: Colors.greenAccent,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                              borderSide: BorderSide(
-                                color: Colors.greenAccent,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        TextField(
-                          controller: bodyController,
-                          maxLines: 4,
-                          decoration: const InputDecoration(
-                            hintText: "نص الإشعار",
-                            prefixIcon: Icon(
-                              Icons.message,
-                              color: Colors.greenAccent,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(20),
-                              ),
-                              borderSide: BorderSide(
-                                color: Colors.greenAccent,
-                                width: 2,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        Card(
-                          child: ListTile(
-                            title: const Text("يحتوي على مسار تنقل"),
-                            subtitle: const Text(
-                              "فعّلها إذا أردت أن يفتح الإشعار صفحة معينة",
-                            ),
-                            trailing: Switch(
-                              value: hasRoute,
-                              activeTrackColor: Colors.greenAccent,
-                              onChanged: (value) {
-                                setState(() {
-                                  hasRoute = value;
-
-                                  if (value) {
-                                    hasCourseDepartmentTarget = false;
-                                    selectedTargetType = null;
-                                    selectedTargetId = null;
-                                    selectedTargetName = null;
-                                  } else {
-                                    selectedRoutePath = null;
-                                    selectedRouteTitle = null;
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-
-                        Card(
-                          child: ListTile(
-                            title: const Text("تنقل خاص بالأقسام أو المواد"),
-                            subtitle: const Text(
-                              "خيار جديد بدون التأثير على route القديم",
-                            ),
-                            trailing: Switch(
-                              value: hasCourseDepartmentTarget,
-                              activeTrackColor: Colors.greenAccent,
-                              onChanged: (value) {
-                                setState(() {
-                                  hasCourseDepartmentTarget = value;
-
-                                  if (value) {
-                                    hasRoute = false;
-                                    selectedRoutePath = null;
-                                    selectedRouteTitle = null;
-                                  } else {
-                                    selectedTargetType = null;
-                                    selectedTargetId = null;
-                                    selectedTargetName = null;
-                                  }
-                                });
-                              },
-                            ),
-                          ),
-                        ),
-
-                        if (hasRoute) ...[
-                          const SizedBox(height: 8),
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.greenAccent),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: openRoutePickerPage,
-                            icon: const Icon(
-                              Icons.folder_open,
-                              color: Colors.green,
-                            ),
-                            label: Text(
-                              selectedRouteTitle == null
-                                  ? "اختر المسار"
-                                  : "المسار المختار: $selectedRouteTitle",
-                            ),
-                          ),
-                          if (selectedRoutePath != null) ...[
-                            const SizedBox(height: 6),
-                            Text(
-                              "Path: $selectedRoutePath",
-                              style: const TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ],
-
-                        if (hasCourseDepartmentTarget) ...[
-                          const SizedBox(height: 8),
-                          OutlinedButton.icon(
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Colors.greenAccent),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            onPressed: openCourseDepartmentTargetPicker,
-                            icon: const Icon(
-                              Icons.folder_open,
-                              color: Colors.green,
-                            ),
-                            label: Text(
-                              selectedTargetName == null
-                                  ? "اختيار كلية أو قسم"
-                                  : "المختار: $selectedTargetName",
-                            ),
-                          ),
-                        ],
-
-                        const SizedBox(height: 40),
-
-                        Center(
-                          child: interfaces.submitButton01(
-                            context,
-                            "ارسل الإشعار لجميع المستخدمين",
-                            () async {
-                              final title = titleController.text.trim();
-                              final body = bodyController.text.trim();
-
-                              if (title.isEmpty || body.isEmpty) {
-                                interfaces.showFlutterToast(
-                                  "يرجى ملء جميع الحقول",
-                                );
-                                return;
-                              }
-
-                              if (hasRoute && selectedRoutePath == null) {
-                                interfaces.showFlutterToast(
-                                  "يرجى اختيار مسار أولاً",
-                                );
-                                return;
-                              }
-                              if (hasCourseDepartmentTarget &&
-                                  (selectedTargetType == null ||
-                                      selectedTargetId == null ||
-                                      selectedTargetName == null)) {
-                                interfaces.showFlutterToast(
-                                  "اختر الكلية أو القسم أولاً",
-                                );
-                                return;
-                              }
-
-                              setState(() {
-                                interfaces.isLoading = true;
-                              });
-
-                              await sendNotificationToAllUsersSafe(
-                                context: context,
-                                title: titleController.text,
-                                body: bodyController.text,
-                                routePath: hasRoute ? selectedRoutePath : null,
-                                routeTitle: hasRoute
-                                    ? selectedRouteTitle
-                                    : null,
-                                targetType: hasCourseDepartmentTarget
-                                    ? selectedTargetType
-                                    : null,
-                                targetId: hasCourseDepartmentTarget
-                                    ? selectedTargetId
-                                    : null,
-                                targetName: hasCourseDepartmentTarget
-                                    ? selectedTargetName
-                                    : null,
-                              );
-
-                              setState(() {
-                                interfaces.isLoading = false;
-                              });
-                            },
-                            double.infinity,
-                            50,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  sendNotificationTab(),
 
                   // ayat tab 3 content
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      children: [
-                        /// زر إضافة آية
-                        interfaces.submitButton01(
-                          context,
-                          "إضافة آية",
-                          () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => AddQuranVersesPage(
-                                  systemDocId: system.systemId,
-                                ),
-                              ),
-                            );
-                          },
-                          double.infinity,
-                          50,
-                        ),
-
-                        const SizedBox(height: 15),
-
-                        /// عرض الآيات
-                        Expanded(
-                          child:
-                              StreamBuilder<
-                                QuerySnapshot<Map<String, dynamic>>
-                              >(
-                                stream: FirebaseFirestore.instance
-                                    .collection("system")
-                                    .doc(system.systemId)
-                                    .collection("QuranVerses")
-                                    .snapshots(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Center(
-                                      child: CircularProgressIndicator(
-                                        color: Colors.greenAccent,
-                                      ),
-                                    );
-                                  }
-
-                                  if (snapshot.hasError) {
-                                    return const Center(
-                                      child: Text("حدث خطأ أثناء تحميل الآيات"),
-                                    );
-                                  }
-
-                                  if (!snapshot.hasData ||
-                                      snapshot.data!.docs.isEmpty) {
-                                    return const Center(
-                                      child: Text("لا توجد آيات مفعلة"),
-                                    );
-                                  }
-
-                                  final docs = snapshot.data!.docs;
-
-                                  return ListView.builder(
-                                    itemCount: docs.length,
-                                    itemBuilder: (context, index) {
-                                      final data = docs[index].data();
-                                      final verse =
-                                          data["verse"]?.toString() ?? "";
-                                      final isActive = data["isActive"];
-
-                                      return InkWell(
-                                        borderRadius: BorderRadius.circular(16),
-                                        onTap: () {
-                                          showAyaOptions(
-                                            context,
-                                            docs[index].id,
-                                            isActive,
-                                          );
-                                        },
-                                        child: Container(
-                                          margin: const EdgeInsets.symmetric(
-                                            vertical: 8,
-                                          ),
-                                          padding: const EdgeInsets.all(16),
-                                          decoration: BoxDecoration(
-                                            color: Theme.of(context).cardColor,
-                                            borderRadius: BorderRadius.circular(
-                                              16,
-                                            ),
-                                            border: Border.all(
-                                              color: isActive
-                                                  ? Colors.greenAccent
-                                                  : Colors.grey,
-                                              width: 2,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            verse,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              height: 1.7,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  quranTab(),
                 ],
               ),
             ),

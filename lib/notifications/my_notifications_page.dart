@@ -2,11 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mood01/chats/chat_page.dart';
-import 'package:mood01/friends/user_fellows_page.dart';
 import 'package:mood01/designs/interfaces.dart';
-import 'package:mood01/global/my_account.dart';
-import 'package:mood01/notifications/notification_target_navigator.dart';
+import 'package:mood01/navi_go.dart';
 
 class MyNotificationsPage extends StatefulWidget {
   const MyNotificationsPage({super.key});
@@ -215,7 +212,6 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
                     final isRead = data["isRead"] ?? false;
                     final createdAt = data["createdAt"] as Timestamp?;
                     final senderId = data["senderId"] ?? "";
-                    final routePath = data["routePath"] ?? "/";
                     final progress = dragProgress[doc.id] ?? 0.0;
 
                     return Dismissible(
@@ -267,50 +263,10 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
 
                             if (type == "chat") {
                               if (!context.mounted) return;
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      ChatPage(otherUserId: senderId),
-                                ),
-                              );
-                            } else if (type == "friend_request") {
-                              if (!context.mounted) return;
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => UserFellowsPage(),
-                                ),
-                              );
+                              context.push(NaviGo.chatPath(senderId));
                             } else if (type == "security_login") {
                               if (!context.mounted) return;
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const MyAccount(),
-                                ),
-                              );
-                            } else if (type == "broadcast") {
-                              final targetType = data["targetType"];
-                              final targetId = data["targetId"];
-                              final targetName = data["targetName"];
-
-                              if ((targetType ?? "").toString().isNotEmpty &&
-                                  (targetId ?? "").toString().isNotEmpty &&
-                                  (targetName ?? "").toString().isNotEmpty) {
-                                if (!context.mounted) return;
-                                await NotificationTargetNavigator.openTarget(
-                                  context,
-                                  targetType: targetType?.toString(),
-                                  targetId: targetId?.toString(),
-                                  targetName: targetName?.toString(),
-                                );
-                              } else if ((routePath ?? "")
-                                  .toString()
-                                  .isNotEmpty) {
-                                if (!context.mounted) return;
-                                await context.push(routePath);
-                              }
+                              context.push("/my-account");
                             }
                           },
                           child: Container(

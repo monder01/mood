@@ -4,12 +4,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mood01/auth/presence_service.dart';
 import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/designs/home_page.dart';
-import 'package:mood01/browse/browse_page.dart';
+import 'package:mood01/browse/admin_browse_page.dart';
 import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 
-class Users {
-  static Users? current;
+class Admin {
+  static Admin? currentAdmin;
   String? userName,
       email,
       name,
@@ -26,7 +26,7 @@ class Users {
       phoneNumber;
   bool? isActive, isOnline, isPremium, isPrivate;
 
-  Users({
+  Admin({
     this.id,
     this.password,
     this.firstName,
@@ -46,20 +46,51 @@ class Users {
     this.messageToken,
   });
 
+  // get admin data
+  factory Admin.getAdminData(DocumentSnapshot adminDoc) {
+    final adminData = adminDoc.data() as Map<String, dynamic>;
+    final firstName = adminData["firstName"] ?? "";
+    final lastName = adminData["lastName"] ?? "";
+    return Admin(
+      id: adminDoc.id,
+      email: adminData["email"] ?? "",
+      name: "$firstName $lastName",
+      photoUrl: adminData["photoUrl"] ?? "",
+      phoneNumber: adminData["phone"] ?? "",
+      role: adminData["role"] ?? "",
+      userName: adminData["userName"] ?? "",
+      messageToken: adminData["messageToken"] ?? "",
+      isActive: adminData["isActive"] ?? false,
+      isOnline: adminData["isOnline"] ?? false,
+      isPrivate: adminData["isPrivate"] ?? false,
+      activeSessionId: adminData["activeSessionId"] ?? "",
+      lastLogin: adminData["lastLogin"] ?? "",
+    );
+  }
+
+  static Future<Admin?> getOtherAdminInfo(String adminId) async {
+    final doc = await FirebaseFirestore.instance
+        .collection("Admin")
+        .doc(adminId)
+        .get();
+    if (!doc.exists) return null;
+    return Admin.getAdminData(doc);
+  }
+
   // get current user data
-  Future<Users?> getCurrentUser() async {
+  Future<Admin?> getCurrentUser() async {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) return null;
 
       DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection("users")
+          .collection("Admin")
           .doc(user.uid)
           .get();
 
       if (!userDoc.exists) return null;
 
-      return Users(
+      return Admin(
         id: user.uid,
         email: user.email,
         name: "${userDoc.get("firstName")} ${userDoc.get("lastName")}",
@@ -114,12 +145,12 @@ class Users {
       }
 
       // تحديث حالة الاتصال
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
+      await FirebaseFirestore.instance.collection("Admin").doc(user.uid).update(
         {"isOnline": true, "lastLogin": FieldValue.serverTimestamp()},
       );
       // get user data
       final userData = await FirebaseFirestore.instance
-          .collection("users")
+          .collection("Admin")
           .doc(user.uid)
           .get();
       final name = "${userData.get("firstName")} ${userData.get("lastName")}";
@@ -265,7 +296,7 @@ class Users {
 
       final user = credential.user;
 
-      await FirebaseFirestore.instance.collection("users").doc(user!.uid).set({
+      await FirebaseFirestore.instance.collection("Admin").doc(user!.uid).set({
         "uid": user.uid,
         "userName": usernameController.text.trim(),
         "firstName": firstnameController.text.trim(),
@@ -362,7 +393,7 @@ class Users {
 
       if (user != null) {
         await FirebaseFirestore.instance
-            .collection("users")
+            .collection("Admin")
             .doc(user.uid)
             .update({
               "isOnline": false,
