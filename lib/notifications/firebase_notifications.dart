@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:mood01/navi_go.dart';
 
 final FlutterLocalNotificationsPlugin localNotifications =
     FlutterLocalNotificationsPlugin();
@@ -24,6 +23,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class FirebaseNotifications {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  static String? pendingRoute;
 
   static Future<void> init() async {
     await _requestPermission();
@@ -142,17 +142,17 @@ class FirebaseNotifications {
     final targetName = (data["targetName"] ?? "").toString();
 
     if (type == "chat" && senderId.isNotEmpty) {
-      NaviGo.router.push("/chat/$senderId");
+      pendingRoute = "/chat/$senderId";
       return;
     }
 
     if (type == "friend_request") {
-      NaviGo.router.push("/fellows");
+      pendingRoute = "/fellows";
       return;
     }
 
     if (type == "security_login") {
-      NaviGo.router.push("/browse");
+      pendingRoute = "/browse";
       return;
     }
 
@@ -163,20 +163,24 @@ class FirebaseNotifications {
         final safeName = Uri.encodeComponent(targetName);
 
         if (targetType == "collegeDepartments") {
-          NaviGo.router.push("/departments/$targetId/$safeName");
+          pendingRoute = "/departments/$targetId/$safeName";
           return;
         }
 
         if (targetType == "departmentCourses") {
-          NaviGo.router.push("/courses/$targetId/$safeName");
+          pendingRoute = "/courses/$targetId/$safeName";
           return;
         }
       }
 
       if (routePath.isNotEmpty) {
-        NaviGo.router.push(routePath);
+        pendingRoute = routePath;
         return;
       }
+    }
+
+    if (routePath.isNotEmpty) {
+      pendingRoute = routePath;
     }
   }
 
@@ -185,9 +189,10 @@ class FirebaseNotifications {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
 
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).update(
-        {"messageToken": newToken},
-      );
+      await FirebaseFirestore.instance
+          .collection("admins")
+          .doc(user.uid)
+          .update({"messageToken": newToken});
 
       debugPrint("تم تحديث التوكن: $newToken");
     });

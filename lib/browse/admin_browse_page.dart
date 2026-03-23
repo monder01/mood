@@ -143,155 +143,178 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     final currentAdmin = admin;
 
     return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          DrawerHeader(
-            decoration: BoxDecoration(color: Colors.greenAccent[200]),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  backgroundColor: Theme.of(context).cardColor,
-                  radius: 40,
-                  child: ClipOval(
-                    child:
-                        currentAdmin?.photoUrl != null &&
-                            currentAdmin!.photoUrl!.isNotEmpty
-                        ? Image.network(
-                            currentAdmin.photoUrl!,
-                            width: 80,
-                            height: 80,
-                            fit: BoxFit.cover,
-                          )
-                        : const Icon(Icons.person, size: 50),
+      child: RefreshIndicator(
+        onRefresh: () => refreshPage(),
+        color: Colors.greenAccent,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(color: Colors.greenAccent[200]),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  InkWell(
+                    borderRadius: BorderRadius.circular(50),
+                    onTap: () async {
+                      await interfaces.displayImageDialog(
+                        context,
+                        currentAdmin!.photoUrl!,
+                      );
+                    },
+                    child: CircleAvatar(
+                      backgroundColor: Theme.of(context).cardColor,
+                      radius: 40,
+                      child: ClipOval(
+                        child:
+                            currentAdmin?.photoUrl != null &&
+                                currentAdmin!.photoUrl!.isNotEmpty
+                            ? Image.network(
+                                currentAdmin.photoUrl!,
+                                width: 80,
+                                height: 80,
+                                fit: BoxFit.cover,
+                              )
+                            : const Icon(Icons.person, size: 50),
+                      ),
+                    ),
                   ),
-                ),
-                Column(
-                  children: [
-                    Text(
-                      currentAdmin?.name ?? "",
-                      style: TextStyle(
-                        fontSize: 20,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.grey.shade800
-                            : Colors.black,
+                  Column(
+                    children: [
+                      Text(
+                        currentAdmin?.name ?? "",
+                        style: TextStyle(
+                          fontSize: 20,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey.shade800
+                              : Colors.black,
+                        ),
                       ),
-                    ),
-                    Text(
-                      currentAdmin?.email ?? "",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Theme.of(context).brightness == Brightness.dark
-                            ? Colors.grey.shade800
-                            : Colors.black.withValues(alpha: 0.6),
+                      Text(
+                        currentAdmin?.email ?? "",
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? Colors.grey.shade800
+                              : Colors.black.withValues(alpha: 0.6),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          ListTile(
-            leading: const Icon(Icons.admin_panel_settings),
-            title: const Text("تواصل إداري"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CoworkersPage()),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.person),
-            title: const Text("الحساب"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const MyAccount()),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.settings),
-            title: const Text("الإعدادات"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SettingPage()),
-              );
-            },
-          ),
-
-          const Divider(),
-
-          ListTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text("عن التطبيق"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AboutAppPage()),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: system.isUpdateAvailable == false
-                ? const Icon(Icons.phone_android)
-                : const Icon(Icons.update),
-            title: system.isUpdateAvailable == false
-                ? Text(
-                    "الاصدار محدث : ${system.appVersion ?? ""}",
-                    style: const TextStyle(color: Colors.green),
-                  )
-                : Text(
-                    "هناك تحديث : ${system.appVersion ?? ""}",
-                    style: const TextStyle(color: Colors.orange),
+            ListTile(
+              leading: const Icon(Icons.admin_panel_settings),
+              title: const Text("تواصل إداري"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CoworkersPage(),
                   ),
-            onTap: () async {
-              if (system.isUpdateAvailable == false) {
-                interfaces.showFlutterToast("لا يوجد تحديثات");
-              } else {
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text("الحساب"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyAccount()),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: const Text("الإعدادات"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const SettingPage()),
+                );
+              },
+            ),
+
+            const Divider(),
+
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text("عن التطبيق"),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AboutAppPage()),
+                );
+              },
+            ),
+
+            ListTile(
+              leading: system.isUpdateAvailable == false
+                  ? const Icon(Icons.phone_android)
+                  : const Icon(Icons.update),
+              title: system.isUpdateAvailable == false
+                  ? Text(
+                      "الاصدار محدث : ${system.appVersion ?? ""}",
+                      style: const TextStyle(color: Colors.green),
+                    )
+                  : Text(
+                      "هناك تحديث : ${system.appVersion ?? ""}",
+                      style: const TextStyle(color: Colors.orange),
+                    ),
+              onTap: () async {
+                if (system.isUpdateAvailable == false) {
+                  interfaces.showFlutterToast("لا يوجد تحديثات");
+                } else {
+                  final confirm = await interfaces.showConfirmationDialog(
+                    context,
+                    "هل تريد تحميل التحديث الجديد؟",
+                  );
+
+                  if (confirm) {
+                    await system.openSystemUrl();
+                  }
+                }
+              },
+            ),
+
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text(
+                "تسجيل الخروج",
+                style: TextStyle(color: Colors.red),
+              ),
+              onTap: () async {
                 final confirm = await interfaces.showConfirmationDialog(
                   context,
-                  "هل تريد تحميل التحديث الجديد؟",
+                  "سيتم تسجيل الخروج وسيتم تحويلك للصفحة الرئيسية ، هل أنت متاكد ؟",
+                  icon: Icons.question_mark_outlined,
                 );
 
-                if (confirm) {
-                  await system.openSystemUrl();
-                }
-              }
-            },
-          ),
+                if (!confirm) return;
+                if (!mounted) return;
+                if (admin == null) return;
 
-          ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text(
-              "تسجيل الخروج",
-              style: TextStyle(color: Colors.red),
+                await admin!.signOut(context);
+              },
             ),
-            onTap: () async {
-              final confirm = await interfaces.showConfirmationDialog(
-                context,
-                "سيتم تسجيل الخروج وسيتم تحويلك للصفحة الرئيسية ، هل أنت متاكد ؟",
-                icon: Icons.question_mark_outlined,
-              );
-
-              if (!confirm) return;
-              if (!mounted) return;
-              if (admin == null) return;
-
-              await admin!.signOut(context);
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> refreshPage() async {
+    await loadSystemInfo();
+    await getFcmToken();
+
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override

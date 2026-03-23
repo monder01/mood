@@ -52,6 +52,13 @@ class _SplashPageState extends State<SplashPage> {
 
       if (!mounted) return;
 
+      final pendingRoute = FirebaseNotifications.pendingRoute;
+      if (pendingRoute != null && pendingRoute.isNotEmpty) {
+        FirebaseNotifications.pendingRoute = null;
+        context.go(pendingRoute);
+        return;
+      }
+
       if (loadadmin != null) {
         context.go('/browse');
       } else {

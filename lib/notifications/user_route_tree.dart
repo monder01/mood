@@ -2,15 +2,23 @@ import 'package:mood01/notifications/route_node.dart';
 
 const List<RouteNode> userRouteTree = [
   RouteNode(
-    title: "الرئيسية",
+    title: "الحساب",
     children: [
-      RouteNode(title: "الصفحة الرئيسية", path: "/"),
-      RouteNode(title: "التصفح الرئيسي", path: "/browse"),
-      RouteNode(title: "عن التطبيق", path: "/about"),
-      RouteNode(title: "الاستكشاف", path: "/discover"),
-      RouteNode(title: "الإشعارات", path: "/notifications"),
+      RouteNode(title: "حسابي", path: "/my-account"),
+      RouteNode(title: "الإعدادات", path: "/setting"),
+      RouteNode(title: "الاشتراك", path: "/subscription"),
     ],
   ),
+
+  RouteNode(
+    title: "التصفح",
+    children: [
+      RouteNode(title: "الصفحة الرئيسية", path: "/browse"),
+      RouteNode(title: "صفحة البحث", path: "/discover"),
+      RouteNode(title: "عن التطبيق", path: "/about"),
+    ],
+  ),
+
   RouteNode(
     title: "الأصدقاء",
     children: [
@@ -18,12 +26,12 @@ const List<RouteNode> userRouteTree = [
       RouteNode(title: "زملائي", path: "/fellows"),
     ],
   ),
+
   RouteNode(
-    title: "المحادثات",
-    children: [RouteNode(title: "محادثاتي", path: "/conversations")],
-  ),
-  RouteNode(
-    title: "التصفح الأكاديمي",
-    children: [RouteNode(title: "تصفح المستخدم", path: "/user-browse")],
+    title: "المحادثات والإشعارات",
+    children: [
+      RouteNode(title: "محادثاتي", path: "/conversations"),
+      RouteNode(title: "الإشعارات", path: "/notifications"),
+    ],
   ),
 ];

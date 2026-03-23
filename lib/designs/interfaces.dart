@@ -8,6 +8,61 @@ import 'package:mood01/notifications/my_notifications_page.dart';
 class Interfaces {
   bool isLoading = false;
 
+  Future<void> displayImageDialog(BuildContext context, String imageUrl) async {
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(0),
+          child: Stack(
+            children: [
+              Container(
+                alignment: Alignment.center,
+                width: MediaQuery.of(context).size.width,
+                height: double.infinity,
+                color: Colors.black,
+                child: InteractiveViewer(
+                  clipBehavior: Clip.none,
+                  boundaryMargin: const EdgeInsets.all(20),
+                  minScale: 1.0,
+                  maxScale: 4.0,
+                  child: Center(
+                    child: Image.network(
+                      imageUrl,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.broken_image,
+                          color: Colors.white,
+                          size: 100,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 10,
+                right: 10,
+                child: threeDcontainer(
+                  context,
+                  Colors.black.withValues(alpha: 0.5),
+                  iconButton: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(Icons.close, size: 30, color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void showProfile(BuildContext context, Map<String, dynamic> userData) {
     // عرض نافذة بروفايل المستخدم بشكل ممتع وبسيط
     showDialog(
@@ -78,6 +133,7 @@ class Interfaces {
   Widget threeDcontainer(
     BuildContext context,
     Color containerColor, {
+    IconButton? iconButton,
     IconData? icon,
     Color? iconColor,
     String? assetPath,
@@ -101,7 +157,7 @@ class Interfaces {
           ? Icon(icon, color: iconColor ?? Colors.white)
           : assetPath != null
           ? CircleAvatar(child: Image.asset(assetPath))
-          : null,
+          : iconButton ?? Container(),
     );
   }
 

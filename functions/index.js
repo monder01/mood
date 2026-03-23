@@ -230,15 +230,9 @@ exports.sendNotificationToAllUsers = onCall(
 
         const uid = request.auth.uid;
 
-        const userDoc = await db.collection("users").doc(uid).get();
+        const adminDoc = await db.collection("admins").doc(uid).get();
 
-        if (!userDoc.exists) {
-            throw new HttpsError("not-found", "المستخدم غير موجود");
-        }
-
-        const userData = userDoc.data() || {};
-
-        if (userData.role !== "admin") {
+        if (!adminDoc.exists) {
             throw new HttpsError("permission-denied", "غير مصرح لك");
         }
 

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mood01/auth/admin.dart';
 import 'package:mood01/designs/interfaces.dart';
@@ -29,12 +30,36 @@ class _MyAccountState extends State<MyAccount> {
     try {
       final pickedFile = await picker.pickImage(
         source: source,
-        imageQuality: 70,
+        imageQuality: 90,
       );
 
       if (pickedFile == null) return;
 
-      final file = File(pickedFile.path);
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        compressQuality: 85,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'قص الصورة',
+            toolbarColor: Colors.black,
+            toolbarWidgetColor: Colors.white,
+            lockAspectRatio: true,
+            hideBottomControls: false,
+            initAspectRatio: CropAspectRatioPreset.square,
+            cropStyle: CropStyle.circle,
+          ),
+          IOSUiSettings(
+            title: 'قص الصورة',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+
+      if (croppedFile == null) return;
+
+      final file = File(croppedFile.path);
       await uploadImage(file);
     } catch (e) {
       if (!mounted) return;
@@ -103,6 +128,14 @@ class _MyAccountState extends State<MyAccount> {
         return SafeArea(
           child: Wrap(
             children: [
+              ListTile(
+                leading: Icon(Icons.remove_red_eye, color: Colors.greenAccent),
+                title: Text("عرض الصورة"),
+                onTap: () async {
+                  Navigator.pop(bottomSheetContext);
+                  await interfaces.displayImageDialog(context, admin.photoUrl!);
+                },
+              ),
               ListTile(
                 leading: const Icon(
                   Icons.camera_alt,
