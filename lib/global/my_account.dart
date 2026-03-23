@@ -17,7 +17,7 @@ class MyAccount extends StatefulWidget {
 
 class _MyAccountState extends State<MyAccount> {
   final interfaces = Interfaces();
-  final Admin admin = Admin();
+  final Admin admin = Admin.currentAdmin!;
   final ImagePicker picker = ImagePicker();
 
   bool isPhotoLoading = false;
@@ -58,15 +58,16 @@ class _MyAccountState extends State<MyAccount> {
 
       final ref = FirebaseStorage.instance
           .ref()
-          .child("admin")
+          .child("admins")
           .child("${user.uid}.jpg");
 
       await ref.putFile(file);
       final imageUrl = await ref.getDownloadURL();
 
-      await FirebaseFirestore.instance.collection("admin").doc(user.uid).update(
-        {"photoUrl": imageUrl},
-      );
+      await FirebaseFirestore.instance
+          .collection("admins")
+          .doc(user.uid)
+          .update({"photoUrl": imageUrl});
 
       admin.photoUrl = imageUrl;
 
@@ -165,7 +166,7 @@ class _MyAccountState extends State<MyAccount> {
     if (user == null) return false;
 
     final snapshot = await FirebaseFirestore.instance
-        .collection("admin")
+        .collection("admins")
         .where("userName", isEqualTo: userName)
         .get();
 
@@ -274,9 +275,10 @@ class _MyAccountState extends State<MyAccount> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection("admin").doc(user.uid).update(
-        {"firstName": newFirstName, "lastName": newLastName},
-      );
+      await FirebaseFirestore.instance
+          .collection("admins")
+          .doc(user.uid)
+          .update({"firstName": newFirstName, "lastName": newLastName});
 
       if (!mounted) return;
       interfaces.showAlert(
@@ -360,9 +362,10 @@ class _MyAccountState extends State<MyAccount> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection("admin").doc(user.uid).update(
-        {"phone": phoneToSave},
-      );
+      await FirebaseFirestore.instance
+          .collection("admins")
+          .doc(user.uid)
+          .update({"phone": phoneToSave});
 
       if (!mounted) return;
       interfaces.showAlert(
@@ -468,9 +471,10 @@ class _MyAccountState extends State<MyAccount> {
         return;
       }
 
-      await FirebaseFirestore.instance.collection("admin").doc(user.uid).update(
-        {"userName": userName},
-      );
+      await FirebaseFirestore.instance
+          .collection("admins")
+          .doc(user.uid)
+          .update({"userName": userName});
 
       if (!mounted) return;
       interfaces.showAlert(
@@ -761,7 +765,7 @@ class _MyAccountState extends State<MyAccount> {
     }
 
     final userStream = FirebaseFirestore.instance
-        .collection("admin")
+        .collection("admins")
         .doc(user.uid)
         .snapshots();
 

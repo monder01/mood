@@ -15,10 +15,10 @@ class ThemeController {
 
       scaffoldBackgroundColor: Colors.white,
 
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.greenAccent,
         foregroundColor: Colors.black,
-        shadowColor: Colors.greenAccent,
+        shadowColor: Colors.grey.shade900,
         elevation: 1,
       ),
 
@@ -134,10 +134,10 @@ class ThemeController {
 
       scaffoldBackgroundColor: const Color(0xFF121212),
 
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Color(0xFF1E1E1E),
         foregroundColor: Colors.white,
-        shadowColor: Colors.white70,
+        shadowColor: Colors.grey.shade800,
         elevation: 1,
       ),
 

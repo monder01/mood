@@ -110,6 +110,8 @@ class _EditCoursePageState extends State<EditCoursePage> {
         iconColor: Colors.green,
       );
 
+      if (!mounted) return;
+
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;

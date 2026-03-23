@@ -135,7 +135,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                         .doc(id)
                         .delete();
                   } catch (e) {
-                    print("Error deleting: $e");
+                    debugPrint("Error deleting: $e");
                     if (context.mounted) {
                       interfaces.showAlert(
                         context,

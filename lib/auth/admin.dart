@@ -62,48 +62,18 @@ class Admin {
       messageToken: adminData["messageToken"] ?? "",
       isActive: adminData["isActive"] ?? false,
       isOnline: adminData["isOnline"] ?? false,
-      isPrivate: adminData["isPrivate"] ?? false,
       activeSessionId: adminData["activeSessionId"] ?? "",
-      lastLogin: adminData["lastLogin"] ?? "",
+      lastLogin: {adminData["lastLogin"] ?? ""}.toString(),
     );
   }
 
   static Future<Admin?> getOtherAdminInfo(String adminId) async {
     final doc = await FirebaseFirestore.instance
-        .collection("Admin")
+        .collection("admins")
         .doc(adminId)
         .get();
     if (!doc.exists) return null;
     return Admin.getAdminData(doc);
-  }
-
-  // get current user data
-  Future<Admin?> getCurrentUser() async {
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) return null;
-
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection("Admin")
-          .doc(user.uid)
-          .get();
-
-      if (!userDoc.exists) return null;
-
-      return Admin(
-        id: user.uid,
-        email: user.email,
-        name: "${userDoc.get("firstName")} ${userDoc.get("lastName")}",
-        photoUrl: userDoc.get("photoUrl") ?? "",
-        phoneNumber: userDoc.get("phone") ?? "",
-        role: userDoc.get("role") ?? "",
-        userName: userDoc.get("userName") ?? "",
-        messageToken: userDoc.get("messageToken") ?? "",
-      );
-    } catch (e) {
-      debugPrint("Error fetching user data: $e");
-      return null;
-    }
   }
 
   // Sign In method
@@ -145,15 +115,21 @@ class Admin {
       }
 
       // تحديث حالة الاتصال
-      await FirebaseFirestore.instance.collection("Admin").doc(user.uid).update(
-        {"isOnline": true, "lastLogin": FieldValue.serverTimestamp()},
-      );
+      await FirebaseFirestore.instance
+          .collection("admins")
+          .doc(user.uid)
+          .update({
+            "isOnline": true,
+            "lastLogin": FieldValue.serverTimestamp(),
+          });
       // get user data
       final userData = await FirebaseFirestore.instance
-          .collection("Admin")
+          .collection("admins")
           .doc(user.uid)
           .get();
-      final name = "${userData.get("firstName")} ${userData.get("lastName")}";
+      Admin.currentAdmin = Admin.getAdminData(userData);
+
+      final name = Admin.currentAdmin!.name;
 
       await SessionService.saveSessionAfterLogin();
 
@@ -296,7 +272,7 @@ class Admin {
 
       final user = credential.user;
 
-      await FirebaseFirestore.instance.collection("Admin").doc(user!.uid).set({
+      await FirebaseFirestore.instance.collection("admins").doc(user!.uid).set({
         "uid": user.uid,
         "userName": usernameController.text.trim(),
         "firstName": firstnameController.text.trim(),
@@ -306,12 +282,21 @@ class Admin {
         "photoUrl": "",
         "isOnline": true,
         "isActive": true,
+        "isPremium": false,
+        "isPrivate": false,
         "messageToken": "",
         "activeSessionId": "",
         "role": "user",
         "createdAt": FieldValue.serverTimestamp(),
         "lastLogin": FieldValue.serverTimestamp(),
       });
+
+      final adminDoc = await FirebaseFirestore.instance
+          .collection("admins")
+          .doc(user.uid)
+          .get();
+
+      Admin.currentAdmin = Admin.getAdminData(adminDoc);
 
       await SessionService.saveSessionAfterLogin();
 
@@ -393,7 +378,7 @@ class Admin {
 
       if (user != null) {
         await FirebaseFirestore.instance
-            .collection("Admin")
+            .collection("admins")
             .doc(user.uid)
             .update({
               "isOnline": false,

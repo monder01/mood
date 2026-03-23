@@ -20,7 +20,7 @@ class SessionService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(localSessionKey, sessionId);
 
-    await FirebaseFirestore.instance.collection("users").doc(user.uid).update({
+    await FirebaseFirestore.instance.collection("admins").doc(user.uid).update({
       "activeSessionId": sessionId,
       "messageToken": token ?? "",
       "lastLogin": FieldValue.serverTimestamp(),

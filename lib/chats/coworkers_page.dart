@@ -22,7 +22,7 @@ class _CoworkersPageState extends State<CoworkersPage> {
     }
 
     return FirebaseFirestore.instance
-        .collection("chats")
+        .collection("adminsChats")
         .where("participants", arrayContains: currentUser!.uid)
         .orderBy("updatedAt", descending: true)
         .snapshots();
@@ -57,10 +57,7 @@ class _CoworkersPageState extends State<CoworkersPage> {
       color: Colors.greenAccent,
       onRefresh: refreshPage,
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection("users")
-            .where("role", isEqualTo: "admin")
-            .snapshots(),
+        stream: FirebaseFirestore.instance.collection("admins").snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return ListView(
@@ -89,7 +86,9 @@ class _CoworkersPageState extends State<CoworkersPage> {
             );
           }
 
-          final docs = snapshot.data?.docs ?? [];
+          final docs = (snapshot.data?.docs ?? [])
+              .where((doc) => doc.id != currentUser?.uid)
+              .toList();
 
           if (docs.isEmpty) {
             return ListView(
@@ -97,10 +96,7 @@ class _CoworkersPageState extends State<CoworkersPage> {
               children: const [
                 SizedBox(height: 300),
                 Center(
-                  child: Text(
-                    "لا يوجد مستخدمون بصلاحية admin",
-                    style: TextStyle(fontSize: 18),
-                  ),
+                  child: Text("لا توجد مشرفين", style: TextStyle(fontSize: 18)),
                 ),
               ],
             );
@@ -117,18 +113,29 @@ class _CoworkersPageState extends State<CoworkersPage> {
               final userName = data["userName"]?.toString() ?? "";
               final email = data["email"]?.toString() ?? "";
               final name = "$firstName $lastName".trim();
+              final adminUid = docs[index].id;
 
               return Card(
                 margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 child: ListTile(
-                  leading: const CircleAvatar(
-                    child: Icon(Icons.admin_panel_settings),
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.greenAccent.withValues(alpha: 0.5),
+                    child: Icon(
+                      Icons.admin_panel_settings,
+                      color: Colors.greenAccent.shade700,
+                    ),
                   ),
                   title: Text(
                     name.isNotEmpty ? name : userName,
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(email.isNotEmpty ? email : userName),
+                  trailing: IconButton(
+                    onPressed: () {
+                      context.push(NaviGo.chatPath(adminUid));
+                    },
+                    icon: Icon(Icons.mail),
+                  ),
                 ),
               );
             },
@@ -217,7 +224,7 @@ class _CoworkersPageState extends State<CoworkersPage> {
 
               return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
                 stream: FirebaseFirestore.instance
-                    .collection("users")
+                    .collection("admins")
                     .doc(otherUserId)
                     .snapshots(),
                 builder: (context, userSnapshot) {

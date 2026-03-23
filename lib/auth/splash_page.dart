@@ -3,7 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mood01/auth/admin.dart';
 import 'package:mood01/auth/presence_service.dart';
+import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/designs/theme_controller.dart';
 import 'package:mood01/firebase_options.dart';
 import 'package:mood01/global/system.dart';
@@ -46,25 +48,11 @@ class _SplashPageState extends State<SplashPage> {
       await PresenceService.startPresence();
 
       // فحص المستخدم الحالي
-      final user = FirebaseAuth.instance.currentUser;
+      final loadadmin = await loadAdmin();
 
       if (!mounted) return;
 
-      // إذا لم يوجد مستخدم مسجل دخول
-      if (user == null) {
-        context.go('/home');
-        return;
-      }
-
-      // إذا يوجد مستخدم، نفحص هل وثيقته موجودة
-      final userDoc = await FirebaseFirestore.instance
-          .collection("users")
-          .doc(user.uid)
-          .get();
-
-      if (!mounted) return;
-
-      if (userDoc.exists) {
+      if (loadadmin != null) {
         context.go('/browse');
       } else {
         context.go('/home');
@@ -74,6 +62,42 @@ class _SplashPageState extends State<SplashPage> {
 
       if (!mounted) return;
       context.go('/home');
+    }
+  }
+
+  Future<Admin?> loadAdmin() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        Admin.currentAdmin = null;
+        return null;
+      }
+
+      final adminDoc = await FirebaseFirestore.instance
+          .collection("admins")
+          .doc(user.uid)
+          .get();
+
+      if (!adminDoc.exists) {
+        Admin.currentAdmin = null;
+        return null;
+      }
+
+      final loadAdmin = Admin.getAdminData(adminDoc);
+
+      if (loadAdmin.isActive == false) {
+        await FirebaseAuth.instance.signOut();
+        Interfaces().showFlutterToast("حسابك معطل من قبل الادارة");
+        Admin.currentAdmin = null;
+        return null;
+      }
+
+      Admin.currentAdmin = loadAdmin;
+      return loadAdmin;
+    } catch (e) {
+      debugPrint("loadAdmin error: ${e.toString()}");
+      Admin.currentAdmin = null;
+      return null;
     }
   }
 

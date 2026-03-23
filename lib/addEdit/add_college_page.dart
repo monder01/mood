@@ -98,7 +98,7 @@ class _AddCollegePageState extends State<AddCollegePage> {
         icon: Icons.error,
         iconColor: Colors.red,
       );
-      print(e);
+      debugPrint("addCollege error: $e");
     } finally {
       if (mounted) {
         setState(() => loadingCollege = false);

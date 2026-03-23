@@ -147,7 +147,7 @@ class _EditDepartmentPageState extends State<EditDepartmentPage> {
         icon: Icons.check_circle_outline,
         iconColor: Colors.green,
       );
-
+      if (!mounted) return;
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;

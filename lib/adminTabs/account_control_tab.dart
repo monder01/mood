@@ -164,6 +164,7 @@ class _AccountControlTabState extends State<AccountControlTab> {
           "userName": userData["userName"] ?? "",
           "email": userData["email"] ?? "",
           "phone": userData["phone"] ?? "",
+          "activeSessionId": userData["activeSessionId"] ?? "",
         });
 
         await userRef.update({"role": newRole});

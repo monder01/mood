@@ -49,16 +49,16 @@ class _ChatPageState extends State<ChatPage> {
     try {
       final generatedChatId = buildChatId(currentUser.uid, widget.otherUserId);
       final chatRef = FirebaseFirestore.instance
-          .collection("chats")
+          .collection("adminsChats")
           .doc(generatedChatId);
 
       final myDoc = await FirebaseFirestore.instance
-          .collection("users")
+          .collection("admins")
           .doc(currentUser.uid)
           .get();
 
       final otherDoc = await FirebaseFirestore.instance
-          .collection("users")
+          .collection("admins")
           .doc(widget.otherUserId)
           .get();
 
@@ -109,7 +109,7 @@ class _ChatPageState extends State<ChatPage> {
       chatId = generatedChatId;
 
       await FirebaseFirestore.instance
-          .collection("users")
+          .collection("admins")
           .doc(currentUser.uid)
           .update({"activeChatId": chatId});
 
@@ -132,7 +132,9 @@ class _ChatPageState extends State<ChatPage> {
 
     messageController.clear();
 
-    final chatRef = FirebaseFirestore.instance.collection("chats").doc(chatId);
+    final chatRef = FirebaseFirestore.instance
+        .collection("adminsChats")
+        .doc(chatId);
 
     await chatRef.collection("messages").add({
       "senderId": currentUser.uid,
@@ -214,7 +216,7 @@ class _ChatPageState extends State<ChatPage> {
       final downloadUrl = await snapshot.ref.getDownloadURL();
 
       final chatRef = FirebaseFirestore.instance
-          .collection("chats")
+          .collection("adminsChats")
           .doc(chatId);
 
       await chatRef.collection("messages").add({
@@ -522,7 +524,7 @@ class _ChatPageState extends State<ChatPage> {
   void dispose() {
     if (chatId != null) {
       FirebaseFirestore.instance
-          .collection("users")
+          .collection("admins")
           .doc(currentUser.uid)
           .update({"activeChatId": null});
     }
@@ -541,7 +543,7 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     final messagesStream = FirebaseFirestore.instance
-        .collection("chats")
+        .collection("adminsChats")
         .doc(chatId)
         .collection("messages")
         .orderBy("createdAt", descending: false)

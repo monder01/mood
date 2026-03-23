@@ -26,7 +26,7 @@ class Browsepage extends StatefulWidget {
 }
 
 class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
-  Admin admin = Admin();
+  Admin? admin;
   final interfaces = Interfaces();
   final System system = System();
 
@@ -46,7 +46,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     if (user == null) return;
 
     _sessionSubscription = FirebaseFirestore.instance
-        .collection("admin")
+        .collection("admins")
         .doc(user.uid)
         .snapshots()
         .listen((snapshot) async {
@@ -79,7 +79,10 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     _sessionSubscription = null;
 
     if (!mounted) return;
-    await admin.signOut(context);
+
+    if (admin != null) {
+      await admin!.signOut(context);
+    }
 
     if (!mounted) return;
     interfaces.showFlutterToast(message);
@@ -94,7 +97,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
       if (fcmToken == null || fcmToken.isEmpty) return;
 
       final doc = await FirebaseFirestore.instance
-          .collection("admin")
+          .collection("admins")
           .doc(firebaseUser.uid)
           .get();
 
@@ -102,23 +105,12 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
 
       if (currentToken != fcmToken) {
         await FirebaseFirestore.instance
-            .collection("admin")
+            .collection("admins")
             .doc(firebaseUser.uid)
             .set({"messageToken": fcmToken}, SetOptions(merge: true));
       }
     } catch (e) {
       debugPrint("FCM token error: $e");
-    }
-  }
-
-  Future<void> loadUser() async {
-    final user = await admin.getCurrentUser();
-    if (!mounted) return;
-
-    if (user != null) {
-      setState(() {
-        admin = user;
-      });
     }
   }
 
@@ -133,7 +125,8 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
 
-    loadUser();
+    admin = Admin.currentAdmin;
+
     loadSystemInfo();
     getFcmToken();
     startSessionMonitoring();
@@ -147,6 +140,8 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
   }
 
   Widget buildDrawer() {
+    final currentAdmin = admin;
+
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -161,9 +156,11 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                   backgroundColor: Theme.of(context).cardColor,
                   radius: 40,
                   child: ClipOval(
-                    child: admin.photoUrl != null && admin.photoUrl!.isNotEmpty
+                    child:
+                        currentAdmin?.photoUrl != null &&
+                            currentAdmin!.photoUrl!.isNotEmpty
                         ? Image.network(
-                            admin.photoUrl!,
+                            currentAdmin.photoUrl!,
                             width: 80,
                             height: 80,
                             fit: BoxFit.cover,
@@ -174,7 +171,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                 Column(
                   children: [
                     Text(
-                      admin.name ?? "",
+                      currentAdmin?.name ?? "",
                       style: TextStyle(
                         fontSize: 20,
                         color: Theme.of(context).brightness == Brightness.dark
@@ -183,7 +180,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                       ),
                     ),
                     Text(
-                      admin.email ?? "",
+                      currentAdmin?.email ?? "",
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(context).brightness == Brightness.dark
@@ -287,8 +284,9 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
 
               if (!confirm) return;
               if (!mounted) return;
+              if (admin == null) return;
 
-              await admin.signOut(context);
+              await admin!.signOut(context);
             },
           ),
         ],
@@ -298,6 +296,13 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    if (admin == null) {
+      return Scaffold(
+        appBar: interfaces.showAppBar(context, title: ""),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
