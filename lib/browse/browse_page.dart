@@ -6,15 +6,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:mood01/admin/admin_main_page.dart';
-import 'package:mood01/admin/admin_system_page.dart';
-import 'package:mood01/admin/admin_user_management_page.dart';
+import 'package:mood01/browse/admin_main_page.dart';
+import 'package:mood01/browse/admin_system_page.dart';
+import 'package:mood01/browse/admin_user_management_page.dart';
 import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/auth/users.dart';
-import 'package:mood01/chats/my_conversations_page.dart';
+import 'package:mood01/chats/coworkers_page.dart';
 import 'package:mood01/designs/about_us_page.dart';
 import 'package:mood01/designs/interfaces.dart';
-import 'package:mood01/friends/user_fellows_page.dart';
 import 'package:mood01/global/my_account.dart';
 import 'package:mood01/global/setting_page.dart';
 import 'package:mood01/global/system.dart';
@@ -199,27 +198,12 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
           ),
 
           ListTile(
-            leading: const Icon(Icons.group),
-            title: const Text("زملائي"),
+            leading: const Icon(Icons.admin_panel_settings),
+            title: const Text("تواصل إداري"),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const UserFellowsPage(),
-                ),
-              );
-            },
-          ),
-
-          ListTile(
-            leading: const Icon(Icons.mail),
-            title: const Text("محادثاتي"),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MyConversationsPage(),
-                ),
+                MaterialPageRoute(builder: (context) => const CoworkersPage()),
               );
             },
           ),

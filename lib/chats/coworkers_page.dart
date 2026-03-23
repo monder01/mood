@@ -1,18 +1,19 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/navi_go.dart';
 
-class MyConversationsPage extends StatefulWidget {
-  const MyConversationsPage({super.key});
+class CoworkersPage extends StatefulWidget {
+  const CoworkersPage({super.key});
 
   @override
-  State<MyConversationsPage> createState() => _MyConversationsPageState();
+  State<CoworkersPage> createState() => _CoworkersPageState();
 }
 
-class _MyConversationsPageState extends State<MyConversationsPage> {
+class _CoworkersPageState extends State<CoworkersPage> {
+  final interfaces = Interfaces();
   User? get currentUser => FirebaseAuth.instance.currentUser;
 
   Stream<QuerySnapshot<Map<String, dynamic>>> getMyChats() {
@@ -46,42 +47,145 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
     return {};
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (currentUser == null) {
-      return Scaffold(
-        appBar: Interfaces().showAppBar(context, title: "", actions: false),
-        body: const Center(child: Text("لا يوجد مستخدم مسجل دخول")),
-      );
-    }
+  Future<void> refreshPage() async {
+    setState(() {});
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
 
-    return Scaffold(
-      appBar: Interfaces().showAppBar(context, title: "", actions: false),
-      body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-        stream: getMyChats(),
+  Widget adminsTab() {
+    return RefreshIndicator(
+      color: Colors.greenAccent,
+      onRefresh: refreshPage,
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection("users")
+            .where("role", isEqualTo: "admin")
+            .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(color: Colors.greenAccent),
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 300),
+                Center(
+                  child: CircularProgressIndicator(color: Colors.greenAccent),
+                ),
+              ],
             );
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text("حدث خطأ: ${snapshot.error}"));
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 300),
+                Center(
+                  child: Text(
+                    "حدث خطأ أثناء تحميل البيانات",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+
+          if (docs.isEmpty) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 300),
+                Center(
+                  child: Text(
+                    "لا يوجد مستخدمون بصلاحية admin",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ],
+            );
+          }
+
+          return ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: docs.length,
+            itemBuilder: (context, index) {
+              final data = docs[index].data() as Map<String, dynamic>;
+
+              final firstName = data["firstName"]?.toString() ?? "";
+              final lastName = data["lastName"]?.toString() ?? "";
+              final userName = data["userName"]?.toString() ?? "";
+              final email = data["email"]?.toString() ?? "";
+              final name = "$firstName $lastName".trim();
+
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                child: ListTile(
+                  leading: const CircleAvatar(
+                    child: Icon(Icons.admin_panel_settings),
+                  ),
+                  title: Text(
+                    name.isNotEmpty ? name : userName,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  subtitle: Text(email.isNotEmpty ? email : userName),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget chatsTab() {
+    return RefreshIndicator(
+      color: Colors.greenAccent,
+      onRefresh: refreshPage,
+      child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        stream: getMyChats(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 300),
+                Center(
+                  child: CircularProgressIndicator(color: Colors.greenAccent),
+                ),
+              ],
+            );
+          }
+
+          if (snapshot.hasError) {
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                const SizedBox(height: 300),
+                Center(child: Text("حدث خطأ: ${snapshot.error}")),
+              ],
+            );
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(
-              child: Text(
-                "لا توجد محادثات بعد",
-                style: TextStyle(fontSize: 18),
-              ),
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 300),
+                Center(
+                  child: Text(
+                    "لا توجد محادثات بعد",
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+              ],
             );
           }
 
           final chats = snapshot.data!.docs;
 
           return ListView.separated(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(10),
             itemCount: chats.length,
             separatorBuilder: (context, index) => const SizedBox(height: 8),
@@ -238,6 +342,31 @@ class _MyConversationsPageState extends State<MyConversationsPage> {
             },
           );
         },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(110),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              interfaces.showAppBar(context, title: "", actions: false),
+              const TabBar(
+                tabs: [
+                  Tab(text: "زملائي"),
+                  Tab(text: "محادثة"),
+                ],
+              ),
+            ],
+          ),
+        ),
+        body: TabBarView(children: [adminsTab(), chatsTab()]),
       ),
     );
   }

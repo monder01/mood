@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:mood01/global/browse_page.dart';
+import 'package:mood01/browse/browse_page.dart';
 import 'package:mood01/auth/signin_page.dart';
 import 'package:mood01/auth/signup_page.dart';
 import 'package:mood01/designs/about_us_page.dart';
@@ -8,7 +8,6 @@ import 'package:mood01/designs/home_page.dart';
 import 'package:mood01/auth/splash_page.dart';
 import 'package:mood01/friends/search_for_friends_page.dart';
 import 'package:mood01/friends/user_fellows_page.dart';
-import 'package:mood01/chats/my_conversations_page.dart';
 import 'package:mood01/chats/chat_page.dart';
 
 class NaviGo {
@@ -61,12 +60,6 @@ class NaviGo {
         path: '/fellows',
         name: 'fellows',
         builder: (context, state) => const UserFellowsPage(),
-      ),
-
-      GoRoute(
-        path: '/conversations',
-        name: 'conversations',
-        builder: (context, state) => const MyConversationsPage(),
       ),
 
       GoRoute(

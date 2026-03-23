@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mood01/auth/presence_service.dart';
 import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/designs/home_page.dart';
-import 'package:mood01/global/browse_page.dart';
+import 'package:mood01/browse/browse_page.dart';
 import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 
