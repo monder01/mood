@@ -52,6 +52,41 @@ class _CoworkersPageState extends State<CoworkersPage> {
     await Future.delayed(const Duration(milliseconds: 500));
   }
 
+  void optionDialog(
+    BuildContext context,
+    String otherUserId,
+    String phoneNumber,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.phone, color: Colors.greenAccent),
+              title: const Text("مكالمة هاتفية"),
+              onTap: () async {
+                Navigator.pop(context);
+                await interfaces.callPhoneFun(
+                  context,
+                  phoneNumber: phoneNumber,
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.mail, color: Colors.greenAccent),
+              title: const Text("إرسال رسالة"),
+              onTap: () async {
+                Navigator.pop(context);
+                context.push(NaviGo.chatPath(otherUserId));
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget adminsTab() {
     return RefreshIndicator(
       color: Colors.greenAccent,
@@ -113,6 +148,7 @@ class _CoworkersPageState extends State<CoworkersPage> {
               final userName = data["userName"]?.toString() ?? "";
               final email = data["email"]?.toString() ?? "";
               final name = "$firstName $lastName".trim();
+              final phoneNumber = data["phone"]?.toString() ?? "";
               final adminUid = docs[index].id;
 
               return Card(
@@ -130,12 +166,8 @@ class _CoworkersPageState extends State<CoworkersPage> {
                     style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                   subtitle: Text(email.isNotEmpty ? email : userName),
-                  trailing: IconButton(
-                    onPressed: () {
-                      context.push(NaviGo.chatPath(adminUid));
-                    },
-                    icon: Icon(Icons.mail),
-                  ),
+                  trailing: Icon(Icons.arrow_forward_ios_rounded),
+                  onTap: () => optionDialog(context, adminUid, phoneNumber),
                 ),
               );
             },

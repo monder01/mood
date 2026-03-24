@@ -4,9 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mood01/notifications/my_notifications_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Interfaces {
   bool isLoading = false;
+
+  Future<void> callPhoneFun(
+    BuildContext context, {
+    required String phoneNumber,
+  }) async {
+    await launchUrl(Uri.parse('tel:$phoneNumber'));
+  }
 
   Future<void> displayImageDialog(BuildContext context, String imageUrl) async {
     await showDialog(

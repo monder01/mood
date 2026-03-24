@@ -36,8 +36,10 @@ class ThemeController {
       ),
 
       // Text Selection
-      textSelectionTheme: const TextSelectionThemeData(
+      textSelectionTheme: TextSelectionThemeData(
         cursorColor: Colors.greenAccent,
+        selectionColor: Colors.greenAccent.withValues(alpha: 0.4),
+        selectionHandleColor: Colors.greenAccent,
       ),
 
       // TabBar
@@ -177,6 +179,13 @@ class ThemeController {
           }
           return Colors.grey.shade700;
         }),
+      ),
+
+      // Text Selection
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: Colors.greenAccent,
+        selectionColor: Colors.greenAccent.withValues(alpha: 0.4),
+        selectionHandleColor: Colors.greenAccent,
       ),
 
       // TextField

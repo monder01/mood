@@ -19,10 +19,20 @@ class _EditCoursePageState extends State<EditCoursePage> {
   final TextEditingController courseDescriptionController =
       TextEditingController();
   final TextEditingController courseUrlController = TextEditingController();
+  final TextEditingController courseLecturerController =
+      TextEditingController();
+  final TextEditingController lecturedAtController = TextEditingController();
 
+  String? selectedSemester;
   bool isActive = false;
   bool isLoadingData = true;
   bool isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    loadCourseData();
+  }
 
   Future<void> loadCourseData() async {
     try {
@@ -30,12 +40,13 @@ class _EditCoursePageState extends State<EditCoursePage> {
 
       if (!snapshot.exists) {
         if (!mounted) return;
-        interfaces.showAlert(
+        await interfaces.showAlert(
           context,
           "المادة غير موجودة",
           icon: Icons.error,
           iconColor: Colors.red,
         );
+        if (!mounted) return;
         Navigator.pop(context);
         return;
       }
@@ -47,10 +58,15 @@ class _EditCoursePageState extends State<EditCoursePage> {
       courseDescriptionController.text =
           data["courseDescription"]?.toString() ?? "";
       courseUrlController.text = data["courseUrl"]?.toString() ?? "";
+      courseLecturerController.text = data["courseLecturer"]?.toString() ?? "";
+      lecturedAtController.text = data["lecturedAt"]?.toString() ?? "";
+      selectedSemester = data["semester"]?.toString().trim().isEmpty == true
+          ? null
+          : data["semester"]?.toString();
       isActive = data["isActive"] ?? false;
     } catch (e) {
       if (!mounted) return;
-      interfaces.showAlert(
+      await interfaces.showAlert(
         context,
         "حدث خطأ أثناء تحميل بيانات المادة",
         icon: Icons.error,
@@ -65,6 +81,73 @@ class _EditCoursePageState extends State<EditCoursePage> {
     }
   }
 
+  Future<void> pickYearDialog() async {
+    int? selectedYear;
+
+    final currentYear =
+        int.tryParse(lecturedAtController.text.trim()) ?? DateTime.now().year;
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return Theme(
+          data: Theme.of(dialogContext).copyWith(
+            colorScheme: Theme.of(dialogContext).colorScheme.copyWith(
+              primary: Colors.greenAccent,
+              onPrimary: Colors.white,
+            ),
+          ),
+          child: AlertDialog(
+            title: const Text("اختر سنة التدريس"),
+            content: SizedBox(
+              width: 300,
+              height: 300,
+              child: YearPicker(
+                firstDate: DateTime(2000),
+                lastDate: DateTime.now(),
+                selectedDate: DateTime(currentYear),
+                onChanged: (DateTime dateTime) {
+                  selectedYear = dateTime.year;
+                  Navigator.pop(dialogContext);
+                },
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (!mounted) return;
+
+    if (selectedYear != null) {
+      setState(() {
+        lecturedAtController.text = selectedYear.toString();
+      });
+    }
+  }
+
+  Widget yearPickerCard() {
+    return TextField(
+      readOnly: true,
+      controller: lecturedAtController,
+      decoration: InputDecoration(
+        hintText: "سنة التدريس",
+        suffixIcon: IconButton(
+          onPressed: () async {
+            await pickYearDialog();
+          },
+          icon: const Icon(Icons.calendar_month),
+        ),
+      ),
+    );
+  }
+
+  Future<bool> isValidUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return false;
+    return uri.hasScheme && uri.host.isNotEmpty;
+  }
+
   Future<void> updateCourse() async {
     if (isSaving) return;
 
@@ -72,19 +155,51 @@ class _EditCoursePageState extends State<EditCoursePage> {
     String code = courseCodeController.text.trim();
     String description = courseDescriptionController.text.trim();
     String url = courseUrlController.text.trim();
+    String courseLecturer = courseLecturerController.text.trim();
+    String year = lecturedAtController.text.trim();
+    String semester = selectedSemester ?? "";
 
-    if (name.isEmpty || code.isEmpty || description.isEmpty || url.isEmpty) {
-      interfaces.showAlert(
+    if (name.isEmpty || code.isEmpty) {
+      await interfaces.showAlert(
         context,
-        "هناك حقول فارغة لم يتم تعبئتها",
+        "هناك حقول مهمة فارغة لم يتم تعبئتها",
         icon: Icons.error,
         iconColor: Colors.red,
       );
       return;
     }
 
-    if (!url.startsWith("http://") && !url.startsWith("https://")) {
-      url = "https://$url";
+    if (semester.isNotEmpty && year.isEmpty) {
+      await interfaces.showAlert(
+        context,
+        "اختر سنة التدريس عند تحديد الفصل",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
+      return;
+    }
+
+    if (semester.isEmpty) {
+      year = "";
+    }
+
+    if (url.isEmpty) {
+      interfaces.showFlutterToast("يرجى التأكد من كتابة رابط المادة لاحقًا");
+    } else {
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        url = "https://$url";
+      }
+
+      final validUrl = await isValidUrl(url);
+      if (!validUrl) {
+        await interfaces.showAlert(
+          context,
+          "رابط المادة غير صالح",
+          icon: Icons.error,
+          iconColor: Colors.red,
+        );
+        return;
+      }
     }
 
     try {
@@ -97,6 +212,9 @@ class _EditCoursePageState extends State<EditCoursePage> {
         "courseName": name,
         "courseCode": code,
         "courseDescription": description,
+        "courseLecturer": courseLecturer,
+        "lecturedAt": year,
+        "semester": semester,
         "isActive": isActive,
         "updatedAt": FieldValue.serverTimestamp(),
       });
@@ -111,7 +229,6 @@ class _EditCoursePageState extends State<EditCoursePage> {
       );
 
       if (!mounted) return;
-
       Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
@@ -131,31 +248,30 @@ class _EditCoursePageState extends State<EditCoursePage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    loadCourseData();
-  }
-
-  @override
   void dispose() {
     courseNameController.dispose();
     courseCodeController.dispose();
     courseDescriptionController.dispose();
     courseUrlController.dispose();
+    courseLecturerController.dispose();
+    lecturedAtController.dispose();
     super.dispose();
   }
 
   Widget courseCard() {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.greenAccent, width: 2),
-      ),
+      decoration: interfaces.containerDecoration(context),
       padding: const EdgeInsets.all(10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          interfaces.textField01(
+            label: "اسم المعلم (إختياري)",
+            keyboardType: TextInputType.text,
+            controller: courseLecturerController,
+          ),
+          const SizedBox(height: 10),
           interfaces.textField01(
             label: "اسم المادة",
             keyboardType: TextInputType.text,
@@ -169,17 +285,57 @@ class _EditCoursePageState extends State<EditCoursePage> {
           ),
           const SizedBox(height: 10),
           interfaces.textField01(
-            label: "وصف المادة",
+            label: "وصف المادة (إختياري)",
             keyboardType: TextInputType.text,
             controller: courseDescriptionController,
             maxLines: 2,
           ),
           const SizedBox(height: 10),
           interfaces.textField01(
-            label: "رابط المادة",
-            keyboardType: TextInputType.text,
+            label: "رابط المادة (إختياري مؤقتا)",
+            keyboardType: TextInputType.url,
             controller: courseUrlController,
             maxLines: 2,
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Text("(إختياري) : "),
+              ChoiceChip(
+                selectedColor: Colors.greenAccent.withValues(alpha: 0.7),
+                label: const Text("خريف"),
+                selected: selectedSemester == "خريف",
+                onSelected: (value) {
+                  setState(() {
+                    selectedSemester = value ? "خريف" : null;
+                    if (!value) {
+                      lecturedAtController.clear();
+                    }
+                  });
+                },
+              ),
+              const SizedBox(width: 8),
+              ChoiceChip(
+                selectedColor: Colors.greenAccent.withValues(alpha: 0.7),
+                label: const Text("ربيع"),
+                selected: selectedSemester == "ربيع",
+                onSelected: (value) {
+                  setState(() {
+                    selectedSemester = value ? "ربيع" : null;
+                    if (!value) {
+                      lecturedAtController.clear();
+                    }
+                  });
+                },
+              ),
+              const Spacer(),
+              SizedBox(
+                width: 150,
+                child: selectedSemester != null
+                    ? yearPickerCard()
+                    : const SizedBox.shrink(),
+              ),
+            ],
           ),
           const SizedBox(height: 10),
           Row(
@@ -209,7 +365,11 @@ class _EditCoursePageState extends State<EditCoursePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("تعديل المادة"), centerTitle: true),
+      appBar: interfaces.showAppBar(
+        context,
+        title: "تعديل المادة ${courseCodeController.text}",
+        actions: false,
+      ),
       body: isLoadingData
           ? const Center(
               child: CircularProgressIndicator(color: Colors.greenAccent),

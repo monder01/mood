@@ -3,17 +3,28 @@ import 'package:flutter/material.dart';
 import 'package:mood01/designs/interfaces.dart';
 
 class Course {
-  final String id = UniqueKey().toString();
+  final String id = DateTime.now().microsecondsSinceEpoch.toString();
 
-  TextEditingController courseNameController = TextEditingController();
-  TextEditingController courseCodeController = TextEditingController();
-  TextEditingController courseDescriptionController = TextEditingController();
-  TextEditingController courseUrlController = TextEditingController();
-  TextEditingController courseLecturerController = TextEditingController();
-  TextEditingController lecturedAtController = TextEditingController();
+  final TextEditingController courseNameController = TextEditingController();
+  final TextEditingController courseCodeController = TextEditingController();
+  final TextEditingController courseDescriptionController =
+      TextEditingController();
+  final TextEditingController courseUrlController = TextEditingController();
+  final TextEditingController courseLecturerController =
+      TextEditingController();
+  final TextEditingController lecturedAtController = TextEditingController();
 
   String? selectedSemester;
   bool isActive = false;
+
+  void dispose() {
+    courseNameController.dispose();
+    courseCodeController.dispose();
+    courseDescriptionController.dispose();
+    courseUrlController.dispose();
+    courseLecturerController.dispose();
+    lecturedAtController.dispose();
+  }
 }
 
 class AddCoursePage extends StatefulWidget {
@@ -31,9 +42,16 @@ class AddCoursePage extends StatefulWidget {
 }
 
 class _AddCoursePageState extends State<AddCoursePage> {
-  List<Course> courses = [];
-  Interfaces interfaces = Interfaces();
+  final List<Course> courses = [];
+  final Interfaces interfaces = Interfaces();
+
   bool isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    courses.add(Course());
+  }
 
   Future<void> pickYearDialog(int index) async {
     int? selectedYear;
@@ -44,10 +62,10 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
     await showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: Theme.of(context).colorScheme.copyWith(
+          data: Theme.of(dialogContext).copyWith(
+            colorScheme: Theme.of(dialogContext).colorScheme.copyWith(
               primary: Colors.greenAccent,
               onPrimary: Colors.white,
             ),
@@ -63,7 +81,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
                 selectedDate: DateTime(currentYear),
                 onChanged: (DateTime dateTime) {
                   selectedYear = dateTime.year;
-                  Navigator.pop(context);
+                  Navigator.pop(dialogContext);
                 },
               ),
             ),
@@ -72,7 +90,9 @@ class _AddCoursePageState extends State<AddCoursePage> {
       },
     );
 
-    if (selectedYear != null && mounted) {
+    if (!mounted) return;
+
+    if (selectedYear != null) {
       setState(() {
         courses[index].lecturedAtController.text = selectedYear.toString();
       });
@@ -95,28 +115,38 @@ class _AddCoursePageState extends State<AddCoursePage> {
     );
   }
 
-  void removeCourse(int index) {
-    if (courses.length == 1) return;
+  void removeCourseByObject(Course course) {
+    if (courses.length == 1) {
+      interfaces.showFlutterToast("يجب أن تبقى مادة واحدة على الأقل");
+      return;
+    }
 
     setState(() {
-      courses[index].courseNameController.dispose();
-      courses[index].courseCodeController.dispose();
-      courses[index].courseDescriptionController.dispose();
-      courses[index].courseUrlController.dispose();
-      courses[index].courseLecturerController.dispose();
-      courses[index].lecturedAtController.dispose();
-      courses.removeAt(index);
+      course.dispose();
+      courses.remove(course);
     });
   }
 
+  Future<bool> isValidUrl(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return false;
+    return uri.hasScheme && uri.host.isNotEmpty;
+  }
+
   Widget courseCard(int index) {
+    final course = courses[index];
+
     return Dismissible(
-      key: ValueKey(courses[index].id),
+      key: ValueKey(course.id),
       confirmDismiss: (direction) async {
-        return courses.length > 1;
+        if (courses.length == 1) {
+          interfaces.showFlutterToast("يجب أن تبقى مادة واحدة على الأقل");
+          return false;
+        }
+        return true;
       },
       onDismissed: (direction) {
-        removeCourse(index);
+        removeCourseByObject(course);
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 10),
@@ -125,47 +155,51 @@ class _AddCoursePageState extends State<AddCoursePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 10,
           children: [
             interfaces.textField01(
               label: "اسم المعلم (إختياري)",
               keyboardType: TextInputType.text,
-              controller: courses[index].courseLecturerController,
+              controller: course.courseLecturerController,
             ),
+            const SizedBox(height: 10),
             interfaces.textField01(
               label: "اسم المادة",
               keyboardType: TextInputType.text,
-              controller: courses[index].courseNameController,
+              controller: course.courseNameController,
             ),
+            const SizedBox(height: 10),
             interfaces.textField01(
               label: "رمز المادة",
               keyboardType: TextInputType.text,
-              controller: courses[index].courseCodeController,
+              controller: course.courseCodeController,
             ),
+            const SizedBox(height: 10),
             interfaces.textField01(
               label: "وصف المادة (إختياري)",
               keyboardType: TextInputType.text,
-              controller: courses[index].courseDescriptionController,
+              controller: course.courseDescriptionController,
               maxLines: 2,
             ),
+            const SizedBox(height: 10),
             interfaces.textField01(
               label: "رابط المادة (إختياري مؤقتا)",
-              keyboardType: TextInputType.text,
-              controller: courses[index].courseUrlController,
+              keyboardType: TextInputType.url,
+              controller: course.courseUrlController,
               maxLines: 2,
             ),
+            const SizedBox(height: 10),
             Row(
               children: [
                 const Text("(إختياري) : "),
                 ChoiceChip(
                   selectedColor: Colors.greenAccent.withValues(alpha: 0.7),
                   label: const Text("خريف"),
-                  selected: courses[index].selectedSemester == "خريف",
+                  selected: course.selectedSemester == "خريف",
                   onSelected: (value) {
                     setState(() {
-                      courses[index].selectedSemester = value ? "خريف" : null;
+                      course.selectedSemester = value ? "خريف" : null;
                       if (!value) {
-                        courses[index].lecturedAtController.clear();
+                        course.lecturedAtController.clear();
                       }
                     });
                   },
@@ -174,12 +208,12 @@ class _AddCoursePageState extends State<AddCoursePage> {
                 ChoiceChip(
                   selectedColor: Colors.greenAccent.withValues(alpha: 0.7),
                   label: const Text("ربيع"),
-                  selected: courses[index].selectedSemester == "ربيع",
+                  selected: course.selectedSemester == "ربيع",
                   onSelected: (value) {
                     setState(() {
-                      courses[index].selectedSemester = value ? "ربيع" : null;
+                      course.selectedSemester = value ? "ربيع" : null;
                       if (!value) {
-                        courses[index].lecturedAtController.clear();
+                        course.lecturedAtController.clear();
                       }
                     });
                   },
@@ -187,14 +221,14 @@ class _AddCoursePageState extends State<AddCoursePage> {
                 const Spacer(),
                 SizedBox(
                   width: 150,
-                  child: courses[index].selectedSemester != null
+                  child: course.selectedSemester != null
                       ? yearPickerCard(index)
                       : const SizedBox.shrink(),
                 ),
               ],
             ),
+            const SizedBox(height: 10),
             Row(
-              spacing: 10,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
@@ -204,9 +238,9 @@ class _AddCoursePageState extends State<AddCoursePage> {
                     border: Border.all(color: Colors.greenAccent, width: 2),
                   ),
                   child: Row(
-                    spacing: 10,
                     children: [
                       const Text("المادة رقم", style: TextStyle(fontSize: 16)),
+                      const SizedBox(width: 10),
                       Text(
                         "${index + 1}",
                         style: const TextStyle(fontSize: 16),
@@ -214,28 +248,30 @@ class _AddCoursePageState extends State<AddCoursePage> {
                     ],
                   ),
                 ),
+                const SizedBox(width: 10),
                 Row(
-                  spacing: 10,
                   children: [
                     const Text("تفعيل/تعطيل", style: TextStyle(fontSize: 16)),
+                    const SizedBox(width: 10),
                     Switch(
                       activeTrackColor: Colors.greenAccent,
-                      value: courses[index].isActive,
+                      value: course.isActive,
                       onChanged: (value) {
                         setState(() {
-                          courses[index].isActive = value;
+                          course.isActive = value;
                         });
                       },
                     ),
                   ],
                 ),
+                const SizedBox(width: 10),
                 Row(
                   children: [
                     const Text("حذف", style: TextStyle(fontSize: 16)),
                     IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
-                        removeCourse(index);
+                        removeCourseByObject(course);
                       },
                     ),
                   ],
@@ -270,7 +306,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
     } else {
       await interfaces.showAlert(
         context,
-        "collectionName غير صالحة",
+        "نوع الربط المحدد غير صالح",
         icon: Icons.error,
         iconColor: Colors.red,
       );
@@ -285,44 +321,44 @@ class _AddCoursePageState extends State<AddCoursePage> {
       final firestore = FirebaseFirestore.instance;
       final WriteBatch batch = firestore.batch();
 
-      for (var course in courses) {
-        String name = course.courseNameController.text.trim();
-        String code = course.courseCodeController.text.trim();
-        String description = course.courseDescriptionController.text.trim();
+      for (final course in courses) {
+        final String name = course.courseNameController.text.trim();
+        final String code = course.courseCodeController.text.trim();
+        final String description = course.courseDescriptionController.text
+            .trim();
         String url = course.courseUrlController.text.trim();
-        String courseLecturer = course.courseLecturerController.text.trim();
-        String year = course.lecturedAtController.text.trim();
-        String semester = course.selectedSemester ?? "";
+        final String courseLecturer = course.courseLecturerController.text
+            .trim();
+        final String year = course.lecturedAtController.text.trim();
+        final String semester = course.selectedSemester ?? "";
 
         if (name.isEmpty || code.isEmpty) {
-          await interfaces.showAlert(
-            context,
-            "هناك حقول مهمة فارغة لم يتم تعبئتها",
-            icon: Icons.error,
-            iconColor: Colors.red,
-          );
+          interfaces.showFlutterToast("يرجى التأكد من كتابة الاسم رمز المادة");
           return;
         }
 
         if (semester.isNotEmpty && year.isEmpty) {
-          await interfaces.showAlert(
-            context,
-            "اختر سنة التدريس عند تحديد الفصل",
-            icon: Icons.error,
-            iconColor: Colors.red,
-          );
+          interfaces.showFlutterToast("اختر سنة التدريس عند تحديد الفصل");
           return;
         }
 
         if (url.isEmpty) {
-          interfaces.showFlutterToast("يرجى التأكد من كتابة رابط المادة لاحقا");
-        } else if (!url.startsWith("http://") && !url.startsWith("https://")) {
-          url = "https://$url";
+          interfaces.showFlutterToast(
+            "يرجى التأكد من كتابة رابط المادة لاحقًا",
+          );
+        } else {
+          if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://$url";
+          }
+
+          final validUrl = await isValidUrl(url);
+          if (!validUrl) {
+            interfaces.showFlutterToast("رابط المادة غير صالح");
+            return;
+          }
         }
 
-        final DocumentReference<Map<String, dynamic>> doc = firestore
-            .collection("courses")
-            .doc();
+        final doc = firestore.collection("courses").doc();
 
         batch.set(doc, {
           nameId: widget.departmentId,
@@ -344,22 +380,21 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
       await interfaces.showAlert(context, "تم حفظ البيانات بنجاح ✅");
 
-      for (var c in courses) {
-        c.courseNameController.dispose();
-        c.courseCodeController.dispose();
-        c.courseDescriptionController.dispose();
-        c.courseUrlController.dispose();
-        c.courseLecturerController.dispose();
-        c.lecturedAtController.dispose();
+      for (final c in courses) {
+        c.dispose();
       }
-
       courses.clear();
 
       if (!mounted) return;
-      Navigator.of(context, rootNavigator: true).pop();
+      Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      await interfaces.showAlert(context, "حدث خطأ أثناء الحفظ ❌");
+      await interfaces.showAlert(
+        context,
+        "حدث خطأ أثناء الحفظ ❌",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -370,20 +405,9 @@ class _AddCoursePageState extends State<AddCoursePage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    courses.add(Course());
-  }
-
-  @override
   void dispose() {
-    for (var c in courses) {
-      c.courseNameController.dispose();
-      c.courseCodeController.dispose();
-      c.courseDescriptionController.dispose();
-      c.courseUrlController.dispose();
-      c.courseLecturerController.dispose();
-      c.lecturedAtController.dispose();
+    for (final c in courses) {
+      c.dispose();
     }
     courses.clear();
     super.dispose();
@@ -401,7 +425,11 @@ class _AddCoursePageState extends State<AddCoursePage> {
         },
         child: const Icon(Icons.add, color: Colors.white),
       ),
-      appBar: AppBar(title: const Text("إضافة مواد"), centerTitle: true),
+      appBar: interfaces.showAppBar(
+        context,
+        title: "إضافة مواد",
+        actions: false,
+      ),
       body: ListView.builder(
         padding: const EdgeInsets.all(10),
         itemCount: courses.length,
