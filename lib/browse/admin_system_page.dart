@@ -190,7 +190,7 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
       await currentUser.getIdToken(true);
 
       final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
-      final callable = functions.httpsCallable('sendNotificationToAllUsers');
+      final callable = functions.httpsCallable('sendBroadcastToUsers');
 
       final result = await callable.call({
         "title": title.trim(),
