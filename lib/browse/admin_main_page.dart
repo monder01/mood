@@ -761,7 +761,7 @@ class _AdminMainPageState extends State<AdminMainPage> {
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 10,
                                     mainAxisSpacing: 10,
-                                    childAspectRatio: 0.8,
+                                    childAspectRatio: 0.75,
                                   ),
                               itemCount: departments.length,
                               itemBuilder: (context, index) {

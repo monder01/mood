@@ -16,21 +16,6 @@ class System {
   Timestamp? systemUpdatedAt;
   bool isUpdateAvailable = false;
 
-  // تحميل الايات النشطة
-  Future<void> loadActiveAyas() async {
-    final snapshot = await FirebaseFirestore.instance
-        .collection("system")
-        .doc(systemId)
-        .collection("QuranVerses")
-        .where("isActive", isEqualTo: true)
-        .limit(2)
-        .get();
-
-    activeAyas = snapshot.docs
-        .map((doc) => doc.data()["verse"]?.toString() ?? "")
-        .toList();
-  }
-
   // تفعيل او تعطيل الاية في النظام
   Future<void> toggleAyaActive(BuildContext context, String ayaId) async {
     try {

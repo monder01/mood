@@ -42,8 +42,6 @@ class _SplashPageState extends State<SplashPage> {
 
       // تحميل معلومات النظام والآيات
       await system.getAppVersion();
-      await system.loadActiveAyas();
-
       // online status start
       await PresenceService.startPresence();
 

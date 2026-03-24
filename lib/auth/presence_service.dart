@@ -13,7 +13,7 @@ class PresenceService {
 
     final uid = user.uid;
 
-    final statusRef = _db.ref("status/$uid");
+    final statusRef = _db.ref("adminStatus/$uid");
     final connectedRef = _db.ref(".info/connected");
 
     _connectedSub?.cancel();
@@ -43,7 +43,7 @@ class PresenceService {
 
     final uid = user.uid;
 
-    await _db.ref("status/$uid").set({
+    await _db.ref("adminStatus/$uid").set({
       "state": "offline",
       "isOnline": false,
       "lastSeen": ServerValue.timestamp,
