@@ -101,6 +101,7 @@ class _AddQuranVersesPageState extends State<AddQuranVersesPage> {
           "verse": verse.verseController.text.trim(),
           "isActive": verse.isActive,
           "createdAt": FieldValue.serverTimestamp(),
+          "updatedAt": FieldValue.serverTimestamp(),
         });
       }
 

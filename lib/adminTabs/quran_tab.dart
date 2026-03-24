@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/addEdit/add_quran_page.dart';
 import 'package:mood01/designs/interfaces.dart';
-import 'package:mood01/global/system.dart';
+import 'package:mood01/settings/system.dart';
 
 class QuranTab extends StatefulWidget {
   const QuranTab({super.key});

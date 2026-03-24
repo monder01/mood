@@ -14,9 +14,9 @@ import 'package:mood01/auth/admin.dart';
 import 'package:mood01/chats/coworkers_page.dart';
 import 'package:mood01/designs/about_us_page.dart';
 import 'package:mood01/designs/interfaces.dart';
-import 'package:mood01/global/my_account.dart';
-import 'package:mood01/global/setting_page.dart';
-import 'package:mood01/global/system.dart';
+import 'package:mood01/settings/my_account.dart';
+import 'package:mood01/settings/setting_page.dart';
+import 'package:mood01/settings/system.dart';
 
 class Browsepage extends StatefulWidget {
   const Browsepage({super.key});

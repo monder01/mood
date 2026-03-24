@@ -8,7 +8,7 @@ import 'package:mood01/auth/presence_service.dart';
 import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/designs/theme_controller.dart';
 import 'package:mood01/firebase_options.dart';
-import 'package:mood01/global/system.dart';
+import 'package:mood01/settings/system.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 
 class SplashPage extends StatefulWidget {
