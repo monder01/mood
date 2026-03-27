@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:mood01/settings/system.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class AboutAppPage extends StatelessWidget {
   AboutAppPage({super.key});
   final interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
   System get system => System.current;
   Future<void> openEmail() async {
     final Uri emailUri = Uri(
@@ -206,7 +208,7 @@ class AboutAppPage extends StatelessWidget {
                     Clipboard.setData(
                       const ClipboardData(text: "monther00147@gmail.com"),
                     );
-                    interfaces.showFlutterToast("تم نسخ البريد الإلكتروني");
+                    lightInterface.showFlutterToast("تم نسخ البريد الإلكتروني");
                   },
                   child: Text(
                     "monther00147@gmail.com",

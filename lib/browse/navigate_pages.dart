@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mood01/browse/admin_main_page.dart';
+import 'package:mood01/browse/admin_resolve_page.dart';
 import 'package:mood01/browse/admin_system_page.dart';
 import 'package:mood01/browse/admin_user_management_page.dart';
 import 'package:mood01/auth/session_service.dart';
@@ -14,20 +15,23 @@ import 'package:mood01/auth/admin.dart';
 import 'package:mood01/chats/coworkers_page.dart';
 import 'package:mood01/designs/about_us_page.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:mood01/settings/my_account.dart';
 import 'package:mood01/settings/setting_page.dart';
 import 'package:mood01/settings/system.dart';
 
-class Browsepage extends StatefulWidget {
-  const Browsepage({super.key});
+class NavigatePages extends StatefulWidget {
+  const NavigatePages({super.key});
 
   @override
-  State<Browsepage> createState() => _BrowsepageState();
+  State<NavigatePages> createState() => _NavigatePagesState();
 }
 
-class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
+class _NavigatePagesState extends State<NavigatePages>
+    with WidgetsBindingObserver {
   Admin? admin;
   final interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
   final System system = System();
 
   int currentIndex = 0;
@@ -37,6 +41,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     AdminMainPage(),
     AdminUserManagementPage(),
     AdminSystemPage(),
+    AdminResolvePage(),
   ];
 
   StreamSubscription<DocumentSnapshot>? _sessionSubscription;
@@ -85,7 +90,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
     }
 
     if (!mounted) return;
-    interfaces.showFlutterToast(message);
+    lightInterface.showFlutterToast(message);
   }
 
   Future<void> getFcmToken() async {
@@ -269,7 +274,7 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
                     ),
               onTap: () async {
                 if (system.isUpdateAvailable == false) {
-                  interfaces.showFlutterToast("لا يوجد تحديثات");
+                  lightInterface.showFlutterToast("لا يوجد تحديثات");
                 } else {
                   final confirm = await interfaces.showConfirmationDialog(
                     context,
@@ -376,6 +381,10 @@ class _BrowsepageState extends State<Browsepage> with WidgetsBindingObserver {
             BottomNavigationBarItem(
               icon: Icon(Icons.near_me_rounded),
               label: "النظام",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.support_agent_rounded),
+              label: "التواصل",
             ),
           ],
         ),

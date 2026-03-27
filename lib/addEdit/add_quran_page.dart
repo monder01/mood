@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 
 class VerseItem {
   final TextEditingController verseController = TextEditingController();
@@ -18,6 +19,8 @@ class AddQuranVersesPage extends StatefulWidget {
 
 class _AddQuranVersesPageState extends State<AddQuranVersesPage> {
   final Interfaces interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
+
   final List<VerseItem> verses = [VerseItem()];
 
   bool isSaving = false;
@@ -50,7 +53,7 @@ class _AddQuranVersesPageState extends State<AddQuranVersesPage> {
       setState(() {
         isLoadingActiveCount = false;
       });
-      interfaces.showFlutterToast(
+      lightInterface.showFlutterToast(
         "فشل تحميل عدد الآيات المفعلة",
         color: Colors.red,
       );
@@ -205,7 +208,7 @@ class _AddQuranVersesPageState extends State<AddQuranVersesPage> {
                         if (value == true &&
                             (activeCountInFirestore + currentLocalActive) >=
                                 2) {
-                          interfaces.showFlutterToast(
+                          lightInterface.showFlutterToast(
                             "فقط آيتان يمكن أن تكونا مفعّلتين",
                             color: Colors.red,
                           );

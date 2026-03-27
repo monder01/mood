@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart' show LightInterface;
 
 class EditCoursePage extends StatefulWidget {
   final DocumentReference courseRef;
@@ -13,6 +14,7 @@ class EditCoursePage extends StatefulWidget {
 
 class _EditCoursePageState extends State<EditCoursePage> {
   final Interfaces interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
 
   final TextEditingController courseNameController = TextEditingController();
   final TextEditingController courseCodeController = TextEditingController();
@@ -184,7 +186,9 @@ class _EditCoursePageState extends State<EditCoursePage> {
     }
 
     if (url.isEmpty) {
-      interfaces.showFlutterToast("يرجى التأكد من كتابة رابط المادة لاحقًا");
+      lightInterface.showFlutterToast(
+        "يرجى التأكد من كتابة رابط المادة لاحقًا",
+      );
     } else {
       if (!url.startsWith("http://") && !url.startsWith("https://")) {
         url = "https://$url";
@@ -192,6 +196,7 @@ class _EditCoursePageState extends State<EditCoursePage> {
 
       final validUrl = await isValidUrl(url);
       if (!validUrl) {
+        if (!mounted) return;
         await interfaces.showAlert(
           context,
           "رابط المادة غير صالح",

@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:mood01/browse/admin_browse_page.dart';
+import 'package:mood01/browse/navigate_pages.dart';
 import 'package:mood01/auth/signin_page.dart';
 import 'package:mood01/auth/signup_page.dart';
 import 'package:mood01/designs/about_us_page.dart';
@@ -41,7 +41,7 @@ class NaviGo {
       GoRoute(
         path: '/browse',
         name: 'browse',
-        builder: (context, state) => const Browsepage(),
+        builder: (context, state) => const NavigatePages(),
       ),
 
       GoRoute(

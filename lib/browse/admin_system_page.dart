@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/adminTabs/quran_tab.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:mood01/settings/system.dart';
 import 'package:mood01/notifications/course_department_target_picker_page.dart';
 import 'package:mood01/notifications/route_picker_page.dart';
@@ -18,6 +19,8 @@ class AdminSystemPage extends StatefulWidget {
 
 class _AdminSystemPageState extends State<AdminSystemPage> {
   final interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
+
   /////////////////tab 1 content///////////////
   final system = System();
 
@@ -86,7 +89,7 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
       setState(() {
         isSystemLoading = false;
       });
-      interfaces.showFlutterToast("فشل تحميل معلومات النظام: $e");
+      lightInterface.showFlutterToast("فشل تحميل معلومات النظام: $e");
     }
   }
 
@@ -95,7 +98,7 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
     final updateLink = updateLinkController.text.trim();
 
     if (version.isEmpty || updateLink.isEmpty) {
-      interfaces.showFlutterToast("يرجى ملء جميع الحقول");
+      lightInterface.showFlutterToast("يرجى ملء جميع الحقول");
       return;
     }
 
@@ -103,24 +106,26 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
     if (uri == null ||
         !(uri.scheme == "http" || uri.scheme == "https") ||
         uri.host.isEmpty) {
-      interfaces.showFlutterToast("رابط التحديث غير صالح");
+      lightInterface.showFlutterToast("رابط التحديث غير صالح");
       return;
     }
     // check if version format is valid
     final versionRegex = RegExp(r'^\d+\.\d+\.\d+$');
     if (!versionRegex.hasMatch(version)) {
-      interfaces.showFlutterToast("صيغة النسخة غير صالحة");
+      lightInterface.showFlutterToast("صيغة النسخة غير صالحة");
       return;
     }
 
     final versionParts = version.split('.').map(int.parse).toList();
     if (versionParts.length != 3) {
-      interfaces.showFlutterToast("صيغة النسخة غير صالحة");
+      lightInterface.showFlutterToast("صيغة النسخة غير صالحة");
       return;
     }
 
     if (system.systemVersion == version) {
-      interfaces.showFlutterToast("الاصدار المستخدم هو نفسه الاصدار الجديد!");
+      lightInterface.showFlutterToast(
+        "الاصدار المستخدم هو نفسه الاصدار الجديد!",
+      );
       return;
     }
 
@@ -141,10 +146,10 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
       await system.getAppVersion();
 
       if (!mounted) return;
-      interfaces.showFlutterToast("تم تحديث معلومات النظام بنجاح");
+      lightInterface.showFlutterToast("تم تحديث معلومات النظام بنجاح");
     } catch (e) {
       if (!mounted) return;
-      interfaces.showFlutterToast("فشل تحديث معلومات النظام: $e");
+      lightInterface.showFlutterToast("فشل تحديث معلومات النظام: $e");
     } finally {
       setState(() {
         isSystemUpdating = false;
@@ -508,19 +513,19 @@ class _AdminSystemPageState extends State<AdminSystemPage> {
                 final body = bodyController.text.trim();
 
                 if (title.isEmpty || body.isEmpty) {
-                  interfaces.showFlutterToast("يرجى ملء جميع الحقول");
+                  lightInterface.showFlutterToast("يرجى ملء جميع الحقول");
                   return;
                 }
 
                 if (hasRoute && selectedRoutePath == null) {
-                  interfaces.showFlutterToast("يرجى اختيار مسار أولاً");
+                  lightInterface.showFlutterToast("يرجى اختيار مسار أولاً");
                   return;
                 }
                 if (hasCourseDepartmentTarget &&
                     (selectedTargetType == null ||
                         selectedTargetId == null ||
                         selectedTargetName == null)) {
-                  interfaces.showFlutterToast("اختر الكلية أو القسم أولاً");
+                  lightInterface.showFlutterToast("اختر الكلية أو القسم أولاً");
                   return;
                 }
 

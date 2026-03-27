@@ -475,9 +475,162 @@ exports.syncUserPresenceToFirestore = onValueWritten(
     }
 );
 
+exports.notifyUserWhenPremiumActivated = onDocumentUpdated(
+    "users/{userId}",
+    async (event) => {
+        try {
+            const before = event.data?.before?.data();
+            const after = event.data?.after?.data();
+
+            if (!before || !after) return;
+
+            const userId = event.params.userId;
+
+            const wasPremium = before.isPremium === true;
+            const isPremiumNow = after.isPremium === true;
+
+            if (wasPremium || !isPremiumNow) return;
+
+            const token = (after.messageToken || "").toString().trim();
+            const fullName = buildDisplayName(after, "المستخدم");
+
+            const title = "تم تفعيل الاشتراك";
+            const body = "تم تأكيد اشتراكك بنجاح، وأصبحت الآن مستخدمًا مميزًا 🎉";
+
+            await saveNotification({
+                collectionName: USER_COLLECTION,
+                docId: userId,
+                title,
+                body,
+                type: "premium_activated",
+                receiverId: userId,
+                action: "premium_enabled",
+                routePath: "/my-account",
+                routeTitle: "الاشتراك",
+                targetType: "subscription",
+                targetId: userId,
+                targetName: fullName,
+            });
+
+            if (!token) {
+                console.log("Premium Activated: لا يوجد messageToken للمستخدم:", userId);
+                return;
+            }
+
+            const response = await sendPushToToken({
+                token,
+                collectionName: USER_COLLECTION,
+                docId: userId,
+                title,
+                body,
+                data: {
+                    type: "premium_activated",
+                    action: "premium_enabled",
+                    receiverId: userId,
+                    routePath: "/my-account",
+                    routeTitle: "الاشتراك",
+                    targetType: "subscription",
+                    targetId: userId,
+                    targetName: fullName,
+                    click_action: "FLUTTER_NOTIFICATION_CLICK",
+                },
+            });
+
+            if (response) {
+                console.log("Premium Activated: تم إرسال إشعار تفعيل الاشتراك إلى المستخدم:", userId);
+            }
+        } catch (error) {
+            console.error("Premium Activated: خطأ أثناء إرسال إشعار تفعيل الاشتراك:", error);
+        }
+    }
+);
+
 // =========================
 // Admin App Functions
 // =========================
+
+exports.notifyAdminsOnNewSubscriptionRequest = onDocumentCreated(
+    "subscriptions/{subscriptionId}",
+    async (event) => {
+        try {
+            const snapshot = event.data;
+            if (!snapshot) return;
+
+            const subscriptionId = event.params.subscriptionId;
+            const subscriptionData = snapshot.data() || {};
+
+            const userId = (subscriptionData.userId || "").toString().trim();
+            const cardType = (subscriptionData.selectedCardType || subscriptionData.cardType || "").toString().trim();
+            const cardValue = (subscriptionData.selectedCardValue || subscriptionData.cardValue || "").toString().trim();
+
+            let requesterName = "مستخدم";
+            if (userId) {
+                const userResult = await getDocData(USER_COLLECTION, userId);
+                if (userResult?.data) {
+                    requesterName = buildDisplayName(userResult.data, "مستخدم");
+                }
+            }
+
+            const title = "طلب اشتراك جديد";
+            const body = userId
+                ? `${requesterName} أرسل طلب اشتراك جديد`
+                : "تم استلام طلب اشتراك جديد";
+
+            const adminsSnapshot = await db.collection(ADMIN_COLLECTION).get();
+            if (adminsSnapshot.empty) return;
+
+            for (const adminDoc of adminsSnapshot.docs) {
+                const adminId = adminDoc.id;
+                const adminData = adminDoc.data() || {};
+                const token = (adminData.messageToken || "").toString().trim();
+
+                await saveNotification({
+                    collectionName: ADMIN_COLLECTION,
+                    docId: adminId,
+                    title,
+                    body,
+                    type: "subscription_request",
+                    senderId: userId,
+                    receiverId: adminId,
+                    routePath: "/subscriptions",
+                    routeTitle: "طلبات الاشتراك",
+                    targetType: "subscription",
+                    targetId: subscriptionId,
+                    targetName: requesterName,
+                });
+
+                if (!token) continue;
+
+                const response = await sendPushToToken({
+                    token,
+                    collectionName: ADMIN_COLLECTION,
+                    docId: adminId,
+                    title,
+                    body,
+                    data: {
+                        type: "subscription_request",
+                        senderId: userId,
+                        receiverId: adminId,
+                        routePath: "/subscriptions",
+                        routeTitle: "طلبات الاشتراك",
+                        targetType: "subscription",
+                        targetId: subscriptionId,
+                        targetName: requesterName,
+                        cardType,
+                        cardValue,
+                        click_action: "FLUTTER_NOTIFICATION_CLICK",
+                    },
+                });
+
+                if (response) {
+                    console.log("Subscription Request: تم إرسال إشعار طلب الاشتراك إلى الأدمن:", adminId);
+                }
+            }
+        } catch (error) {
+            console.error("Subscription Request: خطأ أثناء إرسال إشعار طلب الاشتراك للأدمن:", error);
+        }
+    }
+);
 
 exports.sendAdminChatNotification = onDocumentCreated(
     "adminChats/{chatId}/messages/{messageId}",

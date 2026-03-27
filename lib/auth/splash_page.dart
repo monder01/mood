@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood01/auth/admin.dart';
 import 'package:mood01/auth/presence_service.dart';
-import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:mood01/designs/theme_controller.dart';
 import 'package:mood01/firebase_options.dart';
 import 'package:mood01/settings/system.dart';
@@ -20,6 +20,7 @@ class SplashPage extends StatefulWidget {
 
 class _SplashPageState extends State<SplashPage> {
   final system = System.current;
+  final LightInterface lightInterface = LightInterface();
 
   @override
   void initState() {
@@ -92,7 +93,7 @@ class _SplashPageState extends State<SplashPage> {
 
       if (loadAdmin.isActive == false) {
         await FirebaseAuth.instance.signOut();
-        Interfaces().showFlutterToast("حسابك معطل من قبل الادارة");
+        LightInterface().showFlutterToast("حسابك معطل من قبل الادارة");
         Admin.currentAdmin = null;
         return null;
       }

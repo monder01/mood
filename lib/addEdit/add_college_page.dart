@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 
 class AddCollegePage extends StatefulWidget {
   const AddCollegePage({super.key});
@@ -15,6 +16,7 @@ class AddCollegePage extends StatefulWidget {
 
 class _AddCollegePageState extends State<AddCollegePage> {
   Interfaces interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
   TextEditingController collegeNameController = TextEditingController();
   File? localImage;
   bool isActive = true;
@@ -81,7 +83,7 @@ class _AddCollegePageState extends State<AddCollegePage> {
       });
 
       if (!mounted) return;
-      interfaces.showFlutterToast(
+      lightInterface.showFlutterToast(
         "تم إضافة الكلية بنجاح",
         color: Colors.green[400],
       );

@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:mood01/auth/presence_service.dart';
 import 'package:mood01/auth/session_service.dart';
 import 'package:mood01/designs/home_page.dart';
-import 'package:mood01/browse/admin_browse_page.dart';
+import 'package:mood01/browse/navigate_pages.dart';
 import 'package:mood01/designs/interfaces.dart';
 import 'package:mood01/notifications/firebase_notifications.dart';
 
@@ -20,6 +20,7 @@ class Admin {
       lastLogin, // last login time = last seen time
       messageToken,
       photoUrl,
+      coverUrl,
       role,
       id,
       activeSessionId,
@@ -41,6 +42,7 @@ class Admin {
     this.name,
     this.userName,
     this.photoUrl,
+    this.coverUrl,
     this.phoneNumber,
     this.role,
     this.messageToken,
@@ -156,7 +158,7 @@ class Admin {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const Browsepage()),
+        MaterialPageRoute(builder: (context) => const NavigatePages()),
       );
       Interfaces().showAlert(
         context,
@@ -307,7 +309,7 @@ class Admin {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => Browsepage()),
+        MaterialPageRoute(builder: (context) => NavigatePages()),
       );
       Interfaces().showAlert(
         context,

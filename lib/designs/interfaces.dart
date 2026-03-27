@@ -1,20 +1,25 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mood01/auth/admin.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:mood01/notifications/my_notifications_page.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Interfaces {
+  Admin get admin => Admin.currentAdmin!;
+
   bool isLoading = false;
 
-  Future<void> callPhoneFun(
-    BuildContext context, {
-    required String phoneNumber,
-  }) async {
-    await launchUrl(Uri.parse('tel:$phoneNumber'));
-  }
+  final ImagePicker picker = ImagePicker();
+  bool isPhotoLoading = false;
+  bool isCoverLoading = false;
+  bool isPasswordLoading = false;
+  User? get currentUser => FirebaseAuth.instance.currentUser;
 
   Future<void> displayImageDialog(BuildContext context, String imageUrl) async {
     await showDialog(
@@ -138,6 +143,178 @@ class Interfaces {
     );
   }
 
+  Future<void> pickCoverPhoto(ImageSource source, BuildContext context) async {
+    try {
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 90,
+      );
+
+      if (pickedFile == null) return;
+
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        compressQuality: 85,
+        aspectRatio: const CropAspectRatio(ratioX: 4, ratioY: 3),
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'قص الصورة',
+            toolbarColor: Colors.black,
+            toolbarWidgetColor: Colors.white,
+            lockAspectRatio: true,
+            hideBottomControls: false,
+            initAspectRatio: CropAspectRatioPreset.square,
+            cropStyle: CropStyle.rectangle,
+          ),
+          IOSUiSettings(
+            title: 'قص الصورة',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+
+      if (croppedFile == null) return;
+
+      final file = File(croppedFile.path);
+
+      if (!context.mounted) return;
+      await uploadImage(file, context, isCover: true);
+    } catch (e) {
+      if (!context.mounted) return;
+      showAlert(
+        context,
+        "حدث خطأ أثناء اختيار الصورة",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
+    }
+  }
+
+  Future<void> pickImage(ImageSource source, BuildContext context) async {
+    try {
+      final pickedFile = await picker.pickImage(
+        source: source,
+        imageQuality: 90,
+      );
+
+      if (pickedFile == null) return;
+
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: pickedFile.path,
+        compressQuality: 85,
+        aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+        uiSettings: [
+          AndroidUiSettings(
+            toolbarTitle: 'قص الصورة',
+            toolbarColor: Colors.black,
+            toolbarWidgetColor: Colors.white,
+            lockAspectRatio: true,
+            hideBottomControls: false,
+            initAspectRatio: CropAspectRatioPreset.square,
+            cropStyle: CropStyle.circle,
+          ),
+          IOSUiSettings(
+            title: 'قص الصورة',
+            aspectRatioLockEnabled: true,
+            resetAspectRatioEnabled: false,
+          ),
+        ],
+      );
+
+      if (croppedFile == null) return;
+
+      final file = File(croppedFile.path);
+
+      if (!context.mounted) return;
+      await uploadImage(file, context, isCover: false);
+    } catch (e) {
+      if (!context.mounted) return;
+      showAlert(
+        context,
+        "حدث خطأ أثناء اختيار الصورة",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
+    }
+  }
+
+  Future<void> uploadImage(
+    File file,
+    BuildContext context, {
+    bool? isCover,
+  }) async {
+    final user = currentUser;
+    if (user == null) return;
+
+    bool loadingShown = false;
+
+    try {
+      if (context.mounted && isCover != null) {
+        LightInterface.showContainerLoading(context);
+        loadingShown = true;
+      }
+
+      if (isCover == false) {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child("admins")
+            .child("${user.uid}.jpg");
+
+        await ref.putFile(file);
+        final imageUrl = await ref.getDownloadURL();
+
+        await FirebaseFirestore.instance
+            .collection("admins")
+            .doc(user.uid)
+            .update({"photoUrl": imageUrl});
+
+        admin.photoUrl = imageUrl;
+      } else if (isCover == true) {
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child("admins")
+            .child("${user.uid}_cover.jpg");
+
+        await ref.putFile(file);
+        final imageUrl = await ref.getDownloadURL();
+
+        await FirebaseFirestore.instance
+            .collection("admins")
+            .doc(user.uid)
+            .update({"coverUrl": imageUrl});
+
+        admin.coverUrl = imageUrl;
+      }
+
+      if (loadingShown && context.mounted) {
+        LightInterface.hideLoading(context);
+        loadingShown = false;
+      }
+
+      if (!context.mounted) return;
+      showAlert(
+        context,
+        "تم تحديث الصورة بنجاح",
+        icon: Icons.done,
+        iconColor: Colors.green,
+      );
+    } catch (e) {
+      if (loadingShown && context.mounted) {
+        LightInterface.hideLoading(context);
+        loadingShown = false;
+      }
+
+      if (!context.mounted) return;
+      showAlert(
+        context,
+        "حدث خطأ أثناء رفع الصورة",
+        icon: Icons.error,
+        iconColor: Colors.red,
+      );
+    }
+  }
+
   Widget threeDcontainer(
     BuildContext context,
     Color containerColor, {
@@ -184,6 +361,20 @@ class Interfaces {
       ),
     ],
   );
+  BoxDecoration containerDecoration2(BuildContext context, {Color? color}) =>
+      BoxDecoration(
+        color: color ?? Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.white.withValues(alpha: 0.3),
+            blurRadius: 3,
+            offset: Offset(0, 3),
+          ),
+        ],
+      );
 
   // elevated button style
   ButtonStyle elevatedButtonStyle(double width, double height) =>
@@ -201,7 +392,18 @@ class Interfaces {
     required String title,
     bool actions = true,
   }) => AppBar(
-    title: Text(title),
+    title: title.isEmpty
+        ? null
+        : Container(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+            decoration: containerDecoration2(
+              context,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.black.withValues(alpha: 0.4)
+                  : Colors.white.withValues(alpha: 0.4),
+            ),
+            child: title.isEmpty ? null : Text(title),
+          ),
     centerTitle: true,
     backgroundColor: Colors.greenAccent[200],
     elevation: 5,
@@ -228,28 +430,6 @@ class Interfaces {
           ]
         : null,
   );
-
-  // show toast
-  void showFlutterToast(String message, {Color? color}) {
-    Fluttertoast.showToast(
-      gravity: ToastGravity.BOTTOM,
-      backgroundColor: color ?? Colors.grey,
-      textColor: Colors.white,
-      msg: message,
-    );
-  }
-
-  // pick image
-  Future<void> pickImage(File localImage) async {
-    final picked = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70,
-    );
-
-    if (picked == null) return;
-
-    localImage = File(picked.path);
-  }
 
   // show confirmation dialog
   Future<bool> showConfirmationDialog(

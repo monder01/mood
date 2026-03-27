@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class System {
+  final LightInterface lightInterface = LightInterface();
   static final System current = System();
 
   static List<String> activeAyas = [];
@@ -29,7 +30,7 @@ class System {
 
       if (!ayaSnap.exists) {
         if (!context.mounted) return;
-        Interfaces().showFlutterToast("الآية غير موجودة");
+        LightInterface().showFlutterToast("الآية غير موجودة");
         return;
       }
 
@@ -43,7 +44,7 @@ class System {
         });
 
         if (!context.mounted) return;
-        Interfaces().showFlutterToast("تم تعطيل الآية");
+        LightInterface().showFlutterToast("تم تعطيل الآية");
         return;
       }
 
@@ -56,7 +57,7 @@ class System {
 
       if (activeVerses.docs.length >= 2) {
         if (!context.mounted) return;
-        Interfaces().showFlutterToast(
+        LightInterface().showFlutterToast(
           "لا يمكن تفعيل أكثر من آيتين",
           color: Colors.red,
         );
@@ -69,10 +70,10 @@ class System {
       });
 
       if (!context.mounted) return;
-      Interfaces().showFlutterToast("تم تفعيل الآية", color: Colors.green);
+      LightInterface().showFlutterToast("تم تفعيل الآية", color: Colors.green);
     } catch (e) {
       if (!context.mounted) return;
-      Interfaces().showFlutterToast(
+      LightInterface().showFlutterToast(
         "فشل تغيير حالة الآية: $e",
         color: Colors.red,
       );
@@ -90,10 +91,10 @@ class System {
           .delete();
 
       if (!context.mounted) return;
-      Interfaces().showFlutterToast("تم حذف الآية", color: Colors.green);
+      LightInterface().showFlutterToast("تم حذف الآية", color: Colors.green);
     } catch (e) {
       if (!context.mounted) return;
-      Interfaces().showFlutterToast("فشل حذف الآية: $e", color: Colors.red);
+      LightInterface().showFlutterToast("فشل حذف الآية: $e", color: Colors.red);
     }
   }
 

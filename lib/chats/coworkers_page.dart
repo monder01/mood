@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:mood01/navi_go.dart';
 
 class CoworkersPage extends StatefulWidget {
@@ -67,7 +68,7 @@ class _CoworkersPageState extends State<CoworkersPage> {
               title: const Text("مكالمة هاتفية"),
               onTap: () async {
                 Navigator.pop(context);
-                await interfaces.callPhoneFun(
+                await LightInterface().callPhoneFun(
                   context,
                   phoneNumber: phoneNumber,
                 );
@@ -395,7 +396,7 @@ class _CoworkersPageState extends State<CoworkersPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              interfaces.showAppBar(context, title: "", actions: false),
+              interfaces.showAppBar(context, title: "التواصل", actions: false),
               const TabBar(
                 tabs: [
                   Tab(text: "زملائي"),

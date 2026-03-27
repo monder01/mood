@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:mood01/designs/theme_controller.dart';
 
 class SettingPage extends StatefulWidget {
@@ -11,6 +12,7 @@ class SettingPage extends StatefulWidget {
 
 class _SettingPageState extends State<SettingPage> {
   final Interfaces interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
 
   bool isDarkMode = false;
   bool isNotificationsEnabled = false;
@@ -48,9 +50,9 @@ class _SettingPageState extends State<SettingPage> {
 
   void showDevMessage({String? message}) {
     if (message != null && message.isNotEmpty) {
-      interfaces.showFlutterToast(message);
+      lightInterface.showFlutterToast(message);
     } else {
-      interfaces.showFlutterToast("قيد التطوير، لن يحدث شيء الآن");
+      lightInterface.showFlutterToast("قيد التطوير، لن يحدث شيء الآن");
     }
   }
 
@@ -118,7 +120,7 @@ class _SettingPageState extends State<SettingPage> {
                       setState(() {
                         isProfilePrivate = !isProfilePrivate;
                       });
-                      interfaces.showFlutterToast(
+                      lightInterface.showFlutterToast(
                         "التحكم في ظهور حسابك في البحث",
                       );
                     },
@@ -181,9 +183,6 @@ class _SettingPageState extends State<SettingPage> {
                       });
 
                       await ThemeController.saveTheme(newValue);
-                      showDevMessage(
-                        message: "الخاصية تحت التطوير, يفضل عدم استخدامها",
-                      );
                     },
                     trailing: Switch(
                       activeTrackColor: Colors.greenAccent,
@@ -195,9 +194,6 @@ class _SettingPageState extends State<SettingPage> {
                         });
 
                         await ThemeController.saveTheme(value);
-                        showDevMessage(
-                          message: "الخاصية تحت التطوير, يفضل عدم استخدامها",
-                        );
                       },
                     ),
                   ),

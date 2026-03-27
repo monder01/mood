@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:mood01/navi_go.dart';
 
 class MyNotificationsPage extends StatefulWidget {
@@ -14,6 +15,8 @@ class MyNotificationsPage extends StatefulWidget {
 
 class _MyNotificationsPageState extends State<MyNotificationsPage> {
   final interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
+
   final currentUser = FirebaseAuth.instance.currentUser;
   late final Stream<QuerySnapshot> notificationsStream;
   final DocumentSnapshot? notificationSnapshot = null;
@@ -142,7 +145,7 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
           IconButton(
             onPressed: () async {
               if (isEmpty) {
-                interfaces.showFlutterToast("لا توجد إشعارات");
+                lightInterface.showFlutterToast("لا توجد إشعارات");
                 return;
               }
               if (!context.mounted) return;
@@ -158,12 +161,12 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
           IconButton(
             onPressed: () async {
               if (isEmpty) {
-                interfaces.showFlutterToast("لا توجد إشعارات");
+                lightInterface.showFlutterToast("لا توجد إشعارات");
                 return;
               }
               await markAllAsRead();
               if (!context.mounted) return;
-              interfaces.showFlutterToast("تم تحديد الكل كمقروء");
+              lightInterface.showFlutterToast("تم تحديد الكل كمقروء");
             },
             icon: const Icon(Icons.done_all),
           ),
@@ -370,7 +373,7 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
               doc.reference.delete();
             }
           });
-      Interfaces().showFlutterToast("تم حذف جميع الاشعارات بنجاح");
+      LightInterface().showFlutterToast("تم حذف جميع الاشعارات بنجاح");
       setState(() {
         isdeleteMode = false;
       });
@@ -379,13 +382,13 @@ class _MyNotificationsPageState extends State<MyNotificationsPage> {
       setState(() {
         isdeleteMode = false;
       });
-      Interfaces().showFlutterToast("حدث خطأ اثناء حذف الاشعارات");
+      LightInterface().showFlutterToast("حدث خطأ اثناء حذف الاشعارات");
     } catch (e) {
       debugPrint('Error: $e');
       setState(() {
         isdeleteMode = false;
       });
-      Interfaces().showFlutterToast("حدث خطأ اثناء حذف الاشعارات");
+      LightInterface().showFlutterToast("حدث خطأ اثناء حذف الاشعارات");
     } finally {
       setState(() {
         isdeleteMode = false;

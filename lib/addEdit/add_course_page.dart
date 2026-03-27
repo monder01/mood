@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 
 class Course {
   final String id = DateTime.now().microsecondsSinceEpoch.toString();
@@ -44,6 +45,7 @@ class AddCoursePage extends StatefulWidget {
 class _AddCoursePageState extends State<AddCoursePage> {
   final List<Course> courses = [];
   final Interfaces interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
 
   bool isSaving = false;
 
@@ -117,7 +119,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
   void removeCourseByObject(Course course) {
     if (courses.length == 1) {
-      interfaces.showFlutterToast("يجب أن تبقى مادة واحدة على الأقل");
+      lightInterface.showFlutterToast("يجب أن تبقى مادة واحدة على الأقل");
       return;
     }
 
@@ -140,7 +142,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
       key: ValueKey(course.id),
       confirmDismiss: (direction) async {
         if (courses.length == 1) {
-          interfaces.showFlutterToast("يجب أن تبقى مادة واحدة على الأقل");
+          lightInterface.showFlutterToast("يجب أن تبقى مادة واحدة على الأقل");
           return false;
         }
         return true;
@@ -333,17 +335,19 @@ class _AddCoursePageState extends State<AddCoursePage> {
         final String semester = course.selectedSemester ?? "";
 
         if (name.isEmpty || code.isEmpty) {
-          interfaces.showFlutterToast("يرجى التأكد من كتابة الاسم رمز المادة");
+          lightInterface.showFlutterToast(
+            "يرجى التأكد من كتابة الاسم رمز المادة",
+          );
           return;
         }
 
         if (semester.isNotEmpty && year.isEmpty) {
-          interfaces.showFlutterToast("اختر سنة التدريس عند تحديد الفصل");
+          lightInterface.showFlutterToast("اختر سنة التدريس عند تحديد الفصل");
           return;
         }
 
         if (url.isEmpty) {
-          interfaces.showFlutterToast(
+          lightInterface.showFlutterToast(
             "يرجى التأكد من كتابة رابط المادة لاحقًا",
           );
         } else {
@@ -353,7 +357,7 @@ class _AddCoursePageState extends State<AddCoursePage> {
 
           final validUrl = await isValidUrl(url);
           if (!validUrl) {
-            interfaces.showFlutterToast("رابط المادة غير صالح");
+            lightInterface.showFlutterToast("رابط المادة غير صالح");
             return;
           }
         }

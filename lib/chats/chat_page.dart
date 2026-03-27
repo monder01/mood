@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mood01/designs/interfaces.dart';
+import 'package:mood01/designs/mini_interface.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ChatPage extends StatefulWidget {
@@ -33,6 +34,7 @@ class _ChatPageState extends State<ChatPage> {
   String myLastName = "";
   String myImageUrl = "";
   final interfaces = Interfaces();
+  final LightInterface lightInterface = LightInterface();
 
   String buildChatId(String uid1, String uid2) {
     final ids = [uid1, uid2]..sort();
@@ -245,7 +247,7 @@ class _ChatPageState extends State<ChatPage> {
     } catch (e) {
       debugPrint("sendFileMessage error: $e");
       if (!mounted) return;
-      interfaces.showFlutterToast("فشل رفع الملف");
+      lightInterface.showFlutterToast("فشل رفع الملف");
     } finally {
       if (mounted) {
         setState(() {
@@ -288,11 +290,11 @@ class _ChatPageState extends State<ChatPage> {
       final uri = Uri.parse(url);
       final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!ok) {
-        interfaces.showFlutterToast("تعذر فتح الملف");
+        lightInterface.showFlutterToast("تعذر فتح الملف");
       }
     } catch (e) {
       debugPrint("openFileUrl error: $e");
-      interfaces.showFlutterToast("رابط الملف غير صالح");
+      lightInterface.showFlutterToast("رابط الملف غير صالح");
     }
   }
 
