@@ -36,10 +36,6 @@ class _SettingPageState extends State<SettingPage> {
     VoidCallback? onTap,
   }) {
     return ListTile(
-      // shape: RoundedRectangleBorder(
-      //   borderRadius: BorderRadius.circular(5),
-      //   side: const BorderSide(color: Colors.grey, width: 1),
-      // ),
       leading: Icon(leadingIcon),
       title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: subtitle != null ? Text(subtitle) : null,
@@ -121,7 +117,7 @@ class _SettingPageState extends State<SettingPage> {
                         isProfilePrivate = !isProfilePrivate;
                       });
                       lightInterface.showFlutterToast(
-                        "التحكم في ظهور حسابك في البحث",
+                        "قيد التطوير، لن يحدث شيء الآن",
                       );
                     },
                     trailing: Switch(
